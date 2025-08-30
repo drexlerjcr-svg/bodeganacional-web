@@ -18,7 +18,45 @@
             line-height: 1.6;
         }
 
-        /* Estilos para el encabezado (Header) */
+        /* --- ESTILOS PARA LAS ANIMACIONES DE TEXTO --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-content h1,
+        .hero-content p,
+        .contact-section h2,
+        .contact-info p {
+            opacity: 0;
+            animation-name: fadeInUp;
+            animation-duration: 1s;
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+        }
+
+        /* Añadiendo un retraso a cada elemento para una animación escalonada */
+        .hero-content h1 {
+            animation-delay: 0.5s;
+        }
+        .hero-content p {
+            animation-delay: 1s;
+        }
+        .contact-section h2 {
+            animation-delay: 1.5s;
+        }
+        .contact-info p {
+            animation-delay: 2s;
+        }
+
+
+        /* --- ESTILOS EXISTENTES --- */
         header {
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
@@ -36,11 +74,9 @@
             letter-spacing: 2px;
         }
 
-        /* Estilos para la sección principal (Hero Section) */
         .hero {
             position: relative;
             height: 80vh;
-            /* AQUÍ VA LA URL DIRECTA DE TU IMAGEN */
             background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
             background-size: cover;
             background-position: center;
@@ -52,7 +88,6 @@
             overflow: hidden;
         }
 
-        /* Capa oscura sobre la imagen para mejorar la legibilidad del texto */
         .hero::before {
             content: '';
             position: absolute;
@@ -84,7 +119,6 @@
             margin-bottom: 30px;
         }
 
-        /* Estilos para la sección de contacto */
         .contact-section {
             background-color: #000;
             color: white;
@@ -116,7 +150,8 @@
         .contact-info a:hover {
             text-decoration: underline;
         }
-         footer {
+
+        footer {
             background-color: #000;
             color: #fff;
             padding: 20px 0;
@@ -128,8 +163,7 @@
             margin: 0;
             padding: 5px 0;
         }
-        
-        /* Estilos responsivos (para pantallas más pequeñas) */
+
         @media (max-width: 768px) {
             .hero {
                 height: 60vh;
@@ -169,18 +203,9 @@
         </div>
     </section>
 
-    <!-- Nuevo pie de página -->
     <footer>
         <p>&copy; 2024 Bodega Nacional APP. Todos los derechos reservados.</p>
     </footer>
 
 </body>
-
 </html>
-
-
-
-
-
-
-
