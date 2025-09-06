@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bodega Nacional - PRÓXIMAMENTE</title>
+    <title>Bodega Nacional</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -22,7 +22,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7); /* Capa oscura para el texto */
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: -1;
         }
         .text-neon-green {
@@ -34,42 +34,209 @@
         .object-cover {
             object-fit: cover;
         }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
-<body class="bg-dark-neon text-white min-h-screen flex flex-col justify-between">
-    <div class="container mx-auto px-4 py-8">
-        <header class="flex items-center justify-start mb-12">
-            <div class="relative flex items-center justify-center p-2 rounded-lg bg-green-500 bg-opacity-20 backdrop-blur-sm">
-                <span class="text-white text-lg font-bold uppercase tracking-wide">Bodega Nacional</span>
-                <div class="absolute inset-0 rounded-lg ring-2 ring-green-500 ring-opacity-50"></div>
-            </div>
-        </header>
+<body class="bg-gray-100 text-white min-h-screen flex flex-col justify-between">
+    
+    <!-- Header -->
+    <header class="bg-white bg-opacity-10 backdrop-blur-sm shadow-sm py-4 mb-8">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-100">Bodega Nacional</h1>
+            <nav class="flex space-x-4">
+                <button id="showProximamenteBtn" class="py-2 px-4 rounded-full font-bold transition-colors duration-300">
+                    Inicio
+                </button>
+                <button id="showCatalogoBtn" class="py-2 px-4 rounded-full font-bold transition-colors duration-300">
+                    Catálogo
+                </button>
+            </nav>
+        </div>
+    </header>
 
-        <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div class="text-center lg:text-left">
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-wide text-white text-shadow">
-                    Próximamente la tienda móvil <br>estará disponible
-                </h1>
-                <p class="text-base md:text-xl lg:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0 text-shadow">
-                    Prepárate para una nueva experiencia donde podrás <span class="text-neon-green font-bold">SOLICITAR TUS RUBROS.</span> ¡Estamos trabajando en algo grande.
-                </p>
-                <a href="#" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-400 transition-colors duration-300 transform hover:scale-105">
-                    PRÓXIMAMENTE <span class="inline-block ml-2 transform rotate-45 text-2xl">🛒</span>
-                </a>
-            </div>
-
-            <aside class="relative flex items-center justify-center">
-                <img src="https://i.ibb.co/jvrjKkk9/Sin-t-tulo-removebg-preview-1.png" alt="Carrito de Compras" class="w-full max-w-xs rounded-2xl shadow-2xl animate-pulse-slow">
-                <div class="absolute inset-0 m-auto w-4/5 h-4/5 bg-green-500 opacity-10 rounded-full blur-2xl pointer-events-none"></div>
-            </aside>
-        </main>
+    <!-- Sección "Próximamente" -->
+    <div id="proximamente-section">
+        <div class="container mx-auto px-4 py-8">
+            <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-wide text-white text-shadow">
+                        Próximamente la tienda móvil <br>estará disponible
+                    </h1>
+                    <p class="text-base md:text-xl lg:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0 text-shadow">
+                        Prepárate para una nueva experiencia donde podrás <span class="text-neon-green font-bold">SOLICITAR TUS RUBROS.</span> ¡Estamos trabajando en algo grande.
+                    </p>
+                    <a href="#" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-400 transition-colors duration-300 transform hover:scale-105">
+                        PRÓXIMAMENTE <span class="inline-block ml-2 transform rotate-45 text-2xl">🛒</span>
+                    </a>
+                </div>
+                <aside class="relative flex items-center justify-center">
+                    <img src="https://i.ibb.co/jvrjKkk9/Sin-t-tulo-removebg-preview-1.png" alt="Carrito de Compras" class="w-full max-w-xs rounded-2xl shadow-2xl animate-pulse-slow">
+                    <div class="absolute inset-0 m-auto w-4/5 h-4/5 bg-green-500 opacity-10 rounded-full blur-2xl pointer-events-none"></div>
+                </aside>
+            </main>
+        </div>
     </div>
 
-    <footer class="p-4 text-center text-gray-500 text-sm">
-        © 2025 Bodega Nacional APP. Todos los derechos reservados.
+    <!-- Sección "Catálogo" (oculta por defecto) -->
+    <div id="catalogo-section" class="hidden">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-12 text-white">Nuestros Productos Frescos</h2>
+            <!-- Product Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Card 1: Papa -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/e3c98c/4a3f1b?text=Papa" alt="Papa" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Papa</h3>
+                        <p class="text-gray-600 mb-4">El ingrediente versátil para todas tus comidas.</p>
+                    </div>
+                </div>
+                <!-- Card 2: Tomate -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/e86565/5c2626?text=Tomate" alt="Tomate" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Tomate</h3>
+                        <p class="text-gray-600 mb-4">Jugosos y llenos de sabor.</p>
+                    </div>
+                </div>
+                <!-- Card 3: Cebolla -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/f0e1d1/4a413d?text=Cebolla" alt="Cebolla" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Cebolla</h3>
+                        <p class="text-gray-600 mb-4">Esenciales para dar un toque especial a tus platos.</p>
+                    </div>
+                </div>
+                <!-- Card 4: Zanahoria -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/ff9900/4c3000?text=Zanahoria" alt="Zanahoria" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Zanahoria</h3>
+                        <p class="text-gray-600 mb-4">Dulces y crujientes, ideales para ensaladas.</p>
+                    </div>
+                </div>
+                <!-- Card 5: Pimentón -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://i.ibb.co/ZqXG74f/pimenton.png" alt="Pimentón" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Pimentón</h3>
+                        <p class="text-gray-600 mb-4">Color y sabor para tus recetas.</p>
+                    </div>
+                </div>
+                <!-- Card 6: Lechuga -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/90ee90/003d00?text=Lechuga" alt="Lechuga" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Lechuga</h3>
+                        <p class="text-gray-600 mb-4">Frescura garantizada en tus ensaladas.</p>
+                    </div>
+                </div>
+                <!-- Card 7: Aguacate -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/808000/fffffe?text=Aguacate" alt="Aguacate" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Aguacate</h3>
+                        <p class="text-gray-600 mb-4">Cremosos y nutritivos, perfectos para cualquier momento.</p>
+                    </div>
+                </div>
+                <!-- Card 8: Apio España -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/c7f09a/2f4f2f?text=Apio+Espana" alt="Apio España" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Apio España</h3>
+                        <p class="text-gray-600 mb-4">Ideal para caldos y sopas.</p>
+                    </div>
+                </div>
+                <!-- Card 9: Pulpa de Frutas -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/ff69b4/ffffff?text=Pulpa+de+Frutas" alt="Pulpa de Frutas" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Pulpa de Frutas</h3>
+                        <p class="text-gray-600 mb-4">El sabor natural de la fruta para jugos y postres.</p>
+                    </div>
+                </div>
+                <!-- Card 10: Plátano -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/fefe78/4f4e24?text=Platano" alt="Plátano" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Plátano</h3>
+                        <p class="text-gray-600 mb-4">Energía y sabor en una fruta.</p>
+                    </div>
+                </div>
+                <!-- Card 11: Cebollín -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/b0e0e6/2f4f4f?text=Cebollin" alt="Cebollín" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Cebollín</h3>
+                        <p class="text-gray-600 mb-4">El toque de sabor único para tus recetas.</p>
+                    </div>
+                </div>
+                <!-- Card 12: Acelga -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/76b947/0a2800?text=Acelga" alt="Acelga" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Acelga</h3>
+                        <p class="text-gray-600 mb-4">Hojas verdes, llenas de vitaminas.</p>
+                    </div>
+                </div>
+                <!-- Card 13: Perejil -->
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
+                    <img src="https://placehold.co/400x300/a3c28c/2b3e2b?text=Perejil" alt="Perejil" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Perejil</h3>
+                        <p class="text-gray-600 mb-4">El toque de sabor y color final.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-4 text-center text-gray-500 text-sm">
+        © 2025 Bodega Nacional. Todos los derechos reservados.
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const showProximamenteBtn = document.getElementById('showProximamenteBtn');
+            const showCatalogoBtn = document.getElementById('showCatalogoBtn');
+            const proximamenteSection = document.getElementById('proximamente-section');
+            const catalogoSection = document.getElementById('catalogo-section');
+
+            function showSection(sectionToShow, sectionToHide, btnToActivate, btnToDeactivate) {
+                // Show/hide sections
+                sectionToShow.classList.remove('hidden');
+                sectionToHide.classList.add('hidden');
+
+                // Update button styles
+                btnToActivate.classList.remove('bg-white', 'text-gray-900', 'hover:bg-gray-200');
+                btnToActivate.classList.add('bg-neon-green', 'text-gray-900', 'hover:bg-green-400');
+                
+                btnToDeactivate.classList.remove('bg-neon-green', 'text-gray-900', 'hover:bg-green-400');
+                btnToDeactivate.classList.add('bg-white', 'text-gray-900', 'hover:bg-gray-200');
+            }
+
+            showProximamenteBtn.addEventListener('click', () => {
+                showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
+            });
+
+            showCatalogoBtn.addEventListener('click', () => {
+                showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
+            });
+
+            // Muestra la sección de "Próximamente" por defecto al cargar la página y activa el botón de inicio
+            showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
+        });
+    </script>
+
 </body>
 </html>
-
-
-
