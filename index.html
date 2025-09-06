@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Definición de la fuente y estilos de fondo */
         body {
             font-family: 'Poppins', sans-serif;
             background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDBwYWdlfHx8fGVufDB8fHx8fA%3D%3D');
@@ -25,25 +26,82 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: -1;
         }
-        .text-neon-green {
-            color: #28A745;
-        }
-        .bg-neon-green {
-            background-color: #28A745;
-        }
-        .object-cover {
-            object-fit: cover;
-        }
-        .card {
+
+        /* Variables de color y utilidades */
+        .text-neon-green { color: #28A745; }
+        .bg-neon-green { background-color: #28A745; }
+        .object-cover { object-fit: cover; }
+        .hidden { display: none; }
+
+        /* Estilos de las tarjetas con efecto de "vidrio esmerilado" */
+        .elegant-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+        /* Efecto de levitación al pasar el mouse */
+        .elegant-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
-        .hidden {
-            display: none;
+
+        /* --- Animaciones CSS --- */
+
+        /* Animación de entrada para el texto y el carrito */
+        @keyframes fadeInMoveUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+        .animate-fadeInMoveUp {
+            animation: fadeInMoveUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        /* Animación para el botón "PRÓXIMAMENTE" */
+        @keyframes glowing-border {
+            0% { box-shadow: 0 0 5px #28A745, 0 0 10px #28A745; }
+            50% { box-shadow: 0 0 20px #28A745, 0 0 30px #28A745; }
+            100% { box-shadow: 0 0 5px #28A745, 0 0 10px #28A745; }
+        }
+        .glow-button:hover {
+            animation: glowing-border 1.5s infinite;
+        }
+        
+        /* Animación de entrada escalonada para las tarjetas */
+        .card-animation-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .card-animation {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+            animation: fadeInMoveUp 0.8s ease-out forwards;
+        }
+
+        /* Retrasos para las tarjetas */
+        .card-animation:nth-child(1) { animation-delay: 0.1s; }
+        .card-animation:nth-child(2) { animation-delay: 0.2s; }
+        .card-animation:nth-child(3) { animation-delay: 0.3s; }
+        .card-animation:nth-child(4) { animation-delay: 0.4s; }
+        .card-animation:nth-child(5) { animation-delay: 0.5s; }
+        .card-animation:nth-child(6) { animation-delay: 0.6s; }
+        .card-animation:nth-child(7) { animation-delay: 0.7s; }
+        .card-animation:nth-child(8) { animation-delay: 0.8s; }
+        .card-animation:nth-child(9) { animation-delay: 0.9s; }
+        .card-animation:nth-child(10) { animation-delay: 1.0s; }
+        .card-animation:nth-child(11) { animation-delay: 1.1s; }
+        .card-animation:nth-child(12) { animation-delay: 1.2s; }
+        .card-animation:nth-child(13) { animation-delay: 1.3s; }
+
     </style>
 </head>
 <body class="bg-gray-100 text-white min-h-screen flex flex-col justify-between">
@@ -53,10 +111,10 @@
         <div class="container mx-auto px-4 flex justify-between items-center">
             <h1 class="text-3xl font-bold text-gray-100">Bodega Nacional</h1>
             <nav class="flex space-x-4">
-                <button id="showProximamenteBtn" class="py-2 px-4 rounded-full font-bold transition-colors duration-300">
+                <button id="showProximamenteBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110">
                     Inicio
                 </button>
-                <button id="showCatalogoBtn" class="py-2 px-4 rounded-full font-bold transition-colors duration-300">
+                <button id="showCatalogoBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110">
                     Catálogo
                 </button>
             </nav>
@@ -67,18 +125,18 @@
     <div id="proximamente-section">
         <div class="container mx-auto px-4 py-8">
             <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-                <div class="text-center lg:text-left">
+                <div class="text-center lg:text-left animate-fadeInMoveUp">
                     <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-wide text-white text-shadow">
                         Próximamente la tienda móvil <br>estará disponible
                     </h1>
                     <p class="text-base md:text-xl lg:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0 text-shadow">
                         Prepárate para una nueva experiencia donde podrás <span class="text-neon-green font-bold">SOLICITAR TUS RUBROS.</span> ¡Estamos trabajando en algo grande.
                     </p>
-                    <a href="#" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-400 transition-colors duration-300 transform hover:scale-105">
+                    <a href="#" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-green-400 transition-colors duration-300 transform hover:scale-105 glow-button">
                         PRÓXIMAMENTE <span class="inline-block ml-2 transform rotate-45 text-2xl">🛒</span>
                     </a>
                 </div>
-                <aside class="relative flex items-center justify-center">
+                <aside class="relative flex items-center justify-center animate-fadeInMoveUp">
                     <img src="https://i.ibb.co/jvrjKkk9/Sin-t-tulo-removebg-preview-1.png" alt="Carrito de Compras" class="w-full max-w-xs rounded-2xl shadow-2xl animate-pulse-slow">
                     <div class="absolute inset-0 m-auto w-4/5 h-4/5 bg-green-500 opacity-10 rounded-full blur-2xl pointer-events-none"></div>
                 </aside>
@@ -90,110 +148,110 @@
     <div id="catalogo-section" class="hidden">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-12 text-white">Nuestros Productos Frescos</h2>
-            <!-- Product Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Product Grid con animaciones de entrada escalonadas -->
+            <div class="card-animation-container">
                 <!-- Card 1: Papa -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/2145dRdw/papa.png" alt="Papa" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Papa</h3>
-                        <p class="text-gray-600 mb-4">El ingrediente versátil para todas tus comidas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/2145dRdw/papa.png" alt="Papa" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Papa</h3>
+                        <p class="text-sm text-gray-300">El ingrediente versátil para todas tus comidas.</p>
                     </div>
                 </div>
                 <!-- Card 2: Tomate -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/wNY2RYK0/tomate.png" alt="Tomate" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Tomate</h3>
-                        <p class="text-gray-600 mb-4">Jugosos y llenos de sabor.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/wNY2RYK0/tomate.png" alt="Tomate" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Tomate</h3>
+                        <p class="text-sm text-gray-300">Jugosos y llenos de sabor.</p>
                     </div>
                 </div>
                 <!-- Card 3: Cebolla -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/9kZHJLtM/cebolla.png" alt="Cebolla" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Cebolla</h3>
-                        <p class="text-gray-600 mb-4">Esenciales para dar un toque especial a tus platos.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/9kZHJLtM/cebolla.png" alt="Cebolla" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Cebolla</h3>
+                        <p class="text-sm text-gray-300">Esenciales para dar un toque especial a tus platos.</p>
                     </div>
                 </div>
                 <!-- Card 4: Zanahoria -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/Q3gXMpgm/zanahoria.png" alt="Zanahoria" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Zanahoria</h3>
-                        <p class="text-gray-600 mb-4">Dulces y crujientes, ideales para ensaladas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/Q3gXMpgm/zanahoria.png" alt="Zanahoria" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Zanahoria</h3>
+                        <p class="text-sm text-gray-300">Dulces y crujientes, ideales para ensaladas.</p>
                     </div>
                 </div>
                 <!-- Card 5: Pimentón -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/ZqXG74f/pimenton.png" alt="Pimentón" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Pimentón</h3>
-                        <p class="text-gray-600 mb-4">Color y sabor para tus recetas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/ZqXG74f/pimenton.png" alt="Pimentón" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Pimentón</h3>
+                        <p class="text-sm text-gray-300">Color y sabor para tus recetas.</p>
                     </div>
                 </div>
                 <!-- Card 6: Lechuga -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/VWQQCLHM/lechuga.png" alt="Lechuga" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Lechuga</h3>
-                        <p class="text-gray-600 mb-4">Frescura garantizada en tus ensaladas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/VWQQCLHM/lechuga.png" alt="Lechuga" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Lechuga</h3>
+                        <p class="text-sm text-gray-300">Frescura garantizada en tus ensaladas.</p>
                     </div>
                 </div>
                 <!-- Card 7: Aguacate -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/wFFhNmp3/aguacate.png" alt="Aguacate" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Aguacate</h3>
-                        <p class="text-gray-600 mb-4">Cremosos y nutritivos, perfectos para cualquier momento.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/wFFhNmp3/aguacate.png" alt="Aguacate" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Aguacate</h3>
+                        <p class="text-sm text-gray-300">Cremosos y nutritivos, perfectos para cualquier momento.</p>
                     </div>
                 </div>
                 <!-- Card 8: Apio España -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/KxrNs9KQ/apio-Espana.png" alt="Apio España" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Apio España</h3>
-                        <p class="text-gray-600 mb-4">Ideal para caldos y sopas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/KxrNs9KQ/apio-Espana.png" alt="Apio España" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Apio España</h3>
+                        <p class="text-sm text-gray-300">Ideal para caldos y sopas.</p>
                     </div>
                 </div>
                 <!-- Card 9: Pulpa de Frutas -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/B5Z9yyjD/pulpa.png" alt="Pulpa de Frutas" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Pulpa de Frutas</h3>
-                        <p class="text-gray-600 mb-4">El sabor natural de la fruta para jugos y postres.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/B5Z9yyjD/pulpa.png" alt="Pulpa de Frutas" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Pulpa de Frutas</h3>
+                        <p class="text-sm text-gray-300">El sabor natural de la fruta para jugos y postres.</p>
                     </div>
                 </div>
                 <!-- Card 10: Plátano -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/MDjNcvXx/platano.png" alt="Plátano" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Plátano</h3>
-                        <p class="text-gray-600 mb-4">Energía y sabor en una fruta.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/MDjNcvXx/platano.png" alt="Plátano" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Plátano</h3>
+                        <p class="text-sm text-gray-300">Un acompañante versátil, ideal para tus almuerzos.</p>
                     </div>
                 </div>
                 <!-- Card 11: Cebollín -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/HLBXCsNx/cebollin.png" alt="Cebollín" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Cebollín</h3>
-                        <p class="text-gray-600 mb-4">El toque de sabor único para tus recetas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/HLBXCsNx/cebollin.png" alt="Cebollín" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Cebollín</h3>
+                        <p class="text-sm text-gray-300">El toque de sabor único para tus recetas.</p>
                     </div>
                 </div>
                 <!-- Card 12: Acelga -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/99c60wbQ/acelga.png" alt="Acelga" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Acelga</h3>
-                        <p class="text-gray-600 mb-4">Hojas verdes, llenas de vitaminas.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/99c60wbQ/acelga.png" alt="Acelga" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Acelga</h3>
+                        <p class="text-sm text-gray-300">Hojas verdes, llenas de vitaminas.</p>
                     </div>
                 </div>
                 <!-- Card 13: Perejil -->
-                <div class="card bg-white rounded-xl shadow-lg overflow-hidden text-center">
-                    <img src="https://i.ibb.co/TBF8d3PW/perejil.png" alt="Perejil" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Perejil</h3>
-                        <p class="text-gray-600 mb-4">El toque de sabor y color final.</p>
+                <div class="elegant-card rounded-xl overflow-hidden text-center card-animation">
+                    <img src="https://i.ibb.co/NdkB4S9T/perejil.png" alt="Perejil" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-100">
+                        <h3 class="text-xl font-semibold mb-2">Perejil</h3>
+                        <p class="text-sm text-gray-300">El toque de sabor y color final.</p>
                     </div>
                 </div>
             </div>
@@ -213,11 +271,11 @@
             const catalogoSection = document.getElementById('catalogo-section');
 
             function showSection(sectionToShow, sectionToHide, btnToActivate, btnToDeactivate) {
-                // Show/hide sections
+                // Muestra/oculta las secciones
                 sectionToShow.classList.remove('hidden');
                 sectionToHide.classList.add('hidden');
 
-                // Update button styles
+                // Actualiza los estilos de los botones
                 btnToActivate.classList.remove('bg-white', 'text-gray-900', 'hover:bg-gray-200');
                 btnToActivate.classList.add('bg-neon-green', 'text-gray-900', 'hover:bg-green-400');
                 
@@ -233,11 +291,9 @@
                 showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
             });
 
-            // Muestra la sección de "Próximamente" por defecto al cargar la página y activa el botón de inicio
+            // Muestra la sección de "Próximamente" por defecto
             showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
         });
     </script>
-
 </body>
 </html>
-
