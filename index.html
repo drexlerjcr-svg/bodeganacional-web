@@ -61,6 +61,14 @@
             transform: translateY(20px) scale(0.9);
             animation: fadeInMoveUp 0.8s ease-out forwards;
         }
+        /* Nuevo estilo para la animación del carrito */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .blink-animation {
+            animation: blink 1.5s infinite;
+        }
     </style>
 </head>
 <body class="bg-[#1a1a1a] text-gray-100 min-h-screen flex flex-col justify-between">
@@ -83,10 +91,7 @@
         <div class="container py-4">
             <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                 <div class="text-center lg:text-left animate-fadeInMoveUp">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 tracking-wide text-gray-100">
-                        Próximamente la tienda móvil <br>estará disponible
-                    </h1>
-                    <p class="text-base md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto lg:mx-0">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 tracking-wide text-gray-100"></h1> <p class="text-base md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto lg:mx-0">
                         Prepárate para una nueva experiencia donde podrás <span class="text-neon-green font-bold initial-text-glow">SOLICITAR TUS RUBROS.</span> ¡Estamos trabajando en algo grande!
                     </p>
                     <a href="#" id="proximamente-button" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-[#208a5f] transition-colors duration-300 transform hover:scale-105">
@@ -120,7 +125,14 @@
             const catalogoSection = document.getElementById('catalogo-section');
             const proximamenteButton = document.getElementById('proximamente-button');
             const catalogoGrid = document.getElementById('catalogo-grid');
-            let catalogoCargado = false; // Variable para verificar si el catálogo ya se cargó
+            let catalogoCargado = false;
+
+            // Nuevo: Elementos para el efecto de máquina de escribir
+            const mainTitle = document.querySelector('h1.font-extrabold');
+            const titleText = 'Próximamente la tienda móvil <br>estará disponible';
+
+            // Nuevo: Elemento para el efecto de parpadeo del carrito
+            const carritoImage = document.querySelector('aside img');
 
             // Datos de los productos
             const productos = [
@@ -145,7 +157,6 @@
                 card.classList.add('market-card', 'rounded-xl', 'overflow-hidden', 'text-center', 'card-animation');
                 card.setAttribute('tabindex', '0');
                 card.style.animationDelay = `${index * 0.1}s`;
-
                 card.innerHTML = `
                     <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-56 object-cover">
                     <div class="p-6 text-gray-800">
@@ -158,13 +169,12 @@
 
             // Función para cargar el catálogo
             function cargarCatalogo() {
-                if (catalogoCargado) return; // Si ya se cargó, no hacer nada
-
+                if (catalogoCargado) return;
                 productos.forEach((producto, index) => {
                     const card = crearTarjetaProducto(producto, index);
                     catalogoGrid.appendChild(card);
                 });
-                catalogoCargado = true; // Marcar como cargado
+                catalogoCargado = true;
             }
 
             // Función para mostrar/ocultar secciones
@@ -180,7 +190,7 @@
 
             // Event listener para el botón "Catálogo"
             showCatalogoBtn.addEventListener('click', () => {
-                cargarCatalogo(); // Cargar el catálogo si no se ha cargado
+                cargarCatalogo();
                 showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -204,7 +214,29 @@
                     proximamenteButton.classList.remove('glow-button');
                 }
             });
+
+            // Llama a la función del efecto de máquina de escribir en el título principal
+            typewriterEffect(mainTitle, titleText);
+
+            // Inicia el parpadeo del carrito cada 2 segundos
+            setInterval(() => {
+                carritoImage.classList.toggle('blink-animation');
+            }, 2000);
         });
+
+        // Función del efecto de máquina de escribir
+        function typewriterEffect(element, text, delay = 50) {
+            let i = 0;
+            element.innerHTML = '';
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, delay);
+        }
     </script>
 </body>
 </html>
