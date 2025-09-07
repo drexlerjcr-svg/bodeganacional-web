@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bodega Nacional</title>
-    <!-- Agrega esta línea para cambiar el favicon -->
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos generales y fondo oscuro */
+        /* Estilos CSS existentes */
         body {
             font-family: 'Poppins', sans-serif;
             background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDBwYWdlfHx8fGVufDB8fHx8fA%3D%3D');
@@ -19,37 +18,15 @@
             color: #f9fafb;
             position: relative;
         }
-
-        /* Estilos para el contenedor principal y tarjetas */
         .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 1rem;
         }
-
-        /* Variables de color */
         .text-neon-green { color: #34d399; }
         .bg-neon-green { background-color: #34d399; }
         .text-organic-green { color: #2e7d32; }
         .bg-organic-green { background-color: #2e7d32; }
-
-        /* Estilos de las tarjetas con efecto glassmorphism (para la seccion inicial) */
-        .elegant-card {
-            background-color: rgba(42, 42, 42, 0.5);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.75rem;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s, scale 0.3s ease;
-            position: relative;
-        }
-        .elegant-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7), 0 0 20px #34d399;
-            z-index: 10;
-        }
-
-        /* Estilos para las tarjetas del catálogo */
         .market-card {
             background-color: #fff;
             border-radius: 0.75rem;
@@ -58,87 +35,36 @@
             position: relative;
             cursor: pointer;
         }
-        /* Efecto de brillo al pasar el mouse */
         .market-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
-
-        /* Animaciones */
         @keyframes fadeInMoveUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeInMoveUp {
-            animation: fadeInMoveUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-        }
-        /* Animación de resplandor para el botón */
+        .animate-fadeInMoveUp { animation: fadeInMoveUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
         @keyframes glowing-box {
             0% { box-shadow: 0 0 5px #34d399; }
             50% { box-shadow: 0 0 20px #34d399, 0 0 30px #34d399; }
             100% { box-shadow: 0 0 5px #34d399; }
         }
-        /* Animación de resplandor para el texto del encabezado */
         @keyframes glowing-text {
             0% { text-shadow: 0 0 5px #34d399; }
             50% { text-shadow: 0 0 15px #34d399, 0 0 25px #34d399; }
             100% { text-shadow: 0 0 5px #34d399; }
         }
-        .initial-text-glow {
-            animation: glowing-text 1.5s infinite;
-        }
-        /* Clase para activar el resplandor del botón con JavaScript */
-        .glow-button {
-            animation: glowing-box 1.5s infinite;
-        }
-        .horizontal-scroll-container {
-            display: flex;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x mandatory;
-            gap: 1.5rem;
-            padding-bottom: 1rem;
-        }
-        .horizontal-scroll-container::-webkit-scrollbar {
-            height: 8px;
-        }
-        .horizontal-scroll-container::-webkit-scrollbar-thumb {
-            background-color: #34d399;
-            border-radius: 10px;
-        }
-        .horizontal-scroll-container::-webkit-scrollbar-track {
-            background-color: #2a2a2a;
-        }
+        .initial-text-glow { animation: glowing-text 1.5s infinite; }
+        .glow-button { animation: glowing-box 1.5s infinite; }
         .card-animation {
             opacity: 0;
             transform: translateY(20px) scale(0.9);
             animation: fadeInMoveUp 0.8s ease-out forwards;
         }
-        .card-animation:nth-child(1) { animation-delay: 0.1s; }
-        .card-animation:nth-child(2) { animation-delay: 0.2s; }
-        .card-animation:nth-child(3) { animation-delay: 0.3s; }
-        .card-animation:nth-child(4) { animation-delay: 0.4s; }
-        .card-animation:nth-child(5) { animation-delay: 0.5s; }
-        .card-animation:nth-child(6) { animation-delay: 0.6s; }
-        .card-animation:nth-child(7) { animation-delay: 0.7s; }
-        .card-animation:nth-child(8) { animation-delay: 0.8s; }
-        .card-animation:nth-child(9) { animation-delay: 0.9s; }
-        .card-animation:nth-child(10) { animation-delay: 1.0s; }
-        .card-animation:nth-child(11) { animation-delay: 1.1s; }
-        .card-animation:nth-child(12) { animation-delay: 1.2s; }
-        .card-animation:nth-child(13) { animation-delay: 1.3s; }
-
     </style>
 </head>
 <body class="bg-[#1a1a1a] text-gray-100 min-h-screen flex flex-col justify-between">
     
-    <!-- Encabezado -->
     <header class="bg-[#2a2a2a] bg-opacity-80 backdrop-blur-md shadow-sm py-4 mb-4 sticky top-0 z-50">
         <div class="container flex justify-between items-center">
             <h1 class="text-2xl font-bold text-gray-100 animate-fadeInMoveUp transform hover:scale-105 initial-text-glow">Bodega Nacional</h1>
@@ -153,7 +79,6 @@
         </div>
     </header>
 
-    <!-- Sección "Próximamente" -->
     <div id="proximamente-section" class="flex-grow flex items-center justify-center">
         <div class="container py-4">
             <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -175,121 +100,14 @@
         </div>
     </div>
 
-    <!-- Sección "Catálogo" (oculta por defecto) -->
     <div id="catalogo-section" class="hidden">
         <div class="container py-4">
             <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-8 text-gray-100">Próximamente nuestros productos</h2>
-            <!-- Cuadrícula de productos con animaciones de entrada escalonadas -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Tarjeta 1: Papa -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/2145dRdw/papa.png" alt="Papa" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Papa</h3>
-                        <p class="text-sm text-gray-600">El ingrediente versátil para todas tus comidas.</p>
-                    </div>
+            <div id="catalogo-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 </div>
-                <!-- Tarjeta 2: Tomate -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/wNY2RYK0/tomate.png" alt="Tomate" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Tomate</h3>
-                        <p class="text-sm text-gray-600">Jugosos y llenos de sabor.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 3: Cebolla -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/9kZHJLtM/cebolla.png" alt="Cebolla" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Cebolla</h3>
-                        <p class="text-sm text-gray-600">Esenciales para dar un toque especial a tus platos.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 4: Zanahoria -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/Q3gXMpgm/zanahoria.png" alt="Zanahoria" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Zanahoria</h3>
-                        <p class="text-sm text-gray-600">Dulces y crujientes, ideales para ensaladas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 5: Pimentón -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/ZqXG74f/pimenton.png" alt="Pimentón" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Pimentón</h3>
-                        <p class="text-sm text-gray-600">Color y sabor para tus recetas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 6: Lechuga -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/VWQQCLHM/lechuga.png" alt="Lechuga" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Lechuga</h3>
-                        <p class="text-sm text-gray-600">Frescura garantizada en tus ensaladas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 7: Aguacate -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/wFFhNmp3/aguacate.png" alt="Aguacate" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Aguacate</h3>
-                        <p class="text-sm text-gray-600">Cremosos y nutritivos, perfectos para cualquier momento.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 8: Apio España -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/KxrNs9KQ/apio-Espana.png" alt="Apio España" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Apio España</h3>
-                        <p class="text-sm text-gray-600">Ideal para caldos y sopas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 9: Pulpa de Frutas -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/B5Z9yyjD/pulpa.png" alt="Pulpa de Frutas" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Pulpa de Frutas</h3>
-                        <p class="text-sm text-gray-600">El sabor natural de la fruta para jugos y postres.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 10: Plátano -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/MDjNcvXx/platano.png" alt="Plátano" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Plátano</h3>
-                        <p class="text-sm text-gray-600">Un acompañante versátil, ideal para tus almuerzos.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 11: Cebollín -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/HLBXCsNx/cebollin.png" alt="Cebollín" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Cebollín</h3>
-                        <p class="text-sm text-gray-600">El toque de sabor único para tus recetas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 12: Acelga -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/99c60wbQ/acelga.png" alt="Acelga" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Acelga</h3>
-                        <p class="text-sm text-gray-600">Hojas verdes, llenas de vitaminas.</p>
-                    </div>
-                </div>
-                <!-- Tarjeta 13: Perejil -->
-                <div class="market-card rounded-xl overflow-hidden text-center card-animation" tabindex="0">
-                    <img src="https://i.ibb.co/xSRjdTzF/perejil.png" alt="Perejil" class="w-full h-56 object-cover">
-                    <div class="p-6 text-gray-800">
-                        <h3 class="text-xl font-semibold mb-2 text-organic-green">Perejil</h3>
-                        <p class="text-sm text-gray-600">El toque de sabor y color final.</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Pie de página -->
     <footer class="mt-8 py-4 text-center text-gray-500 text-sm">
         © 2025 Bodega Nacional. Todos los derechos reservados.
     </footer>
@@ -301,28 +119,75 @@
             const proximamenteSection = document.getElementById('proximamente-section');
             const catalogoSection = document.getElementById('catalogo-section');
             const proximamenteButton = document.getElementById('proximamente-button');
+            const catalogoGrid = document.getElementById('catalogo-grid');
+            let catalogoCargado = false; // Variable para verificar si el catálogo ya se cargó
 
+            // Datos de los productos
+            const productos = [
+                { nombre: 'Papa', descripcion: 'El ingrediente versátil para todas tus comidas.', imagen: 'https://i.ibb.co/2145dRdw/papa.png' },
+                { nombre: 'Tomate', descripcion: 'Jugosos y llenos de sabor.', imagen: 'https://i.ibb.co/wNY2RYK0/tomate.png' },
+                { nombre: 'Cebolla', descripcion: 'Esenciales para dar un toque especial a tus platos.', imagen: 'https://i.ibb.co/9kZHJLtM/cebolla.png' },
+                { nombre: 'Zanahoria', descripcion: 'Dulces y crujientes, ideales para ensaladas.', imagen: 'https://i.ibb.co/Q3gXMpgm/zanahoria.png' },
+                { nombre: 'Pimentón', descripcion: 'Color y sabor para tus recetas.', imagen: 'https://i.ibb.co/ZqXG74f/pimenton.png' },
+                { nombre: 'Lechuga', descripcion: 'Frescura garantizada en tus ensaladas.', imagen: 'https://i.ibb.co/VWQQCLHM/lechuga.png' },
+                { nombre: 'Aguacate', descripcion: 'Cremosos y nutritivos, perfectos para cualquier momento.', imagen: 'https://i.ibb.co/wFFhNmp3/aguacate.png' },
+                { nombre: 'Apio España', descripcion: 'Ideal para caldos y sopas.', imagen: 'https://i.ibb.co/KxrNs9KQ/apio-Espana.png' },
+                { nombre: 'Pulpa de Frutas', descripcion: 'El sabor natural de la fruta para jugos y postres.', imagen: 'https://i.ibb.co/B5Z9yyjD/pulpa.png' },
+                { nombre: 'Plátano', descripcion: 'Un acompañante versátil, ideal para tus almuerzos.', imagen: 'https://i.ibb.co/MDjNcvXx/platano.png' },
+                { nombre: 'Cebollín', descripcion: 'El toque de sabor único para tus recetas.', imagen: 'https://i.ibb.co/HLBXCsNx/cebollin.png' },
+                { nombre: 'Acelga', descripcion: 'Hojas verdes, llenas de vitaminas.', imagen: 'https://i.ibb.co/99c60wbQ/acelga.png' },
+                { nombre: 'Perejil', descripcion: 'El toque de sabor y color final.', imagen: 'https://i.ibb.co/xSRjdTzF/perejil.png' }
+            ];
+
+            // Función para generar una tarjeta de producto
+            function crearTarjetaProducto(producto, index) {
+                const card = document.createElement('div');
+                card.classList.add('market-card', 'rounded-xl', 'overflow-hidden', 'text-center', 'card-animation');
+                card.setAttribute('tabindex', '0');
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                card.innerHTML = `
+                    <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-56 object-cover">
+                    <div class="p-6 text-gray-800">
+                        <h3 class="text-xl font-semibold mb-2 text-organic-green">${producto.nombre}</h3>
+                        <p class="text-sm text-gray-600">${producto.descripcion}</p>
+                    </div>
+                `;
+                return card;
+            }
+
+            // Función para cargar el catálogo
+            function cargarCatalogo() {
+                if (catalogoCargado) return; // Si ya se cargó, no hacer nada
+
+                productos.forEach((producto, index) => {
+                    const card = crearTarjetaProducto(producto, index);
+                    catalogoGrid.appendChild(card);
+                });
+                catalogoCargado = true; // Marcar como cargado
+            }
+
+            // Función para mostrar/ocultar secciones
             function showSection(sectionToShow, sectionToHide, btnToActivate, btnToDeactivate) {
-                // Ocultar la sección actual y mostrar la nueva
                 sectionToHide.classList.add('hidden');
                 sectionToShow.classList.remove('hidden');
 
-                // Actualizar los estilos de los botones para reflejar la sección activa
                 btnToActivate.classList.remove('bg-transparent', 'text-white');
                 btnToActivate.classList.add('bg-organic-green', 'text-gray-900');
                 btnToDeactivate.classList.remove('bg-organic-green', 'text-gray-900');
                 btnToDeactivate.classList.add('bg-transparent', 'text-white');
             }
 
-            showProximamenteBtn.addEventListener('click', () => {
-                showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
-                // Desplazar la ventana a la parte superior cuando se navega al inicio
+            // Event listener para el botón "Catálogo"
+            showCatalogoBtn.addEventListener('click', () => {
+                cargarCatalogo(); // Cargar el catálogo si no se ha cargado
+                showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            showCatalogoBtn.addEventListener('click', () => {
-                showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
-                // Desplazar la ventana a la parte superior cuando se navega al catálogo
+            // Event listener para el botón "Inicio"
+            showProximamenteBtn.addEventListener('click', () => {
+                showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
@@ -331,15 +196,10 @@
 
             // Lógica para el resplandor del botón de "PRÓXIMAMENTE"
             proximamenteButton.addEventListener('click', (event) => {
-                // Evita que el evento se propague al documento
-                event.stopPropagation(); 
-                // Alternar la clase 'glow-button' al hacer clic
+                event.stopPropagation();
                 proximamenteButton.classList.toggle('glow-button');
             });
-
-            // Listener global para el documento
             document.addEventListener('click', (event) => {
-                // Si el clic no fue en el botón, quita la clase de resplandor
                 if (event.target !== proximamenteButton && proximamenteButton.classList.contains('glow-button')) {
                     proximamenteButton.classList.remove('glow-button');
                 }
