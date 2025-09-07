@@ -17,6 +17,7 @@
             background-attachment: fixed;
             color: #f9fafb;
             position: relative;
+            overflow-x: hidden; /* Evitar scroll horizontal por animaciones */
         }
         .container {
             max-width: 1280px;
@@ -27,18 +28,8 @@
         .bg-neon-green { background-color: #34d399; }
         .text-organic-green { color: #2e7d32; }
         .bg-organic-green { background-color: #2e7d32; }
-        .market-card {
-            background-color: #fff;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            cursor: pointer;
-        }
-        .market-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
+
+        /* Existing Animations */
         @keyframes fadeInMoveUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -61,40 +52,149 @@
             transform: translateY(20px) scale(0.9);
             animation: fadeInMoveUp 0.8s ease-out forwards;
         }
-        /* Nuevo estilo para la animación del carrito */
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        .blink-animation {
-            animation: blink 1.5s infinite;
+        .blink-animation { animation: blink 1.5s infinite; }
+
+        /* Nuevo: Estilo de las tarjetas de catálogo con animación de hover */
+        .market-card {
+            background-color: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, rotate 0.3s ease; /* Añadimos rotate */
+            position: relative;
+            cursor: pointer;
+            overflow: hidden; /* Asegurar que la imagen no se salga al rotar */
+        }
+        .market-card:hover {
+            transform: translateY(-8px) scale(1.02); /* Ligeramente más grande */
+            rotate: 2deg; /* Pequeña rotación */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .market-card img {
+            transition: transform 0.3s ease; /* Transición para la imagen al escalar */
+        }
+        .market-card:hover img {
+            transform: scale(1.05); /* Escala la imagen dentro de la tarjeta */
+        }
+
+        /* Nuevo: Efecto Ripple para el botón */
+        .ripple-button {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-button .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            animation: ripple-animation 0.6s linear forwards;
+            transform: scale(0);
+            pointer-events: none;
+        }
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Nuevo: Animación de fondo brillante para el header */
+        @keyframes header-glow {
+            0% { box-shadow: 0 0 0px rgba(52, 211, 153, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(52, 211, 153, 0.8); }
+            100% { box-shadow: 0 0 0px rgba(52, 211, 153, 0.4); }
+        }
+        .header-bg-glow { animation: header-glow 4s infinite ease-in-out; }
+
+        /* Nuevo: Confeti flotante */
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #34d399; /* Neon green */
+            opacity: 0;
+            animation: confetti-fall linear infinite;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        @keyframes confetti-fall {
+            0% {
+                transform: translate(0, 0) rotateZ(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            100% {
+                transform: translate(var(--x), 100vh) rotateZ(var(--deg));
+                opacity: 0;
+            }
+        }
+
+        /* Nuevo: Scroll Reveal básico para las secciones */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Nuevo: Efecto de deslizamiento en los botones de navegación */
+        .nav-button-hover-effect {
+            position: relative;
+            z-index: 1;
+        }
+        .nav-button-hover-effect::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #34d399; /* Neon green */
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease-out;
+            z-index: -1;
+        }
+        .nav-button-hover-effect:hover::before {
+            transform: scaleX(1);
+        }
+        /* Para el botón activo, para que la línea se mantenga */
+        .nav-button-active::before {
+            transform: scaleX(1) !important;
         }
     </style>
 </head>
 <body class="bg-[#1a1a1a] text-gray-100 min-h-screen flex flex-col justify-between">
     
-    <header class="bg-[#2a2a2a] bg-opacity-80 backdrop-blur-md shadow-sm py-4 mb-4 sticky top-0 z-50">
+    <header class="bg-[#2a2a2a] bg-opacity-80 backdrop-blur-md shadow-sm py-4 mb-4 sticky top-0 z-50 header-bg-glow">
         <div class="container flex justify-between items-center">
             <h1 class="text-2xl font-bold text-gray-100 animate-fadeInMoveUp transform hover:scale-105 initial-text-glow">Bodega Nacional</h1>
             <nav class="flex space-x-4">
-                <button id="showProximamenteBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110 animate-fadeInMoveUp" style="animation-delay: 0.3s;">
+                <button id="showProximamenteBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110 animate-fadeInMoveUp nav-button-hover-effect" style="animation-delay: 0.3s;">
                     Inicio
                 </button>
-                <button id="showCatalogoBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110 animate-fadeInMoveUp" style="animation-delay: 0.4s;">
+                <button id="showCatalogoBtn" class="py-2 px-4 rounded-full font-bold transition-transform duration-300 transform hover:scale-110 animate-fadeInMoveUp nav-button-hover-effect" style="animation-delay: 0.4s;">
                     Catálogo
                 </button>
             </nav>
         </div>
     </header>
 
-    <div id="proximamente-section" class="flex-grow flex items-center justify-center">
+    <div id="proximamente-section" class="flex-grow flex items-center justify-center scroll-reveal">
         <div class="container py-4">
             <main class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                 <div class="text-center lg:text-left animate-fadeInMoveUp">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 tracking-wide text-gray-100"></h1> <p class="text-base md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto lg:mx-0">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 tracking-wide text-gray-100"></h1>
+                    <p class="text-base md:text-xl text-gray-300 mb-6 max-w-2xl mx-auto lg:mx-0">
                         Prepárate para una nueva experiencia donde podrás <span class="text-neon-green font-bold initial-text-glow">SOLICITAR TUS RUBROS.</span> ¡Estamos trabajando en algo grande!
                     </p>
-                    <a href="#" id="proximamente-button" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-[#208a5f] transition-colors duration-300 transform hover:scale-105">
+                    <a href="#" id="proximamente-button" class="inline-block bg-neon-green text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-[#208a5f] transition-colors duration-300 transform hover:scale-105 ripple-button">
                         PRÓXIMAMENTE <span class="inline-block ml-2 transform rotate-45 text-2xl">🛒</span>
                     </a>
                 </div>
@@ -105,7 +205,7 @@
         </div>
     </div>
 
-    <div id="catalogo-section" class="hidden">
+    <div id="catalogo-section" class="hidden scroll-reveal">
         <div class="container py-4">
             <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-8 text-gray-100">Próximamente nuestros productos</h2>
             <div id="catalogo-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -127,14 +227,19 @@
             const catalogoGrid = document.getElementById('catalogo-grid');
             let catalogoCargado = false;
 
-            // Nuevo: Elementos para el efecto de máquina de escribir
-            const mainTitle = document.querySelector('h1.font-extrabold');
-            const titleText = 'Próximamente la tienda móvil <br>estará disponible';
+            // Elementos para el efecto de máquina de escribir
+            const mainTitleElement = document.querySelector('h1.font-extrabold');
+            const titleTexts = [
+                'Próximamente la tienda móvil estará disponible',
+                '¡Descarga nuestra App!',
+                'Explora nuestro catálogo ahora'
+            ];
+            let currentTitleIndex = 0;
 
-            // Nuevo: Elemento para el efecto de parpadeo del carrito
+            // Elemento para el efecto de parpadeo del carrito
             const carritoImage = document.querySelector('aside img');
 
-            // Datos de los productos
+            // Datos de los productos (los mismos que antes)
             const productos = [
                 { nombre: 'Papa', descripcion: 'El ingrediente versátil para todas tus comidas.', imagen: 'https://i.ibb.co/2145dRdw/papa.png' },
                 { nombre: 'Tomate', descripcion: 'Jugosos y llenos de sabor.', imagen: 'https://i.ibb.co/wNY2RYK0/tomate.png' },
@@ -177,66 +282,119 @@
                 catalogoCargado = true;
             }
 
-            // Función para mostrar/ocultar secciones
+            // Función para mostrar/ocultar secciones y manejar clases de botones
             function showSection(sectionToShow, sectionToHide, btnToActivate, btnToDeactivate) {
+                // Ocultar la sección actual
                 sectionToHide.classList.add('hidden');
-                sectionToShow.classList.remove('hidden');
+                sectionToHide.classList.remove('visible'); // Para scroll reveal
 
+                // Mostrar la nueva sección con animación
+                sectionToShow.classList.remove('hidden');
+                setTimeout(() => { // Pequeño delay para que la transición funcione
+                    sectionToShow.classList.add('visible'); // Para scroll reveal
+                }, 10);
+                
+
+                // Actualizar clases de los botones de navegación
                 btnToActivate.classList.remove('bg-transparent', 'text-white');
-                btnToActivate.classList.add('bg-organic-green', 'text-gray-900');
-                btnToDeactivate.classList.remove('bg-organic-green', 'text-gray-900');
+                btnToActivate.classList.add('bg-organic-green', 'text-gray-900', 'nav-button-active'); // Añadimos nav-button-active
+                
+                btnToDeactivate.classList.remove('bg-organic-green', 'text-gray-900', 'nav-button-active');
                 btnToDeactivate.classList.add('bg-transparent', 'text-white');
             }
 
-            // Event listener para el botón "Catálogo"
+            // --- Nuevas funciones de JS para animaciones ---
+
+            // Máquina de escribir con bucle
+            function typeAndDeleteEffect() {
+                let textIndex = 0;
+                let charIndex = 0;
+                let isDeleting = false;
+
+                function type() {
+                    const currentText = titleTexts[textIndex];
+                    if (!isDeleting && charIndex < currentText.length) {
+                        mainTitleElement.innerHTML += currentText.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(type, 80);
+                    } else if (isDeleting && charIndex > 0) {
+                        mainTitleElement.innerHTML = currentText.substring(0, charIndex - 1);
+                        charIndex--;
+                        setTimeout(type, 40);
+                    } else if (!isDeleting && charIndex === currentText.length) {
+                        setTimeout(() => { isDeleting = true; type(); }, 1500); // Esperar y empezar a borrar
+                    } else if (isDeleting && charIndex === 0) {
+                        isDeleting = false;
+                        textIndex = (textIndex + 1) % titleTexts.length;
+                        setTimeout(type, 500); // Esperar y empezar a escribir el siguiente texto
+                    }
+                }
+                type();
+            }
+
+            // Efecto Ripple para el botón de "PRÓXIMAMENTE"
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - (button.getBoundingClientRect().left + radius)}px`;
+                circle.style.top = `${event.clientY - (button.getBoundingClientRect().top + radius)}px`;
+                circle.classList.add('ripple-effect');
+
+                const ripple = button.getElementsByClassName('ripple-effect')[0];
+
+                if (ripple) {
+                    ripple.remove();
+                }
+
+                button.appendChild(circle);
+            }
+
+            // Generar Confeti
+            function createConfetti() {
+                const confettiCount = 50;
+                const body = document.body;
+                for (let i = 0; i < confettiCount; i++) {
+                    const piece = document.createElement('div');
+                    piece.classList.add('confetti-piece');
+                    piece.style.left = `${Math.random() * 100}vw`;
+                    piece.style.animationDelay = `${Math.random() * 5}s`;
+                    piece.style.setProperty('--x', `${(Math.random() - 0.5) * 500}px`); // Movimiento horizontal aleatorio
+                    piece.style.setProperty('--deg', `${Math.random() * 360}deg`); // Rotación aleatoria
+                    body.appendChild(piece);
+                }
+            }
+
+
+            // --- Event Listeners y Llamadas Iniciales ---
+
             showCatalogoBtn.addEventListener('click', () => {
                 cargarCatalogo();
                 showSection(catalogoSection, proximamenteSection, showCatalogoBtn, showProximamenteBtn);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // Event listener para el botón "Inicio"
             showProximamenteBtn.addEventListener('click', () => {
                 showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
+            // Asignar el ripple effect al botón de "PRÓXIMAMENTE"
+            proximamenteButton.addEventListener('click', createRipple);
+
             // Muestra la sección de "Próximamente" por defecto
             showSection(proximamenteSection, catalogoSection, showProximamenteBtn, showCatalogoBtn);
 
-            // Lógica para el resplandor del botón de "PRÓXIMAMENTE"
-            proximamenteButton.addEventListener('click', (event) => {
-                event.stopPropagation();
-                proximamenteButton.classList.toggle('glow-button');
-            });
-            document.addEventListener('click', (event) => {
-                if (event.target !== proximamenteButton && proximamenteButton.classList.contains('glow-button')) {
-                    proximamenteButton.classList.remove('glow-button');
-                }
-            });
-
-            // Llama a la función del efecto de máquina de escribir en el título principal
-            typewriterEffect(mainTitle, titleText);
-
-            // Inicia el parpadeo del carrito cada 2 segundos
+            // Inicia las animaciones
+            typeAndDeleteEffect(); // Máquina de escribir
             setInterval(() => {
                 carritoImage.classList.toggle('blink-animation');
-            }, 2000);
+            }, 2000); // Parpadeo del carrito
+            createConfetti(); // Confeti al cargar la página
         });
-
-        // Función del efecto de máquina de escribir
-        function typewriterEffect(element, text, delay = 50) {
-            let i = 0;
-            element.innerHTML = '';
-            const interval = setInterval(() => {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, delay);
-        }
     </script>
 </body>
 </html>
