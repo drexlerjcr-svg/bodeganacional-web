@@ -3,157 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando - Fixed Sidebar</title>
+    <title>Dashboard Ejecutivo Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #1e3a8a; --secondary: #3b82f6; --accent: #f97316;
-            --bg: #f8fafc; --white: #ffffff; --text: #1e293b;
+            --bg: #f0f2f5; --white: #ffffff; --text: #1e293b;
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
         }
 
-        /* RESET PARA ELIMINAR SCROLL GLOBAL */
-        html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; /* Bloquea el scroll de toda la pantalla */
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-        }
+        html, body { height: 100%; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--bg); }
         
-        /* LAYOUT PRINCIPAL */
-        .app-container { 
-            display: flex; 
-            height: 100vh; /* Altura total de la ventana */
-            width: 100vw;
-        }
+        .app-container { display: flex; height: 100vh; width: 100vw; }
         
-        /* BARRA IZQUIERDA FIJA */
+        /* SIDEBAR IZQUIERDA FIJA */
         .sidebar { 
-            width: 300px; 
-            min-width: 300px;
-            background: var(--white); 
-            border-right: 1px solid #e2e8f0; 
-            display: flex; 
-            flex-direction: column;
-            height: 100%; /* Ocupa todo el alto disponible */
+            width: 280px; min-width: 280px; background: var(--white); 
+            border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; 
         }
-        .sidebar-header { padding: 25px; background: var(--primary); color: white; text-align: center; }
-        .state-list { 
-            overflow-y: auto; /* Permite scroll interno si hay muchos estados */
-            padding: 15px; 
-            flex-grow: 1; 
-        }
-
-        /* CONTENIDO DERECHO CON SCROLL PROPIO */
-        .main-content { 
-            flex-grow: 1; 
-            padding: 30px; 
-            overflow-y: auto; /* AQUÍ está el scroll de la información */
-            background: #f1f5f9;
-        }
-
-        /* ESTILOS DE COMPONENTES */
+        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: bold; }
+        .state-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
         .state-item { 
-            padding: 14px 18px; margin-bottom: 6px; border-radius: 10px; cursor: pointer;
+            padding: 12px 15px; margin-bottom: 5px; border-radius: 8px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s; font-size: 0.85rem; border: 1px solid transparent; color: #64748b;
+            transition: 0.2s; font-size: 0.85rem; color: #475569;
         }
-        .state-item:hover { background: #f1f5f9; color: var(--primary); }
-        .state-item.active { background: var(--primary); color: white; font-weight: 600; box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2); }
+        .state-item:hover { background: #f8fafc; color: var(--primary); }
+        .state-item.active { background: var(--primary); color: white; font-weight: 600; }
 
-        .top-banner { 
-            background: var(--white); color: var(--primary); padding: 25px 35px; border-radius: 15px; margin-bottom: 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 8px solid var(--accent);
-        }
+        /* CONTENIDO DERECHO CON SCROLL */
+        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 30px; }
-        .kpi-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .kpi-title { font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
-        .kpi-value { font-size: 2.5rem; font-weight: 800; margin: 10px 0; color: var(--primary); }
-        .kpi-perc { font-size: 0.9rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+        /* ESTILO INSPIRADO EN TUS IMÁGENES */
+        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
 
-        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .chart-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* TARJETAS SUPERIORES */
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--primary); }
+        .card.success::before { background: var(--success); }
+        .card.warning::before { background: var(--warning); }
         
-        .ranking-item { margin-bottom: 18px; }
-        .rank-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; }
-        .rank-bar-bg { background: #f1f5f9; height: 10px; border-radius: 10px; overflow: hidden; }
-        .rank-bar-fill { background: linear-gradient(90deg, var(--secondary), var(--accent)); height: 100%; border-radius: 10px; }
+        .card-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .card-value { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--text); }
 
-        #loader { position: fixed; inset: 0; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        
-        /* Personalización de la scrollbar para que se vea pro */
-        .main-content::-webkit-scrollbar { width: 8px; }
-        .main-content::-webkit-scrollbar-track { background: #f1f5f9; }
+        /* FILA DE GRÁFICOS CIRCULARES */
+        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 10px; }
+        .compliance-card { background: white; padding: 20px; border-radius: 12px; text-align: center; }
+        .chart-container { position: relative; height: 120px; margin-bottom: 10px; }
+
+        /* LISTA DE DESEMPEÑO (BARRAS) */
+        .performance-card { background: white; padding: 25px; border-radius: 12px; margin-top: 20px; }
+        .bar-item { margin-bottom: 15px; }
+        .bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+        .bar-bg { background: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
+
+        #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+
+        /* Scrollbar estética */
+        .main-content::-webkit-scrollbar { width: 6px; }
         .main-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .main-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top:15px; font-weight:600">Sincronizando información...</p>
-</div>
+<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
 
 <div class="app-container">
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2 style="margin:0; font-size: 1.2rem; letter-spacing: 1px;">SALA DE MANDO</h2>
-        </div>
+        <div class="sidebar-header">MENU DE FILTROS</div>
         <div class="state-list" id="state-selector">
             <div class="state-item active" onclick="resetFilter(this)">
-                <span><i class="fas fa-layer-group"></i> TOTAL NACIONAL</span>
+                <span><i class="fas fa-layer-group"></i> NACIONAL</span>
                 <i class="fas fa-chevron-right"></i>
             </div>
         </div>
     </aside>
 
     <main class="main-content">
-        <div class="top-banner">
-            <div>
-                <h1 id="view-title" style="margin:0; font-size: 1.8rem;">VENEZUELA (TOTAL)</h1>
-                <span id="current-date" style="color: #64748b;"></span>
+        <h2 id="view-title" style="margin:0; color: var(--primary);">VENEZUELA (CONSOLIDADO)</h2>
+        <p style="color: #64748b; margin-bottom: 30px;">Resumen ejecutivo de gestión de datos</p>
+
+        <div class="section-title">Resumen General</div>
+        <div class="kpi-grid">
+            <div class="card">
+                <div class="card-label">Registros Recibidos</div>
+                <div class="card-value" id="val-recibidos">0</div>
             </div>
-            <div style="background: #f1f5f9; padding: 10px 20px; border-radius: 10px;">
-                <span style="color: var(--success); font-weight: bold;"><i class="fas fa-circle" style="font-size: 0.6rem;"></i> SISTEMA ACTIVO</span>
+            <div class="card success">
+                <div class="card-label">Atendidas</div>
+                <div class="card-value" id="val-atendidas">0</div>
+            </div>
+            <div class="card warning">
+                <div class="card-label">Por Atender</div>
+                <div class="card-value" id="val-pendientes">0</div>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="kpi-card" style="border-top: 4px solid var(--primary);">
-                <div class="kpi-title">Registros Totales</div>
-                <div class="kpi-value" id="val-recibidos">0</div>
-                <span class="kpi-perc" style="background: #e0e7ff; color: var(--primary);">Consolidado</span>
+        <div class="section-title">Cumplimiento de Metas</div>
+        <div class="compliance-grid">
+            <div class="compliance-card">
+                <div class="chart-container"><canvas id="chartAte"></canvas></div>
+                <div class="card-label">Efectividad Atenc.</div>
             </div>
-            <div class="kpi-card" style="border-top: 4px solid var(--success);">
-                <div class="kpi-title">Casos Atendidos</div>
-                <div class="kpi-value" id="val-atendidas" style="color: var(--success);">0</div>
-                <span id="perc-atendidas" class="kpi-perc" style="background: #dcfce7; color: var(--success);">0% Eficacia</span>
+            <div class="compliance-card">
+                <div class="chart-container"><canvas id="chartCer"></canvas></div>
+                <div class="card-label">Cierre de Casos</div>
             </div>
-            <div class="kpi-card" style="border-top: 4px solid var(--danger);">
-                <div class="kpi-title">Pendientes</div>
-                <div class="kpi-value" id="val-pendientes" style="color: var(--danger);">0</div>
-                <span id="perc-pendientes" class="kpi-perc" style="background: #fee2e2; color: var(--danger);">0% por gestionar</span>
+            <div class="compliance-card">
+                <div class="chart-container"><canvas id="chartPen"></canvas></div>
+                <div class="card-label">Pendientes %</div>
             </div>
         </div>
 
-        <div class="charts-section">
-            <div class="chart-card">
-                <h3 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">Estatus General</h3>
-                <div style="height: 250px;"><canvas id="statusChart"></canvas></div>
+        <div class="section-title">Análisis de Estatus Detallado</div>
+        <div class="performance-card" id="status-bars">
             </div>
-            <div class="chart-card">
-                <h3 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">Top Cumplimiento</h3>
-                <div id="ranking-container"></div>
-            </div>
-        </div>
 
-        <div style="height: 100px;"></div>
+        <div style="height: 50px;"></div>
     </main>
 </div>
 
@@ -161,22 +131,17 @@
     const sheetId = '19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ';
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Hoja 1`;
     let rawData = [];
-    let myChart;
+    let charts = {};
 
-    const listaEstados = [
-        "AMAZONAS", "ANZOATEGUI", "APURE", "ARAGUA", "BARINAS", "BOLIVAR", "CARABOBO", "COJEDES", 
-        "DELTA AMACURO", "DISTRITO CAPITAL", "FALCON", "GUARICO", "LARA", "MERIDA", "MIRANDA", 
-        "MONAGAS", "NUEVA ESPARTA", "PORTUGUESA", "SUCRE", "TACHIRA", "TRUJILLO", "VARGAS", "YARACUY", "ZULIA"
-    ];
+    const listaEstados = ["AMAZONAS", "ANZOATEGUI", "APURE", "ARAGUA", "BARINAS", "BOLIVAR", "CARABOBO", "COJEDES", "DELTA AMACURO", "DISTRITO CAPITAL", "FALCON", "GUARICO", "LARA", "MERIDA", "MIRANDA", "MONAGAS", "NUEVA ESPARTA", "PORTUGUESA", "SUCRE", "TACHIRA", "TRUJILLO", "VARGAS", "YARACUY", "ZULIA"];
 
     async function init() {
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-VE', {weekday: 'long', day:'numeric', month:'long', year:'numeric'});
         try {
             const container = document.getElementById('state-selector');
             listaEstados.forEach(est => {
                 const div = document.createElement('div');
                 div.className = 'state-item';
-                div.innerHTML = `<span>${est}</span> <i class="fas fa-chevron-right" style="opacity:0.2"></i>`;
+                div.innerHTML = `<span>${est}</span> <i class="fas fa-chevron-right"></i>`;
                 div.onclick = () => filterData(est, div);
                 container.appendChild(div);
             });
@@ -192,12 +157,11 @@
             });
 
             updateUI(rawData);
-            renderRanking();
             document.getElementById('loader').style.display = 'none';
         } catch (e) { console.error(e); }
     }
 
-    function updateUI(data, title = "VENEZUELA (TOTAL)") {
+    function updateUI(data, title = "VENEZUELA (CONSOLIDADO)") {
         let s = { rec: 0, ate: 0, pen: 0, cer: 0, ins: 0, apr: 0, des: 0, con: 0 };
         data.forEach(d => {
             s.rec += Number(d['REGISTROS RECIBIDOS']) || 0;
@@ -211,54 +175,49 @@
         });
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('val-recibidos').innerText = s.rec.toLocaleString('es-VE');
-        document.getElementById('val-atendidas').innerText = s.ate.toLocaleString('es-VE');
-        document.getElementById('val-pendientes').innerText = s.pen.toLocaleString('es-VE');
-        
-        const pAte = s.rec > 0 ? Math.round((s.ate / s.rec) * 100) : 0;
-        const pPen = s.rec > 0 ? Math.round((s.pen / s.rec) * 100) : 0;
-        document.getElementById('perc-atendidas').innerText = pAte + "% Eficacia";
-        document.getElementById('perc-pendientes').innerText = pPen + "% Pendiente";
+        document.getElementById('val-recibidos').innerText = s.rec.toLocaleString();
+        document.getElementById('val-atendidas').innerText = s.ate.toLocaleString();
+        document.getElementById('val-pendientes').innerText = s.pen.toLocaleString();
 
-        updateChart(s);
+        const pAte = s.rec > 0 ? Math.round((s.ate/s.rec)*100) : 0;
+        const pCer = s.ate > 0 ? Math.round((s.cer/s.ate)*100) : 0;
+        const pPen = s.rec > 0 ? Math.round((s.pen/s.rec)*100) : 0;
+
+        renderDonut('chartAte', pAte, '#22c55e');
+        renderDonut('chartCer', pCer, '#3b82f6');
+        renderDonut('chartPen', pPen, '#f59e0b');
+
+        renderBars(s);
     }
 
-    function renderRanking() {
-        const rankingContainer = document.getElementById('ranking-container');
-        let stats = listaEstados.map(est => {
-            const filtered = rawData.filter(d => d['ESTADO'] === est);
-            const rec = filtered.reduce((acc, curr) => acc + (Number(curr['REGISTROS RECIBIDOS']) || 0), 0);
-            const ate = filtered.reduce((acc, curr) => acc + (Number(curr['ATENDIDAS']) || 0), 0);
-            return { name: est, perc: rec > 0 ? Math.round((ate/rec)*100) : 0 };
-        }).sort((a, b) => b.perc - a.perc).slice(0, 5);
-
-        rankingContainer.innerHTML = stats.map(s => `
-            <div class="ranking-item">
-                <div class="rank-label"><span>${s.name}</span> <span>${s.perc}%</span></div>
-                <div class="rank-bar-bg"><div class="rank-bar-fill" style="width: ${s.perc}%"></div></div>
-            </div>
-        `).join('');
-    }
-
-    function updateChart(s) {
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        if (myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
+    function renderDonut(id, perc, color) {
+        if (charts[id]) charts[id].destroy();
+        charts[id] = new Chart(document.getElementById(id), {
             type: 'doughnut',
             data: {
-                labels: ['Cerradas', 'Inspec.', 'En Proceso', 'Desestimadas', 'Otras'],
-                datasets: [{
-                    data: [s.cer, s.ins, s.apr, s.des, s.con],
-                    backgroundColor: ['#1e3a8a', '#3b82f6', '#f59e0b', '#ef4444', '#10b981'],
-                    borderWidth: 0
-                }]
+                datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }]
             },
-            options: { 
-                plugins: { legend: { position: 'right' } },
-                cutout: '70%',
-                maintainAspectRatio: false
-            }
+            options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
         });
+    }
+
+    function renderBars(s) {
+        const container = document.getElementById('status-bars');
+        const items = [
+            { label: 'Cerradas', val: s.cer, color: '#1e3a8a' },
+            { label: 'Inspeccionadas', val: s.ins, color: '#3b82f6' },
+            { label: 'Por Aprobación', val: s.apr, color: '#f59e0b' },
+            { label: 'Desestimadas', val: s.des, color: '#ef4444' },
+            { label: 'Conciliatorio', val: s.con, color: '#10b981' }
+        ];
+
+        const max = Math.max(...items.map(i => i.val)) || 1;
+        container.innerHTML = items.map(i => `
+            <div class="bar-item">
+                <div class="bar-info"><span>${i.label}</span><span>${i.val.toLocaleString()}</span></div>
+                <div class="bar-bg"><div class="bar-fill" style="width: ${(i.val/max)*100}%; background: ${i.color}"></div></div>
+            </div>
+        `).join('');
     }
 
     function filterData(state, el) {
@@ -266,7 +225,6 @@
         updateUI(filtered, state);
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        // Scrollea arriba al cambiar de estado por si el usuario estaba abajo
         document.querySelector('.main-content').scrollTop = 0;
     }
 
