@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ejecutivo Pro</title>
+    <title>Dashboard Ejecutivo Pro - Corregido</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,71 +13,56 @@
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
         }
 
-        html, body { height: 100%; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background: var(--bg); }
-        
+        html, body { height: 100%; margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: var(--bg); }
         .app-container { display: flex; height: 100vh; width: 100vw; }
         
-        /* SIDEBAR IZQUIERDA FIJA */
-        .sidebar { 
-            width: 280px; min-width: 280px; background: var(--white); 
-            border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; 
-        }
-        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: bold; }
+        /* SIDEBAR */
+        .sidebar { width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: bold; text-align: center; }
         .state-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
-        .state-item { 
-            padding: 12px 15px; margin-bottom: 5px; border-radius: 8px; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s; font-size: 0.85rem; color: #475569;
-        }
+        .state-item { padding: 12px 15px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #475569; }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; font-weight: 600; }
 
-        /* CONTENIDO DERECHO CON SCROLL */
-        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; }
-
-        /* ESTILO INSPIRADO EN TUS IMÁGENES */
+        /* MAIN CONTENT */
+        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
         .section-title { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
 
-        /* TARJETAS SUPERIORES */
+        /* KPIs */
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
-        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--primary); }
-        .card.success::before { background: var(--success); }
-        .card.warning::before { background: var(--warning); }
-        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
+        .card.success { border-left-color: var(--success); }
+        .card.warning { border-left-color: var(--warning); }
         .card-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
         .card-value { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--text); }
 
-        /* FILA DE GRÁFICOS CIRCULARES */
-        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 10px; }
-        .compliance-card { background: white; padding: 20px; border-radius: 12px; text-align: center; }
-        .chart-container { position: relative; height: 120px; margin-bottom: 10px; }
+        /* GRÁFICOS CIRCULARES CON NÚMERO CENTRADO */
+        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .compliance-card { background: white; padding: 20px; border-radius: 12px; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .chart-box { position: relative; width: 120px; height: 120px; }
+        .chart-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 800; color: var(--text); }
 
-        /* LISTA DE DESEMPEÑO (BARRAS) */
-        .performance-card { background: white; padding: 25px; border-radius: 12px; margin-top: 20px; }
+        /* BARRAS DE DESEMPEÑO */
+        .performance-card { background: white; padding: 25px; border-radius: 12px; }
         .bar-item { margin-bottom: 15px; }
         .bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
         .bar-bg { background: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
+        .bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
 
         #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-
-        /* Scrollbar estética */
-        .main-content::-webkit-scrollbar { width: 6px; }
-        .main-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
+<div id="loader"><i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i></div>
 
 <div class="app-container">
     <aside class="sidebar">
-        <div class="sidebar-header">MENU DE FILTROS</div>
+        <div class="sidebar-header">MENU DE ESTADOS</div>
         <div class="state-list" id="state-selector">
             <div class="state-item active" onclick="resetFilter(this)">
-                <span><i class="fas fa-layer-group"></i> NACIONAL</span>
+                <span><i class="fas fa-globe"></i> NACIONAL</span>
                 <i class="fas fa-chevron-right"></i>
             </div>
         </div>
@@ -85,44 +70,32 @@
 
     <main class="main-content">
         <h2 id="view-title" style="margin:0; color: var(--primary);">VENEZUELA (CONSOLIDADO)</h2>
-        <p style="color: #64748b; margin-bottom: 30px;">Resumen ejecutivo de gestión de datos</p>
-
+        
         <div class="section-title">Resumen General</div>
         <div class="kpi-grid">
-            <div class="card">
-                <div class="card-label">Registros Recibidos</div>
-                <div class="card-value" id="val-recibidos">0</div>
-            </div>
-            <div class="card success">
-                <div class="card-label">Atendidas</div>
-                <div class="card-value" id="val-atendidas">0</div>
-            </div>
-            <div class="card warning">
-                <div class="card-label">Por Atender</div>
-                <div class="card-value" id="val-pendientes">0</div>
-            </div>
+            <div class="card"><div class="card-label">Registros Recibidos</div><div class="card-value" id="val-recibidos">0</div></div>
+            <div class="card success"><div class="card-label">Atendidas</div><div class="card-value" id="val-atendidas">0</div></div>
+            <div class="card warning"><div class="card-label">Por Atender</div><div class="card-value" id="val-pendientes">0</div></div>
         </div>
 
         <div class="section-title">Cumplimiento de Metas</div>
         <div class="compliance-grid">
             <div class="compliance-card">
-                <div class="chart-container"><canvas id="chartAte"></canvas></div>
-                <div class="card-label">Efectividad Atenc.</div>
+                <div class="chart-box"><canvas id="chartAte"></canvas><div class="chart-number" id="txtAte">0%</div></div>
+                <div class="card-label" style="margin-top:10px">Eficacia</div>
             </div>
             <div class="compliance-card">
-                <div class="chart-container"><canvas id="chartCer"></canvas></div>
-                <div class="card-label">Cierre de Casos</div>
+                <div class="chart-box"><canvas id="chartCer"></canvas><div class="chart-number" id="txtCer">0%</div></div>
+                <div class="card-label" style="margin-top:10px">Cierre</div>
             </div>
             <div class="compliance-card">
-                <div class="chart-container"><canvas id="chartPen"></canvas></div>
-                <div class="card-label">Pendientes %</div>
+                <div class="chart-box"><canvas id="chartPen"></canvas><div class="chart-number" id="txtPen">0%</div></div>
+                <div class="card-label" style="margin-top:10px">Pendiente</div>
             </div>
         </div>
 
-        <div class="section-title">Análisis de Estatus Detallado</div>
-        <div class="performance-card" id="status-bars">
-            </div>
-
+        <div class="section-title">Estatus Detallado</div>
+        <div class="performance-card" id="status-bars"></div>
         <div style="height: 50px;"></div>
     </main>
 </div>
@@ -183,6 +156,10 @@
         const pCer = s.ate > 0 ? Math.round((s.cer/s.ate)*100) : 0;
         const pPen = s.rec > 0 ? Math.round((s.pen/s.rec)*100) : 0;
 
+        document.getElementById('txtAte').innerText = pAte + "%";
+        document.getElementById('txtCer').innerText = pCer + "%";
+        document.getElementById('txtPen').innerText = pPen + "%";
+
         renderDonut('chartAte', pAte, '#22c55e');
         renderDonut('chartCer', pCer, '#3b82f6');
         renderDonut('chartPen', pPen, '#f59e0b');
@@ -195,9 +172,9 @@
         charts[id] = new Chart(document.getElementById(id), {
             type: 'doughnut',
             data: {
-                datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }]
+                datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0, circumference: 360, rotation: 0 }]
             },
-            options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
+            options: { cutout: '85%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, maintainAspectRatio: false }
         });
     }
 
