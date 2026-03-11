@@ -3,225 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de mando - Intendencia de Protección</title>
+    <title>Sala de Mando Operativa - Full Responsive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-body: #f1f5f9; --card-bg: #ffffff;
-            --primary: #1e3a8a; --accent: #3b82f6;
-            --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
-            --text-main: #1e293b; --text-muted: #64748b;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
+            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
+            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); overflow: hidden; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         
-        /* Layout Principal */
-        .app-layout { display: flex; height: 100vh; width: 100vw; position: relative; }
+        /* Layout */
+        .app-container { display: flex; height: 100vh; position: relative; }
 
         /* Sidebar Responsive */
         .sidebar { 
-            width: 260px; min-width: 260px; background: var(--card-bg); 
-            border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; 
-            transition: transform 0.3s ease-in-out; z-index: 1000;
+            width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
         }
 
-        /* Viewport Principal */
-        .viewport { flex-grow: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; }
-        
-        /* Header / Banner */
-        .hero-banner { 
+        /* Viewport */
+        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
+
+        /* Header */
+        .banner { 
             background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--shadow);
+            margin-bottom: 25px; box-shadow: var(--shadow);
         }
-        .hero-banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; }
+        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Botón de Menú Móvil */
-        .menu-toggle {
+        /* Mobile Nav */
+        .menu-btn {
             display: none; position: fixed; bottom: 20px; right: 20px;
-            background: var(--primary); color: white; width: 55px; height: 55px;
-            border-radius: 50%; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 2000; cursor: pointer; font-size: 1.2rem;
+            background: var(--primary); color: white; width: 60px; height: 60px;
+            border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2000; cursor: pointer; font-size: 1.5rem;
         }
 
         /* Grids Adaptativos */
-        .section-tag { 
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
-            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
-        }
-        .section-tag::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
-
-        .grid-cards { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 15px; 
+        .grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+            gap: 15px; margin-bottom: 30px; 
         }
 
         /* Estilo de Card */
         .card { 
-            background: var(--card-bg); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
+            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
             box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
         }
-        .card-top { display: flex; justify-content: space-between; align-items: center; }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
-        .card-val { font-size: 1.6rem; font-weight: 800; }
-        .progress-box { width: 100%; height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
-        .progress-bar { height: 100%; transition: width 0.8s ease; }
+        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 0.8s ease; }
 
-        /* Overlay para móviles */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
-
-        /* --- MEDIA QUERIES (EL AJUSTE REAL) --- */
-        @media (max-width: 1024px) {
-            .grid-cards { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+        .section-title { 
+            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
+            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
         }
+        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
+        /* Media Queries */
         @media (max-width: 768px) {
-            .sidebar {
-                position: absolute; left: 0; transform: translateX(-100%);
-                height: 100%; box-shadow: 10px 0 15px rgba(0,0,0,0.1);
-            }
-            .sidebar.active { transform: translateX(0); }
-            .menu-toggle { display: block; }
-            .overlay.active { display: block; }
-            .grid-cards { grid-template-columns: 1fr; } /* Una columna en móvil */
-            .hero-banner h1 { font-size: 1rem; }
-            .viewport { padding: 15px; }
+            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
+            .sidebar.open { transform: translateX(0); }
+            .menu-btn { display: block; }
+            .grid { grid-template-columns: 1fr; }
+            .main-view { padding: 15px; }
         }
 
-        .state-btn { padding: 12px; margin: 4px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: flex; justify-content: space-between; }
-        .state-btn.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+        .state-item.active { background: var(--primary); color: white; }
+        #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i></div>
-<button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-map-marked-alt"></i></button>
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
+<button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<div class="app-layout">
+<div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header" style="padding: 20px; border-bottom: 1px solid #eee;">Filtro de Ubicación</div>
+        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-btn active" onclick="resetToNational(this)">
-                <span>NACIONAL (TOTAL)</span><i class="fas fa-globe"></i>
-            </div>
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
         </div>
     </aside>
 
-    <main class="viewport">
-        <div class="hero-banner">
-            <div>
-                <h1 id="main-title">CARGANDO...</h1>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Sistema de Monitoreo en Tiempo Real</div>
-            </div>
-            <i class="fas fa-shield-alt fa-2x" style="opacity: 0.3;"></i>
+    <main class="main-view">
+        <div class="banner">
+            <h1 id="view-title">VENEZUELA</h1>
+            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;">Sala de Monitoreo de Fiscalización</div>
         </div>
 
-        <div class="section-tag">Indicadores Críticos</div>
-        <div class="grid-cards" id="grid-principales"></div>
+        <div class="section-title">Indicadores Críticos</div>
+        <div class="grid" id="grid-criticos"></div>
 
-        <div class="section-tag">Estatus y Flujo</div>
-        <div class="grid-cards" id="grid-estatus"></div>
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="grid" id="grid-estatus"></div>
 
-        <div class="section-tag">Gestión de Fiscales</div>
-        <div class="grid-cards" id="grid-fiscales"></div>
+        <div class="section-title">Asignación y Dependencias</div>
+        <div class="grid" id="grid-fiscales"></div>
 
-        <div class="section-tag">Rendimiento %</div>
-        <div class="grid-cards" id="grid-porcentajes"></div>
-        <div style="height: 50px;"></div>
+        <div class="section-title">Rendimiento y Eficiencia</div>
+        <div class="grid" id="grid-metricas"></div>
+
+        <div style="height: 60px;"></div>
     </main>
 </div>
 
 <script>
     const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja 1";
-    let fullData = [];
+    let rawData = [];
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    async function fetchData() {
+    async function init() {
         try {
             const res = await fetch(url);
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            fullData = json.table.rows.map(r => {
-                let row = {};
-                r.c.forEach((cell, i) => { if(cols[i]) row[cols[i]] = cell ? (cell.f || cell.v) : 0; });
-                return row;
+            rawData = json.table.rows.map(r => {
+                let obj = {};
+                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+                return obj;
             });
-            populateSidebar();
-            renderDashboard(fullData);
+            renderSidebar();
+            updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) { console.error(e); }
     }
 
-    function populateSidebar() {
+    function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        const states = [...new Set(fullData.map(d => d['ESTADO']))].filter(Boolean).sort();
+        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
         states.forEach(s => {
             const div = document.createElement('div');
-            div.className = 'state-btn';
-            div.innerHTML = `<span>${s}</span><i class="fas fa-chevron-right" style="font-size:0.5rem"></i>`;
+            div.className = 'state-item';
+            div.innerText = s;
             div.onclick = () => {
-                renderDashboard(fullData.filter(d => d['ESTADO'] === s), s);
-                document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
+                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
-                if(window.innerWidth <= 768) toggleSidebar();
+                if(window.innerWidth <= 768) toggleMenu();
             };
             list.appendChild(div);
         });
     }
 
     function createCard(label, value, icon, color, isPercent = false) {
-        const valDisplay = isPercent ? (Number(value).toFixed(1)) + '%' : Number(value).toLocaleString();
+        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
         return `
             <div class="card">
-                <div class="card-top">
+                <div class="card-head">
                     <span class="card-label">${label}</span>
                     <i class="fas ${icon}" style="color:${color}"></i>
                 </div>
-                <div class="card-val" style="color:${color}">${valDisplay}</div>
-                <div class="progress-box"><div class="progress-bar" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
+                <div class="card-val" style="color:${color}">${valStr}</div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
             </div>`;
     }
 
-    function renderDashboard(data, title = "VENEZUELA") {
+    function updateDashboard(data, title = "VENEZUELA") {
         let s = {};
-        const keys = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "DIRECTOR DE FISCALIZACIÓN"];
-        keys.forEach(k => s[k] = 0);
-        data.forEach(d => { keys.forEach(k => { s[k] += Number(d[k]) || 0; }); });
+        const columns = [
+            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", 
+            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", 
+            "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", 
+            "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
+            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
+        ];
+        columns.forEach(c => s[c] = 0);
+        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
 
-        document.getElementById('main-title').innerText = title;
-        document.getElementById('grid-principales').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-folder", "#1e3a8a") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "#22c55e") + createCard("Pendientes", s["POR ATENDER"], "fa-clock", "#ef4444");
-        
+        document.getElementById('view-title').innerText = title;
+
+        // CRITICOS
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
+            createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
+            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
+
+        // ESTATUS
         document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevos", s["NUEVO"], "fa-plus", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-import", "#8b5cf6") +
+            createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
+            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
             createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
+            createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
+            createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
+            createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
+            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
+            createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
             createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
 
+        // FISCALES
         document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Con Fiscal", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706");
+            createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
+            createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+            createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
+            createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
+            createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
 
+        // METRICAS
         const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        document.getElementById('grid-porcentajes').innerHTML = createCard("Eficiencia %", pAte, "fa-percentage", "#22c55e", true);
+        const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
+        document.getElementById('grid-metricas').innerHTML = 
+            createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
+            createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
     }
 
-    function resetToNational(el) {
-        renderDashboard(fullData);
-        document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+    function resetFilter(el) {
+        updateDashboard(rawData);
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        if(window.innerWidth <= 768) toggleSidebar();
+        if(window.innerWidth <= 768) toggleMenu();
     }
 
-    fetchData();
+    init();
 </script>
 </body>
 </html>
