@@ -3,98 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando - Filtro por Estados</title>
+    <title>Sala de Control - Dashboard Ejecutivo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #1e3a8a; --accent: #f97316; --bg: #f1f5f9;
-            --success: #22c55e; --danger: #ef4444; --text: #1e293b;
+            --primary: #1e3a8a; --secondary: #3b82f6; --accent: #f97316;
+            --bg: #f8fafc; --white: #ffffff; --text: #1e293b;
+            --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
-        .dashboard-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
-
-        /* Lista de Estados Estilizada */
-        .sidebar { background: white; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 85vh; }
-        .sidebar-header { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        .state-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
-        .state-item { 
-            display: flex; align-items: center; padding: 12px 15px; margin-bottom: 5px;
-            border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid transparent;
-            font-weight: 500; color: #475569;
-        }
-        .state-item:hover { background: #eff6ff; color: var(--primary); }
-        .state-item.active { background: var(--primary); color: white; font-weight: bold; }
-        .state-item i { margin-right: 12px; font-size: 0.9rem; opacity: 0.7; }
-
-        /* Panel de Datos */
-        .header-banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
-        .card-val { font-size: 2.2rem; font-weight: 800; margin: 5px 0; color: var(--primary); }
-        .card-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-
-        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .status-item { background: #f8fafc; padding: 12px 18px; border-radius: 8px; display: flex; justify-content: space-between; border-left: 4px solid #cbd5e1; }
-
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         
-        /* Scrollbar Personalizada */
-        .state-list::-webkit-scrollbar { width: 6px; }
-        .state-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .app-container { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
+        
+        /* Barra Lateral con los Estados */
+        .sidebar { background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; background: var(--primary); color: white; text-align: center; }
+        .state-list { overflow-y: auto; padding: 15px; flex-grow: 1; }
+        .state-item { 
+            padding: 14px 18px; margin-bottom: 6px; border-radius: 10px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; font-size: 0.85rem; border: 1px solid transparent; color: #64748b;
+        }
+        .state-item:hover { background: #f1f5f9; color: var(--primary); }
+        .state-item.active { background: var(--primary); color: white; font-weight: 600; box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2); }
+
+        /* Contenido Principal */
+        .main-content { padding: 30px; overflow-y: auto; background: #f1f5f9; }
+        .top-banner { 
+            background: var(--white); color: var(--primary); padding: 25px 35px; border-radius: 15px; margin-bottom: 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 8px solid var(--accent);
+        }
+
+        /* Tarjetas Principales (KPIs) */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 30px; }
+        .kpi-card { 
+            background: var(--white); padding: 25px; border-radius: 16px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative;
+        }
+        .kpi-title { font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-value { font-size: 2.5rem; font-weight: 800; margin: 10px 0; color: var(--primary); }
+        .kpi-perc { font-size: 0.9rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+
+        /* Sección de Gráficas y Ranking */
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .chart-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        
+        /* Estilo de Barras de Progreso para el Ranking */
+        .ranking-item { margin-bottom: 18px; }
+        .rank-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; }
+        .rank-bar-bg { background: #f1f5f9; height: 10px; border-radius: 10px; overflow: hidden; }
+        .rank-bar-fill { background: linear-gradient(90deg, var(--secondary), var(--accent)); height: 100%; border-radius: 10px; transition: width 1.5s ease; }
+
+        #loader { position: fixed; inset: 0; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p>Actualizando Sala de Mando...</p>
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p style="margin-top:15px; font-weight:600">Cargando Sistema de Control...</p>
 </div>
 
-<div class="dashboard-layout">
-    <div class="sidebar">
+<div class="app-container">
+    <aside class="sidebar">
         <div class="sidebar-header">
-            <h3 style="margin:0"><i class="fas fa-map-marker-alt"></i> FILTRAR ESTADO</h3>
+            <h2 style="margin:0; font-size: 1.2rem; letter-spacing: 1px;">SALA DE MANDO</h2>
         </div>
         <div class="state-list" id="state-selector">
             <div class="state-item active" onclick="resetFilter(this)">
-                <i class="fas fa-globe"></i> TOTAL NACIONAL
+                <span><i class="fas fa-layer-group"></i> TOTAL NACIONAL</span>
+                <i class="fas fa-chevron-right"></i>
             </div>
             </div>
-    </div>
+    </aside>
 
-    <div class="data-panel">
-        <div class="header-banner">
+    <main class="main-content">
+        <div class="top-banner">
             <div>
-                <h2 id="state-name" style="margin:0">VENEZUELA (TOTAL NACIONAL)</h2>
-                <span id="update-tag" style="opacity:0.8; font-size: 0.9rem;">Consolidado de Gestión</span>
+                <h1 id="view-title" style="margin:0; font-size: 1.8rem; text-transform: uppercase;">Venezuela (Consolidado)</h1>
+                <span id="current-date" style="color: #64748b;"></span>
             </div>
-            <i class="fas fa-chart-bar fa-2x"></i>
-        </div>
-
-        <div class="kpi-grid">
-            <div class="card"><div class="card-label">Registros Recibidos</div><div class="card-val" id="val-recibidos">0</div></div>
-            <div class="card" style="border-top-color: var(--success);"><div class="card-label">Atendidas</div><div class="card-val" id="val-atendidas" style="color: var(--success);">0</div></div>
-            <div class="card" style="border-top-color: var(--danger);"><div class="card-label">Por Atender</div><div class="card-val" id="val-pendientes" style="color: var(--danger);">0</div></div>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-top:0; color: var(--primary);">DETALLE DE ESTATUS</h3>
-            <div class="status-grid">
-                <div class="status-item"><span>CERRADAS</span><b id="val-cerradas">0</b></div>
-                <div class="status-item"><span>INSPECCIONADAS</span><b id="val-inspec">0</b></div>
-                <div class="status-item"><span>POR APROBACIÓN</span><b id="val-aprob">0</b></div>
-                <div class="status-item"><span>DESESTIMADAS</span><b id="val-desest">0</b></div>
-                <div class="status-item"><span>PROCESO CONCILIATORIO</span><b id="val-concil">0</b></div>
-                <div class="status-item"><span>DENUNCIAS NO ADMITIDAS</span><b id="val-noadmit">0</b></div>
+            <div style="background: #f1f5f9; padding: 10px 20px; border-radius: 10px; text-align: center;">
+                <span style="display:block; font-size: 0.7rem; color: #94a3b8; font-weight: bold;">ESTADO DE CONEXIÓN</span>
+                <span style="color: var(--success); font-weight: bold;"><i class="fas fa-circle" style="font-size: 0.6rem;"></i> EN LÍNEA</span>
             </div>
         </div>
-    </div>
+
+        <div class="stats-grid">
+            <div class="kpi-card" style="border-top: 4px solid var(--primary);">
+                <div class="kpi-title">Registros Totales</div>
+                <div class="kpi-value" id="val-recibidos">0</div>
+                <span class="kpi-perc" style="background: #e0e7ff; color: var(--primary);">Volumen General</span>
+            </div>
+            <div class="kpi-card" style="border-top: 4px solid var(--success);">
+                <div class="kpi-title">Casos Atendidos</div>
+                <div class="kpi-value" id="val-atendidas" style="color: var(--success);">0</div>
+                <span id="perc-atendidas" class="kpi-perc" style="background: #dcfce7; color: var(--success);">0% de Eficacia</span>
+            </div>
+            <div class="kpi-card" style="border-top: 4px solid var(--danger);">
+                <div class="kpi-title">Casos Pendientes</div>
+                <div class="kpi-value" id="val-pendientes" style="color: var(--danger);">0</div>
+                <span id="perc-pendientes" class="kpi-perc" style="background: #fee2e2; color: var(--danger);">0% por gestionar</span>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;"><i class="fas fa-chart-pie" style="color: var(--secondary);"></i> Distribución de Estatus</h3>
+                <div style="height: 300px; display: flex; justify-content: center; align-items: center;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 style="margin-top:0; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;"><i class="fas fa-medal" style="color: var(--warning);"></i> Ranking de Cumplimiento</h3>
+                <div id="ranking-container" style="margin-top: 15px;">
+                    </div>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
     const sheetId = '19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ';
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Hoja 1`;
     let rawData = [];
+    let myChart;
+
     const listaEstados = [
         "AMAZONAS", "ANZOATEGUI", "APURE", "ARAGUA", "BARINAS", "BOLIVAR", "CARABOBO", "COJEDES", 
         "DELTA AMACURO", "DISTRITO CAPITAL", "FALCON", "GUARICO", "LARA", "MERIDA", "MIRANDA", 
@@ -102,14 +138,15 @@
     ];
 
     async function init() {
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-VE', {weekday: 'long', day:'numeric', month:'long', year:'numeric'});
+        
         try {
-            // Generar lista de estados en el HTML
             const container = document.getElementById('state-selector');
-            listaEstados.forEach(estado => {
+            listaEstados.forEach(est => {
                 const div = document.createElement('div');
                 div.className = 'state-item';
-                div.innerHTML = `<i class="fas fa-location-arrow"></i> ${estado}`;
-                div.onclick = () => filterByState(estado, div);
+                div.innerHTML = `<span>${est}</span> <i class="fas fa-chevron-right" style="opacity:0.2"></i>`;
+                div.onclick = () => filterData(est, div);
                 container.appendChild(div);
             });
 
@@ -125,12 +162,13 @@
             });
 
             updateUI(rawData);
+            renderRanking();
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error(e); }
+        } catch (e) { alert("Error al conectar con los datos."); }
     }
 
-    function updateUI(data, name = "VENEZUELA (TOTAL NACIONAL)") {
-        let s = { rec: 0, ate: 0, pen: 0, cer: 0, ins: 0, apr: 0, des: 0, con: 0, nad: 0 };
+    function updateUI(data, title = "VENEZUELA (TOTAL)") {
+        let s = { rec: 0, ate: 0, pen: 0, cer: 0, ins: 0, apr: 0, des: 0, con: 0 };
         data.forEach(d => {
             s.rec += Number(d['REGISTROS RECIBIDOS']) || 0;
             s.ate += Number(d['ATENDIDAS']) || 0;
@@ -140,33 +178,70 @@
             s.apr += Number(d['POR APROBAR FISCALIZACIÓN']) || 0;
             s.des += Number(d['DESESTIMADA']) || 0;
             s.con += Number(d['PROCESO CONCILIATORIO']) || 0;
-            s.nad += Number(d['DENUNCIAS NO ADMITIDAS']) || 0;
         });
 
-        document.getElementById('state-name').innerText = name;
-        document.getElementById('val-recibidos').innerText = s.rec.toLocaleString();
-        document.getElementById('val-atendidas').innerText = s.ate.toLocaleString();
-        document.getElementById('val-pendientes').innerText = s.pen.toLocaleString();
-        document.getElementById('val-cerradas').innerText = s.cer.toLocaleString();
-        document.getElementById('val-inspec').innerText = s.ins.toLocaleString();
-        document.getElementById('val-aprob').innerText = s.apr.toLocaleString();
-        document.getElementById('val-desest').innerText = s.des.toLocaleString();
-        document.getElementById('val-concil').innerText = s.con.toLocaleString();
-        document.getElementById('val-noadmit').innerText = s.nad.toLocaleString();
+        document.getElementById('view-title').innerText = title;
+        document.getElementById('val-recibidos').innerText = s.rec.toLocaleString('es-VE');
+        document.getElementById('val-atendidas').innerText = s.ate.toLocaleString('es-VE');
+        document.getElementById('val-pendientes').innerText = s.pen.toLocaleString('es-VE');
+        
+        const pAte = s.rec > 0 ? Math.round((s.ate / s.rec) * 100) : 0;
+        const pPen = s.rec > 0 ? Math.round((s.pen / s.rec) * 100) : 0;
+        document.getElementById('perc-atendidas').innerText = pAte + "% Eficacia";
+        document.getElementById('perc-pendientes').innerText = pPen + "% Pendiente";
+
+        updateChart(s);
     }
 
-    function filterByState(state, element) {
+    function renderRanking() {
+        const rankingContainer = document.getElementById('ranking-container');
+        let stats = listaEstados.map(est => {
+            const filtered = rawData.filter(d => d['ESTADO'] === est);
+            const rec = filtered.reduce((acc, curr) => acc + (Number(curr['REGISTROS RECIBIDOS']) || 0), 0);
+            const ate = filtered.reduce((acc, curr) => acc + (Number(curr['ATENDIDAS']) || 0), 0);
+            return { name: est, perc: rec > 0 ? Math.round((ate/rec)*100) : 0 };
+        }).sort((a, b) => b.perc - a.perc).slice(0, 5);
+
+        rankingContainer.innerHTML = stats.map(s => `
+            <div class="ranking-item">
+                <div class="rank-label"><span>${s.name}</span> <span>${s.perc}%</span></div>
+                <div class="rank-bar-bg"><div class="rank-bar-fill" style="width: ${s.perc}%"></div></div>
+            </div>
+        `).join('');
+    }
+
+    function updateChart(s) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cerradas', 'Inspec.', 'En Proceso', 'Desestimadas', 'Otras'],
+                datasets: [{
+                    data: [s.cer, s.ins, s.apr, s.des, s.con],
+                    backgroundColor: ['#1e3a8a', '#3b82f6', '#f59e0b', '#ef4444', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: { 
+                plugins: { legend: { position: 'right' } },
+                cutout: '75%',
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function filterData(state, el) {
         const filtered = rawData.filter(d => d['ESTADO'] === state);
         updateUI(filtered, state);
-        
-        document.querySelectorAll('.state-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
     }
 
-    function resetFilter(element) {
+    function resetFilter(el) {
         updateUI(rawData);
-        document.querySelectorAll('.state-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
     }
 
     init();
