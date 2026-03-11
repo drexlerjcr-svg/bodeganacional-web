@@ -2,167 +2,173 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mando de Control y Seguimiento - Interactivo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Mando - Control y Seguimiento Interactivo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #2563eb; --accent: #f97316; --bg: #f1f5f9;
+            --primary: #1e3a8a; --accent: #f97316; --bg: #f1f5f9;
             --success: #22c55e; --danger: #ef4444; --text: #1e293b;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
-        .main-layout { display: grid; grid-template-columns: 450px 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
-        
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .dashboard-layout { display: grid; grid-template-columns: 500px 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
+
         /* Mapa Interactivo */
-        .map-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 20px; }
-        .map-box h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        svg path { fill: #cbd5e1; stroke: #fff; stroke-width: 1; cursor: pointer; transition: all 0.3s; }
-        svg path:hover { fill: var(--primary) !important; opacity: 0.8; }
-        svg path.active { fill: var(--accent) !important; }
+        .map-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 20px; text-align: center; }
+        svg path { fill: #d1d5db; stroke: #fff; stroke-width: 0.5; cursor: pointer; transition: all 0.3s; }
+        svg path:hover { fill: #3b82f6 !important; }
+        svg path.active { fill: var(--accent) !important; stroke: #fff; stroke-width: 1.5; }
 
         /* Tarjetas de Datos */
-        .data-panel { display: flex; flex-direction: column; gap: 20px; }
-        .state-banner { background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .card-val { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--primary); }
+        .header-banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
+        .card-val { font-size: 2.2rem; font-weight: 800; margin: 5px 0; color: var(--primary); }
         .card-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
-        /* Tabla de Estatus (Imagen 5) */
-        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .status-item { background: #f8fafc; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #cbd5e1; }
+        /* Panel de Estatus */
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .status-item { background: #f8fafc; padding: 12px 18px; border-radius: 8px; display: flex; justify-content: space-between; border-left: 4px solid #cbd5e1; }
+        .status-item span { font-size: 0.8rem; font-weight: 600; color: #475569; }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .reset-btn { width: 100%; padding: 12px; margin-top: 15px; border: none; background: #e2e8f0; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .reset-btn:hover { background: #cbd5e1; }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p>Sincronizando datos de Sala de Mando...</p>
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p>Sincronizando Sala de Mando...</p>
 </div>
 
-<div class="main-layout">
-    <div class="map-box">
-        <h3>FILTRAR POR ESTADO</h3>
-        <p style="font-size: 0.8rem; color: #64748b;">Haga clic en un estado para ver el detalle acumulado.</p>
-        <div id="venezuela-map">
-            <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                <path id="ZULIA" d="..." onclick="filterByState('ZULIA')" title="Zulia" />
-                <path id="MIRANDA" d="..." onclick="filterByState('MIRANDA')" title="Miranda" />
-                <path id="DISTRITO CAPITAL" d="..." onclick="filterByState('DISTRITO CAPITAL')" title="Distrito Capital" />
-                </svg>
-        </div>
-        <button onclick="resetFilter()" style="width:100%; padding:10px; margin-top:10px; cursor:pointer; background: #e2e8f0; border:none; border-radius:5px; font-weight:bold;">VER TOTAL NACIONAL</button>
+<div class="dashboard-layout">
+    <div class="map-container">
+        <h3 style="margin-top:0">MAPA DE CONTROL</h3>
+        <p style="font-size: 0.8rem; color: #64748b;">Haz clic en un estado para filtrar el acumulado</p>
+        
+        <svg viewBox="0 0 700 650" xmlns="http://www.w3.org/2000/svg">
+            <g id="venezuela-map">
+                <path id="AMAZONAS" d="M363,407 L444,411 L469,578 L356,589 Z" onclick="filterState('AMAZONAS')"><title>Amazonas</title></path>
+                <path id="ANZOATEGUI" d="M439,173 L498,177 L514,281 L448,279 Z" onclick="filterState('ANZOATEGUI')"><title>Anzoátegui</title></path>
+                <path id="APURE" d="M194,302 L368,318 L386,400 L203,382 Z" onclick="filterState('APURE')"><title>Apure</title></path>
+                <path id="ARAGUA" d="M331,164 L343,164 L341,194 L328,194 Z" onclick="filterState('ARAGUA')"><title>Aragua</title></path>
+                <path id="BARINAS" d="M193,248 L298,284 L288,321 L187,294 Z" onclick="filterState('BARINAS')"><title>Barinas</title></path>
+                <path id="BOLIVAR" d="M449,282 L657,282 L690,480 L450,404 Z" onclick="filterState('BOLIVAR')"><title>Bolívar</title></path>
+                <path id="CARABOBO" d="M312,165 L328,165 L326,195 L310,195 Z" onclick="filterState('CARABOBO')"><title>Carabobo</title></path>
+                <path id="COJEDES" d="M285,193 L319,193 L317,252 L283,252 Z" onclick="filterState('COJEDES')"><title>Cojedes</title></path>
+                <path id="DELTA AMACURO" d="M552,194 L639,206 L648,276 L552,276 Z" onclick="filterState('DELTA AMACURO')"><title>Delta Amacuro</title></path>
+                <path id="FALCON" d="M176,108 L289,122 L279,165 L186,165 Z" onclick="filterState('FALCON')"><title>Falcón</title></path>
+                <path id="GUARICO" d="M330,202 L442,212 L438,315 L328,311 Z" onclick="filterState('GUARICO')"><title>Guárico</title></path>
+                <path id="LARA" d="M185,168 L277,168 L275,204 L183,204 Z" onclick="filterState('LARA')"><title>Lara</title></path>
+                <path id="MERIDA" d="M140,242 L185,242 L198,288 L135,278 Z" onclick="filterState('MERIDA')"><title>Mérida</title></path>
+                <path id="MIRANDA" d="M346,164 L416,164 L414,196 L344,196 Z" onclick="filterState('MIRANDA')"><title>Miranda</title></path>
+                <path id="MONAGAS" d="M504,179 L565,189 L555,257 L504,251 Z" onclick="filterState('MONAGAS')"><title>Monagas</title></path>
+                <path id="NUEVA ESPARTA" d="M465,130 L498,130 L498,148 L465,148 Z" onclick="filterState('NUEVA ESPARTA')"><title>Nueva Esparta</title></path>
+                <path id="PORTUGUESA" d="M228,211 L280,211 L294,277 L224,277 Z" onclick="filterState('PORTUGUESA')"><title>Portuguesa</title></path>
+                <path id="SUCRE" d="M480,154 L580,165 L575,185 L475,175 Z" onclick="filterState('SUCRE')"><title>Sucre</title></path>
+                <path id="TACHIRA" d="M115,280 L145,280 L150,325 L110,325 Z" onclick="filterState('TACHIRA')"><title>Táchira</title></path>
+                <path id="TRUJILLO" d="M175,210 L220,210 L220,245 L175,245 Z" onclick="filterState('TRUJILLO')"><title>Trujillo</title></path>
+                <path id="YARACUY" d="M280,150 L308,150 L306,178 L278,178 Z" onclick="filterState('YARACUY')"><title>Yaracuy</title></path>
+                <path id="ZULIA" d="M85,110 L170,140 L170,260 L85,260 Z" onclick="filterState('ZULIA')"><title>Zulia</title></path>
+                <path id="VARGAS" d="M346,152 L392,152 L390,161 L344,161 Z" onclick="filterState('VARGAS')"><title>La Guaira</title></path>
+                <path id="DISTRITO CAPITAL" d="M352,165 L364,165 L362,176 L350,176 Z" onclick="filterState('DISTRITO CAPITAL')"><title>Caracas</title></path>
+            </g>
+        </svg>
+        <button class="reset-btn" onclick="resetFilter()">VER TOTAL NACIONAL</button>
     </div>
 
     <div class="data-panel">
-        <div class="state-banner">
-            <h2 id="display-state">VENEZUELA (TOTAL NACIONAL)</h2>
-            <div id="display-date" style="opacity: 0.8;">Datos Acumulados</div>
+        <div class="header-banner">
+            <div>
+                <h2 id="state-name" style="margin:0">VENEZUELA (TOTAL NACIONAL)</h2>
+                <span style="opacity:0.8">Seguimiento Acumulado de Denuncias</span>
+            </div>
+            <i class="fas fa-database fa-2x"></i>
         </div>
 
         <div class="kpi-grid">
-            <div class="card">
-                <div class="card-label">Registros Recibidos</div>
-                <div class="card-val" id="val-recibidos">0</div>
-            </div>
-            <div class="card" style="border-top-color: var(--success);">
-                <div class="card-label">Atendidas</div>
-                <div class="card-val" id="val-atendidas" style="color: var(--success);">0</div>
-            </div>
-            <div class="card" style="border-top-color: var(--danger);">
-                <div class="card-label">Por Atender</div>
-                <div class="card-val" id="val-pendientes" style="color: var(--danger);">0</div>
-            </div>
-        </div>
-
-        <div class="status-grid">
-            <div class="card" style="grid-column: span 2;">
-                <h3 style="margin-top:0">DESGLOSE DE ESTATUS (ACUMULADO)</h3>
-                <div class="status-grid" id="status-items-container">
-                    <div class="status-item"><span>CERRADAS</span><strong id="val-cerradas">0</strong></div>
-                    <div class="status-item"><span>INSPECCIONADAS</span><strong id="val-inspec">0</strong></div>
-                    <div class="status-item"><span>POR APROBACIÓN</span><strong id="val-aprob">0</strong></div>
-                    <div class="status-item"><span>DESESTIMADAS</span><strong id="val-desest">0</strong></div>
-                    <div class="status-item"><span>PROCESO CONCILIATORIO</span><strong id="val-concil">0</strong></div>
-                    <div class="status-item"><span>DENUNCIAS NO ADMITIDAS</span><strong id="val-noadmit">0</strong></div>
-                </div>
-            </div>
+            <div class="card"><div class="card-label">Recibidos</div><div class="card-val" id="val-recibidos">0</div></div>
+            <div class="card" style="border-top-color: var(--success);"><div class="card-label">Atendidas</div><div class="card-val" id="val-atendidas" style="color: var(--success);">0</div></div>
+            <div class="card" style="border-top-color: var(--danger);"><div class="card-label">Por Atender</div><div class="card-val" id="val-pendientes" style="color: var(--danger);">0</div></div>
         </div>
 
         <div class="card">
-            <canvas id="mainChart" height="100"></canvas>
+            <h3 style="margin-top:0">DESGLOSE DE ESTATUS</h3>
+            <div class="status-grid">
+                <div class="status-item"><span>CERRADAS</span><b id="val-cerradas">0</b></div>
+                <div class="status-item"><span>INSPECCIONADAS</span><b id="val-inspec">0</b></div>
+                <div class="status-item"><span>POR APROBACIÓN</span><b id="val-aprob">0</b></div>
+                <div class="status-item"><span>DESESTIMADAS</span><b id="val-desest">0</b></div>
+                <div class="status-item"><span>CONCILIATORIO</span><b id="val-concil">0</b></div>
+                <div class="status-item"><span>NO ADMITIDAS</span><b id="val-noadmit">0</b></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Configuración de tu Google Sheet
     const sheetId = '19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ';
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Hoja 1`;
-    
-    let fullData = [];
+    let rawData = [];
 
-    async function fetchData() {
-        const res = await fetch(url);
-        const text = await res.text();
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        const headers = json.table.cols.map(c => c.label.toUpperCase());
-        
-        fullData = json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { if(headers[i]) obj[headers[i]] = cell ? (cell.f || cell.v) : 0; });
-            return obj;
-        });
-        
-        updateDisplay(fullData);
-        document.getElementById('loader').style.display = 'none';
+    async function init() {
+        try {
+            const res = await fetch(url);
+            const text = await res.text();
+            const json = JSON.parse(text.substring(47).slice(0, -2));
+            const headers = json.table.cols.map(c => c.label.toUpperCase());
+            rawData = json.table.rows.map(r => {
+                let obj = {};
+                r.c.forEach((cell, i) => { if(headers[i]) obj[headers[i]] = cell ? (cell.f || cell.v) : 0; });
+                return obj;
+            });
+            updateUI(rawData);
+            document.getElementById('loader').style.display = 'none';
+        } catch (e) { console.error(e); }
     }
 
-    function updateDisplay(data, stateName = "VENEZUELA (TOTAL NACIONAL)") {
-        let stats = { recibidos: 0, atendidas: 0, porAtender: 0, cerrado: 0, inspec: 0, aprob: 0, desest: 0, concil: 0, noadmit: 0 };
-
+    function updateUI(data, name = "VENEZUELA (TOTAL NACIONAL)") {
+        let s = { rec: 0, ate: 0, pen: 0, cer: 0, ins: 0, apr: 0, des: 0, con: 0, nad: 0 };
         data.forEach(d => {
-            stats.recibidos += Number(d['REGISTROS RECIBIDOS']) || 0;
-            stats.atendidas += Number(d['ATENDIDAS']) || 0;
-            stats.porAtender += Number(d['POR ATENDER']) || 0;
-            stats.cerrado += Number(d['CERRADO']) || 0;
-            stats.inspec += Number(d['INSPECCIONADO']) || 0;
-            stats.aprob += Number(d['POR APROBAR FISCALIZACIÓN']) || 0;
-            stats.desest += Number(d['DESESTIMADA']) || 0;
-            stats.concil += Number(d['PROCESO CONCILIATORIO']) || 0;
-            stats.noadmit += Number(d['DENUNCIAS NO ADMITIDAS']) || 0;
+            s.rec += Number(d['REGISTROS RECIBIDOS']) || 0;
+            s.ate += Number(d['ATENDIDAS']) || 0;
+            s.pen += Number(d['POR ATENDER']) || 0;
+            s.cer += Number(d['CERRADO']) || 0;
+            s.ins += Number(d['INSPECCIONADO']) || 0;
+            s.apr += Number(d['POR APROBAR FISCALIZACIÓN']) || 0;
+            s.des += Number(d['DESESTIMADA']) || 0;
+            s.con += Number(d['PROCESO CONCILIATORIO']) || 0;
+            s.nad += Number(d['DENUNCIAS NO ADMITIDAS']) || 0;
         });
 
-        document.getElementById('display-state').innerText = stateName;
-        document.getElementById('val-recibidos').innerText = stats.recibidos.toLocaleString();
-        document.getElementById('val-atendidas').innerText = stats.atendidas.toLocaleString();
-        document.getElementById('val-pendientes').innerText = stats.porAtender.toLocaleString();
-        
-        document.getElementById('val-cerradas').innerText = stats.cerrado;
-        document.getElementById('val-inspec').innerText = stats.inspec;
-        document.getElementById('val-aprob').innerText = stats.aprob;
-        document.getElementById('val-desest').innerText = stats.desest;
-        document.getElementById('val-concil').innerText = stats.concil;
-        document.getElementById('val-noadmit').innerText = stats.noadmit;
+        document.getElementById('state-name').innerText = name;
+        document.getElementById('val-recibidos').innerText = s.rec;
+        document.getElementById('val-atendidas').innerText = s.ate;
+        document.getElementById('val-pendientes').innerText = s.pen;
+        document.getElementById('val-cerradas').innerText = s.cer;
+        document.getElementById('val-inspec').innerText = s.ins;
+        document.getElementById('val-aprob').innerText = s.apr;
+        document.getElementById('val-desest').innerText = s.des;
+        document.getElementById('val-concil').innerText = s.con;
+        document.getElementById('val-noadmit').innerText = s.nad;
     }
 
-    function filterByState(state) {
-        const filtered = fullData.filter(d => d['ESTADO'] === state);
-        updateDisplay(filtered, state);
-        
-        // Efecto visual en el mapa
+    function filterState(state) {
+        const filtered = rawData.filter(d => d['ESTADO'] === state);
+        updateUI(filtered, state);
         document.querySelectorAll('path').forEach(p => p.classList.remove('active'));
         document.getElementById(state).classList.add('active');
     }
 
     function resetFilter() {
-        updateDisplay(fullData);
+        updateUI(rawData);
         document.querySelectorAll('path').forEach(p => p.classList.remove('active'));
     }
 
-    fetchData();
+    init();
 </script>
 </body>
 </html>
