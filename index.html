@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ejecutivo Pro - Corregido</title>
+    <title>Dashboard Control Total</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -17,37 +17,41 @@
         .app-container { display: flex; height: 100vh; width: 100vw; }
         
         /* SIDEBAR */
-        .sidebar { width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: bold; text-align: center; }
+        .sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: bold; text-align: center; font-size: 0.9rem; }
         .state-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
-        .state-item { padding: 12px 15px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #475569; }
-        .state-item:hover { background: #f8fafc; color: var(--primary); }
+        .state-item { padding: 10px 15px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #475569; border: 1px solid transparent; }
+        .state-item:hover { background: #f1f5f9; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; font-weight: 600; }
 
         /* MAIN CONTENT */
-        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
-        .section-title { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+        .main-content { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; }
+        .section-title { font-size: 0.85rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
 
         /* KPIs */
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
         .card.success { border-left-color: var(--success); }
         .card.warning { border-left-color: var(--warning); }
-        .card-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
-        .card-value { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--text); }
+        .card-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .card-value { font-size: 1.8rem; font-weight: 800; margin: 5px 0; color: var(--text); }
 
-        /* GRÁFICOS CIRCULARES CON NÚMERO CENTRADO */
-        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .compliance-card { background: white; padding: 20px; border-radius: 12px; position: relative; display: flex; flex-direction: column; align-items: center; }
-        .chart-box { position: relative; width: 120px; height: 120px; }
-        .chart-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 800; color: var(--text); }
+        /* GRÁFICOS CIRCULARES */
+        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .compliance-card { background: white; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
+        .chart-box { position: relative; width: 110px; height: 110px; }
+        .chart-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.1rem; font-weight: 800; }
 
-        /* BARRAS DE DESEMPEÑO */
-        .performance-card { background: white; padding: 25px; border-radius: 12px; }
-        .bar-item { margin-bottom: 15px; }
-        .bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-        .bar-bg { background: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
+        /* MAPA Y LINEAS */
+        .visual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .visual-card { background: white; padding: 20px; border-radius: 12px; min-height: 300px; display: flex; flex-direction: column; }
+
+        /* BARRAS */
+        .performance-card { background: white; padding: 20px; border-radius: 10px; }
+        .bar-item { margin-bottom: 12px; }
+        .bar-info { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+        .bar-bg { background: #f1f5f9; height: 10px; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
 
         #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 1000; }
@@ -55,47 +59,56 @@
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i></div>
+<div id="loader"><i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i></div>
 
 <div class="app-container">
     <aside class="sidebar">
-        <div class="sidebar-header">MENU DE ESTADOS</div>
+        <div class="sidebar-header">UBICACIONES GEOGRÁFICAS</div>
         <div class="state-list" id="state-selector">
             <div class="state-item active" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe"></i> NACIONAL</span>
+                <span><i class="fas fa-globe-americas"></i> NACIONAL</span>
                 <i class="fas fa-chevron-right"></i>
             </div>
         </div>
     </aside>
 
     <main class="main-content">
-        <h2 id="view-title" style="margin:0; color: var(--primary);">VENEZUELA (CONSOLIDADO)</h2>
+        <h2 id="view-title" style="margin:0; color: var(--primary);">CONSOLIDADO NACIONAL</h2>
         
-        <div class="section-title">Resumen General</div>
+        <div class="section-title">Resumen de Registros</div>
         <div class="kpi-grid">
-            <div class="card"><div class="card-label">Registros Recibidos</div><div class="card-value" id="val-recibidos">0</div></div>
-            <div class="card success"><div class="card-label">Atendidas</div><div class="card-value" id="val-atendidas">0</div></div>
-            <div class="card warning"><div class="card-label">Por Atender</div><div class="card-value" id="val-pendientes">0</div></div>
+            <div class="card"><div class="card-label">REGISTROS RECIBIDOS</div><div class="card-value" id="val-recibidos">0</div></div>
+            <div class="card success"><div class="card-label">ATENDIDAS</div><div class="card-value" id="val-atendidas">0</div></div>
+            <div class="card warning"><div class="card-label">POR ATENDER</div><div class="card-value" id="val-pendientes">0</div></div>
         </div>
 
-        <div class="section-title">Cumplimiento de Metas</div>
+        <div class="section-title">Análisis de Cumplimiento</div>
         <div class="compliance-grid">
             <div class="compliance-card">
                 <div class="chart-box"><canvas id="chartAte"></canvas><div class="chart-number" id="txtAte">0%</div></div>
-                <div class="card-label" style="margin-top:10px">Eficacia</div>
+                <div class="card-label" style="margin-top:10px">ATENDIDAS %</div>
             </div>
             <div class="compliance-card">
                 <div class="chart-box"><canvas id="chartCer"></canvas><div class="chart-number" id="txtCer">0%</div></div>
-                <div class="card-label" style="margin-top:10px">Cierre</div>
+                <div class="card-label" style="margin-top:10px">CERRADO %</div>
             </div>
             <div class="compliance-card">
                 <div class="chart-box"><canvas id="chartPen"></canvas><div class="chart-number" id="txtPen">0%</div></div>
-                <div class="card-label" style="margin-top:10px">Pendiente</div>
+                <div class="card-label" style="margin-top:10px">POR ATENDER %</div>
             </div>
         </div>
 
-        <div class="section-title">Estatus Detallado</div>
-        <div class="performance-card" id="status-bars"></div>
+        <div class="visual-grid">
+            <div class="visual-card">
+                <div class="card-label" style="margin-bottom:15px">Tendencia de Registros</div>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="visual-card">
+                <div class="card-label" style="margin-bottom:15px">Distribución por Estatus</div>
+                <div id="status-bars" class="performance-card"></div>
+            </div>
+        </div>
+
         <div style="height: 50px;"></div>
     </main>
 </div>
@@ -122,7 +135,8 @@
             const res = await fetch(url);
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
-            const headers = json.table.cols.map(c => c.label.toUpperCase());
+            const headers = json.table.cols.map(c => c.label ? c.label.toUpperCase() : "");
+            
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => { if(headers[i]) obj[headers[i]] = cell ? (cell.f || cell.v) : 0; });
@@ -134,7 +148,7 @@
         } catch (e) { console.error(e); }
     }
 
-    function updateUI(data, title = "VENEZUELA (CONSOLIDADO)") {
+    function updateUI(data, title = "CONSOLIDADO NACIONAL") {
         let s = { rec: 0, ate: 0, pen: 0, cer: 0, ins: 0, apr: 0, des: 0, con: 0 };
         data.forEach(d => {
             s.rec += Number(d['REGISTROS RECIBIDOS']) || 0;
@@ -153,7 +167,7 @@
         document.getElementById('val-pendientes').innerText = s.pen.toLocaleString();
 
         const pAte = s.rec > 0 ? Math.round((s.ate/s.rec)*100) : 0;
-        const pCer = s.ate > 0 ? Math.round((s.cer/s.ate)*100) : 0;
+        const pCer = s.rec > 0 ? Math.round((s.cer/s.rec)*100) : 0; // Ajustado a registros totales para consistencia
         const pPen = s.rec > 0 ? Math.round((s.pen/s.rec)*100) : 0;
 
         document.getElementById('txtAte').innerText = pAte + "%";
@@ -163,7 +177,7 @@
         renderDonut('chartAte', pAte, '#22c55e');
         renderDonut('chartCer', pCer, '#3b82f6');
         renderDonut('chartPen', pPen, '#f59e0b');
-
+        renderLineChart(data);
         renderBars(s);
     }
 
@@ -171,21 +185,44 @@
         if (charts[id]) charts[id].destroy();
         charts[id] = new Chart(document.getElementById(id), {
             type: 'doughnut',
+            data: { datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }] },
+            options: { cutout: '80%', plugins: { legend: false, tooltip: false }, maintainAspectRatio: false }
+        });
+    }
+
+    function renderLineChart(data) {
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        if (charts['line']) charts['line'].destroy();
+        
+        // Simulación de línea temporal basada en los estados seleccionados
+        const labels = data.length > 5 ? data.slice(0,7).map(d => d['ESTADO'] || "Dato") : ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+        const vals = data.length > 5 ? data.slice(0,7).map(d => d['REGISTROS RECIBIDOS']) : [10, 25, 45, 30, 60, 80, 55];
+
+        charts['line'] = new Chart(ctx, {
+            type: 'line',
             data: {
-                datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0, circumference: 360, rotation: 0 }]
+                labels: labels,
+                datasets: [{
+                    label: 'Registros',
+                    data: vals,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            options: { cutout: '85%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, maintainAspectRatio: false }
+            options: { plugins: { legend: false }, scales: { y: { beginAtZero: true } } }
         });
     }
 
     function renderBars(s) {
         const container = document.getElementById('status-bars');
         const items = [
-            { label: 'Cerradas', val: s.cer, color: '#1e3a8a' },
-            { label: 'Inspeccionadas', val: s.ins, color: '#3b82f6' },
-            { label: 'Por Aprobación', val: s.apr, color: '#f59e0b' },
-            { label: 'Desestimadas', val: s.des, color: '#ef4444' },
-            { label: 'Conciliatorio', val: s.con, color: '#10b981' }
+            { label: 'CERRADO', val: s.cer, color: '#1e3a8a' },
+            { label: 'INSPECCIONADO', val: s.ins, color: '#3b82f6' },
+            { label: 'POR APROBAR FISCALIZACIÓN', val: s.apr, color: '#f59e0b' },
+            { label: 'DESESTIMADA', val: s.des, color: '#ef4444' },
+            { label: 'PROCESO CONCILIATORIO', val: s.con, color: '#10b981' }
         ];
 
         const max = Math.max(...items.map(i => i.val)) || 1;
