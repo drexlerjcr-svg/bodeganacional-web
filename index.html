@@ -2,196 +2,167 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mando sobre el Control y Seguimientos Denuncias</title>
+    <title>Mando de Control y Seguimiento - Interactivo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #2563eb; --orange: #f97316; --gray-bg: #f1f5f9;
-            --text: #1e293b; --card: #ffffff;
+            --primary: #2563eb; --accent: #f97316; --bg: #f1f5f9;
+            --success: #22c55e; --danger: #ef4444; --text: #1e293b;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--gray-bg); margin: 0; padding: 20px; color: var(--text); }
-        .container { max-width: 1400px; margin: 0 auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .main-layout { display: grid; grid-template-columns: 450px 1fr; gap: 20px; max-width: 1600px; margin: 0 auto; }
         
-        /* Encabezado Principal */
-        .header { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        
-        /* Grid de Resumen Acumulativo */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .kpi-card { background: var(--card); padding: 25px; border-radius: 15px; border-bottom: 5px solid #e2e8f0; transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-5px); }
-        .kpi-title { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-value { font-size: 2.5rem; font-weight: 900; margin: 10px 0; color: var(--primary); }
-        
-        /* Gráficos Principales */
-        .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* Mapa Interactivo */
+        .map-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 20px; }
+        .map-box h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        svg path { fill: #cbd5e1; stroke: #fff; stroke-width: 1; cursor: pointer; transition: all 0.3s; }
+        svg path:hover { fill: var(--primary) !important; opacity: 0.8; }
+        svg path.active { fill: var(--accent) !important; }
 
-        /* Lista de Estados (Ranking Acumulativo) */
-        .ranking-box { height: 400px; overflow-y: auto; padding-right: 10px; }
-        .ranking-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .bar-bg { background: #e2e8f0; height: 8px; border-radius: 4px; width: 100%; margin-top: 5px; }
-        .bar-fill { height: 100%; border-radius: 4px; background: var(--orange); }
+        /* Tarjetas de Datos */
+        .data-panel { display: flex; flex-direction: column; gap: 20px; }
+        .state-banner { background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
+        .card-val { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--primary); }
+        .card-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 999; }
+        /* Tabla de Estatus (Imagen 5) */
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .status-item { background: #f8fafc; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #cbd5e1; }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
     </style>
 </head>
 <body>
 
-<div id="loader"><h2>Cargando Datos Acumulados...</h2></div>
+<div id="loader">
+    <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p>Sincronizando datos de Sala de Mando...</p>
+</div>
 
-<div class="container">
-    <div class="header">
-        <h1 style="margin:0; font-size: 1.5rem;">SALA DE MANDO: CONTROL Y SEGUIMIENTO</h1>
-        <p style="margin:5px 0 0 0; opacity: 0.8;">Monitoreo de Denuncias Acumuladas</p>
+<div class="main-layout">
+    <div class="map-box">
+        <h3>FILTRAR POR ESTADO</h3>
+        <p style="font-size: 0.8rem; color: #64748b;">Haga clic en un estado para ver el detalle acumulado.</p>
+        <div id="venezuela-map">
+            <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                <path id="ZULIA" d="..." onclick="filterByState('ZULIA')" title="Zulia" />
+                <path id="MIRANDA" d="..." onclick="filterByState('MIRANDA')" title="Miranda" />
+                <path id="DISTRITO CAPITAL" d="..." onclick="filterByState('DISTRITO CAPITAL')" title="Distrito Capital" />
+                </svg>
+        </div>
+        <button onclick="resetFilter()" style="width:100%; padding:10px; margin-top:10px; cursor:pointer; background: #e2e8f0; border:none; border-radius:5px; font-weight:bold;">VER TOTAL NACIONAL</button>
     </div>
 
-    <div class="summary-grid">
-        <div class="kpi-card" style="border-color: var(--primary);">
-            <div class="kpi-title">Denuncias Recibidas</div>
-            <div class="kpi-value" id="val-recibidas">0</div>
-            <div style="color: #64748b; font-size: 0.8rem;"><i class="fas fa-chart-line"></i> Total Acumulado</div>
+    <div class="data-panel">
+        <div class="state-banner">
+            <h2 id="display-state">VENEZUELA (TOTAL NACIONAL)</h2>
+            <div id="display-date" style="opacity: 0.8;">Datos Acumulados</div>
         </div>
-        <div class="kpi-card" style="border-color: var(--orange);">
-            <div class="kpi-title">Denuncias Atendidas</div>
-            <div class="kpi-value" id="val-atendidas" style="color: var(--orange);">0</div>
-            <div id="perc-atendidas" style="font-weight: bold; color: var(--orange);">0% de Efectividad</div>
-        </div>
-        <div class="kpi-card" style="border-color: #ef4444;">
-            <div class="kpi-title">Denuncias Por Atender</div>
-            <div class="kpi-value" id="val-pendientes" style="color: #ef4444;">0</div>
-            <div id="perc-pendientes" style="color: #ef4444;">0% Pendiente</div>
-        </div>
-    </div>
 
-    <div class="main-grid">
-        <div class="chart-box">
-            <h3>VARIACIÓN % DENUNCIA ATENDIDA</h3>
-            <canvas id="timeChart"></canvas>
+        <div class="kpi-grid">
+            <div class="card">
+                <div class="card-label">Registros Recibidos</div>
+                <div class="card-val" id="val-recibidos">0</div>
+            </div>
+            <div class="card" style="border-top-color: var(--success);">
+                <div class="card-label">Atendidas</div>
+                <div class="card-val" id="val-atendidas" style="color: var(--success);">0</div>
+            </div>
+            <div class="card" style="border-top-color: var(--danger);">
+                <div class="card-label">Por Atender</div>
+                <div class="card-val" id="val-pendientes" style="color: var(--danger);">0</div>
+            </div>
         </div>
-        
-        <div class="chart-box">
-            <h3>DENUNCIA ATENDIDA POR ESTADO</h3>
-            <div class="ranking-box" id="ranking-estados">
+
+        <div class="status-grid">
+            <div class="card" style="grid-column: span 2;">
+                <h3 style="margin-top:0">DESGLOSE DE ESTATUS (ACUMULADO)</h3>
+                <div class="status-grid" id="status-items-container">
+                    <div class="status-item"><span>CERRADAS</span><strong id="val-cerradas">0</strong></div>
+                    <div class="status-item"><span>INSPECCIONADAS</span><strong id="val-inspec">0</strong></div>
+                    <div class="status-item"><span>POR APROBACIÓN</span><strong id="val-aprob">0</strong></div>
+                    <div class="status-item"><span>DESESTIMADAS</span><strong id="val-desest">0</strong></div>
+                    <div class="status-item"><span>PROCESO CONCILIATORIO</span><strong id="val-concil">0</strong></div>
+                    <div class="status-item"><span>DENUNCIAS NO ADMITIDAS</span><strong id="val-noadmit">0</strong></div>
                 </div>
+            </div>
         </div>
-    </div>
 
-    <div class="chart-box">
-        <h3>DESGLOSE POR ESTATUS ACUMULADO</h3>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; margin-top: 20px;">
-            <div><h4 style="color:#94a3b8">CERRADAS</h4><div id="val-cerradas" class="kpi-value" style="font-size: 1.5rem;">0</div></div>
-            <div><h4 style="color:#94a3b8">INSPECCIONADAS</h4><div id="val-inspec" class="kpi-value" style="font-size: 1.5rem;">0</div></div>
-            <div><h4 style="color:#94a3b8">POR APROBACIÓN</h4><div id="val-aprob" class="kpi-value" style="font-size: 1.5rem;">0</div></div>
-            <div><h4 style="color:#94a3b8">DESESTIMADAS</h4><div id="val-desest" class="kpi-value" style="font-size: 1.5rem;">0</div></div>
+        <div class="card">
+            <canvas id="mainChart" height="100"></canvas>
         </div>
     </div>
 </div>
 
 <script>
+    // Configuración de tu Google Sheet
     const sheetId = '19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ';
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Hoja 1`;
+    
+    let fullData = [];
 
-    async function loadDashboard() {
-        try {
-            const res = await fetch(url);
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const rows = json.table.rows;
-            const headers = json.table.cols.map(c => c.label.toUpperCase());
-
-            // Convertir a objetos usando los títulos de tu imagen 2
-            const data = rows.map(r => {
-                let obj = {};
-                r.c.forEach((cell, i) => { if(headers[i]) obj[headers[i]] = cell ? (cell.f || cell.v) : 0; });
-                return obj;
-            });
-
-            processData(data);
-        } catch (e) { console.error(e); }
-    }
-
-    function processData(data) {
-        // --- SUMATORIAS ACUMULATIVAS (Usando tus nombres de columna) ---
-        let recibidas = 0, atendidas = 0, pendientes = 0;
-        let cerradas = 0, inspec = 0, aprob = 0, desest = 0;
-        let estadosMap = {};
-
-        data.forEach(d => {
-            recibidas += Number(d['REGISTROS RECIBIDOS']) || 0;
-            atendidas += Number(d['ATENDIDAS']) || 0; // Columna de tu imagen
-            pendientes += Number(d['POR ATENDER']) || 0;
-            
-            // Estatus individuales
-            cerradas += Number(d['CERRADO']) || 0;
-            inspec += Number(d['INSPECCIONADO']) || 0;
-            aprob += Number(d['POR APROBAR FISCALIZACIÓN']) || 0;
-            desest += Number(d['DESESTIMADA']) || 0;
-
-            // Agrupar por Estado
-            let est = d['ESTADO'];
-            if(est) {
-                estadosMap[est] = (estadosMap[est] || 0) + (Number(d['ATENDIDAS']) || 0);
-            }
-        });
-
-        // Actualizar UI
-        document.getElementById('val-recibidas').innerText = recibidas.toLocaleString();
-        document.getElementById('val-atendidas').innerText = atendidas.toLocaleString();
-        document.getElementById('val-pendientes').innerText = pendientes.toLocaleString();
+    async function fetchData() {
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const headers = json.table.cols.map(c => c.label.toUpperCase());
         
-        document.getElementById('perc-atendidas').innerText = ((atendidas/recibidas)*100).toFixed(1) + "% Eficacia Atendida";
-        document.getElementById('perc-pendientes').innerText = ((pendientes/recibidas)*100).toFixed(1) + "% Por Atender";
-
-        document.getElementById('val-cerradas').innerText = cerradas;
-        document.getElementById('val-inspec').innerText = inspec;
-        document.getElementById('val-aprob').innerText = aprob;
-        document.getElementById('val-desest').innerText = desest;
-
-        // Ranking de Estados
-        const rankingHtml = Object.entries(estadosMap)
-            .sort((a,b) => b[1] - a[1])
-            .map(([name, val]) => `
-                <div class="ranking-item">
-                    <div style="width: 100%;">
-                        <div style="display:flex; justify-content:space-between">
-                            <span style="font-weight:bold">${name}</span>
-                            <span>${val}</span>
-                        </div>
-                        <div class="bar-bg"><div class="bar-fill" style="width: ${(val/atendidas)*100}%"></div></div>
-                    </div>
-                </div>
-            `).join('');
-        document.getElementById('ranking-estados').innerHTML = rankingHtml;
-
-        renderChart(data);
+        fullData = json.table.rows.map(r => {
+            let obj = {};
+            r.c.forEach((cell, i) => { if(headers[i]) obj[headers[i]] = cell ? (cell.f || cell.v) : 0; });
+            return obj;
+        });
+        
+        updateDisplay(fullData);
         document.getElementById('loader').style.display = 'none';
     }
 
-    function renderChart(data) {
-        // Gráfico de Variación Temporal (Días de tu Excel)
-        const ctx = document.getElementById('timeChart').getContext('2d');
-        const labels = data.slice(-10).map(d => d['FECHA'] || 'S/F');
-        const values = data.slice(-10).map(d => d['ATENDIDAS']);
+    function updateDisplay(data, stateName = "VENEZUELA (TOTAL NACIONAL)") {
+        let stats = { recibidos: 0, atendidas: 0, porAtender: 0, cerrado: 0, inspec: 0, aprob: 0, desest: 0, concil: 0, noadmit: 0 };
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Atendidas por Día',
-                    data: values,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+        data.forEach(d => {
+            stats.recibidos += Number(d['REGISTROS RECIBIDOS']) || 0;
+            stats.atendidas += Number(d['ATENDIDAS']) || 0;
+            stats.porAtender += Number(d['POR ATENDER']) || 0;
+            stats.cerrado += Number(d['CERRADO']) || 0;
+            stats.inspec += Number(d['INSPECCIONADO']) || 0;
+            stats.aprob += Number(d['POR APROBAR FISCALIZACIÓN']) || 0;
+            stats.desest += Number(d['DESESTIMADA']) || 0;
+            stats.concil += Number(d['PROCESO CONCILIATORIO']) || 0;
+            stats.noadmit += Number(d['DENUNCIAS NO ADMITIDAS']) || 0;
         });
+
+        document.getElementById('display-state').innerText = stateName;
+        document.getElementById('val-recibidos').innerText = stats.recibidos.toLocaleString();
+        document.getElementById('val-atendidas').innerText = stats.atendidas.toLocaleString();
+        document.getElementById('val-pendientes').innerText = stats.porAtender.toLocaleString();
+        
+        document.getElementById('val-cerradas').innerText = stats.cerrado;
+        document.getElementById('val-inspec').innerText = stats.inspec;
+        document.getElementById('val-aprob').innerText = stats.aprob;
+        document.getElementById('val-desest').innerText = stats.desest;
+        document.getElementById('val-concil').innerText = stats.concil;
+        document.getElementById('val-noadmit').innerText = stats.noadmit;
     }
 
-    loadDashboard();
+    function filterByState(state) {
+        const filtered = fullData.filter(d => d['ESTADO'] === state);
+        updateDisplay(filtered, state);
+        
+        // Efecto visual en el mapa
+        document.querySelectorAll('path').forEach(p => p.classList.remove('active'));
+        document.getElementById(state).classList.add('active');
+    }
+
+    function resetFilter() {
+        updateDisplay(fullData);
+        document.querySelectorAll('path').forEach(p => p.classList.remove('active'));
+    }
+
+    fetchData();
 </script>
 </body>
 </html>
