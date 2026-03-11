@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Fiscalización - Mando de Control</title>
+    <title>Dashboard Fiscalización - Vista de Métricas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,7 +13,7 @@
             --success: #10b981; --danger: #ef4444;
         }
 
-        html, body { height: 100%; margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); }
+        html, body { height: 100%; margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); }
         .app-container { display: flex; height: 100vh; width: 100vw; }
         
         /* SIDEBAR */
@@ -31,37 +31,35 @@
         .state-item:hover { background: #f8fafc; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-        /* CONTENIDO DERECHO */
+        /* CONTENIDO DERECHO CON SCROLL */
         .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
         .view-title-bar { background: var(--secondary); color: white; padding: 20px 25px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
         .view-title-bar h1 { margin: 0; font-size: 1.4rem; font-weight: 800; }
 
         /* KPIs SUPERIORES */
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .card-kpi { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; border-bottom: 4px solid transparent; }
+        .card-kpi { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-bottom: 4px solid transparent; }
         .kpi-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
         .kpi-value { font-size: 2.2rem; font-weight: 900; margin-top: 5px; display: block; color: var(--primary); }
         .card-recibidos { border-bottom-color: var(--secondary); }
         .card-atendidas { border-bottom-color: var(--success); }
         .card-pendientes { border-bottom-color: var(--danger); }
 
-        /* SECCIÓN CENTRAL (MAPA Y CUMPLIMIENTO) */
-        .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; }
-        .panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* SECCIÓN DE METAS (DONAS) */
+        .panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .panel-title { font-weight: 800; font-size: 0.9rem; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
         
-        /* GRÁFICOS DONA */
-        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .compliance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .comp-item { text-align: center; }
-        .chart-container { position: relative; height: 100px; width: 100px; margin: 0 auto; }
-        .chart-label { font-size: 0.7rem; font-weight: 700; color: #64748b; margin-top: 10px; display: block; }
-        .percent-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 1rem; }
+        .chart-container { position: relative; height: 120px; width: 120px; margin: 0 auto; }
+        .percent-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 1.2rem; }
+        .chart-label { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-top: 12px; display: block; }
 
-        /* DESGLOSE STATUS (BARRAS) */
-        .status-list { display: flex; flex-direction: column; gap: 15px; }
-        .bar-row { display: flex; flex-direction: column; gap: 5px; }
-        .bar-info { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; }
-        .bar-track { background: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
+        /* DESGLOSE RANKING (BARRAS) */
+        .status-list { display: flex; flex-direction: column; gap: 20px; }
+        .bar-row { display: flex; flex-direction: column; gap: 8px; }
+        .bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; }
+        .bar-track { background: #f1f5f9; height: 14px; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 10px; transition: width 1s ease-out; }
 
         #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 1000; }
@@ -69,14 +67,14 @@
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
+<div id="loader"><i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i></div>
 
 <div class="app-container">
     <aside class="sidebar">
-        <div class="sidebar-header">Filtrar por Estado</div>
+        <div class="sidebar-header">Filtros por Estado</div>
         <div class="state-list" id="state-selector">
             <div class="state-item active" onclick="resetFilter(this)">
-                <span>VER TOTAL NACIONAL</span>
+                <span>TOTAL NACIONAL</span>
                 <i class="fas fa-globe"></i>
             </div>
         </div>
@@ -85,7 +83,7 @@
     <main class="main-content">
         <div class="view-title-bar">
             <h1 id="view-title">VENEZUELA (TOTAL NACIONAL)</h1>
-            <span style="font-size: 0.8rem; opacity: 0.8;">Datos Acumulados</span>
+            <i class="fas fa-chart-line fa-lg"></i>
         </div>
 
         <div class="kpi-grid">
@@ -103,38 +101,31 @@
             </div>
         </div>
 
-        <div class="dashboard-row">
-            <div class="panel">
-                <div class="panel-title">Mapa de Control</div>
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; background: #fafafa; border-radius: 8px;">
-                    <i class="fas fa-map-marked-alt fa-4x" style="color: #cbd5e1; margin-bottom: 15px;"></i>
-                    <p style="color: #94a3b8; font-size: 0.85rem;">Seleccione un estado en el panel izquierdo</p>
+        <div class="panel">
+            <div class="panel-title">Cumplimiento de Metas Acumulado</div>
+            <div class="compliance-grid">
+                <div class="comp-item">
+                    <div class="chart-container"><canvas id="cAte"></canvas><div class="percent-text" id="tAte" style="color: var(--success)">0%</div></div>
+                    <span class="chart-label">ATENDIDAS %</span>
                 </div>
-            </div>
-            <div class="panel">
-                <div class="panel-title">Cumplimiento de Metas (%)</div>
-                <div class="compliance-grid">
-                    <div class="comp-item">
-                        <div class="chart-container"><canvas id="cAte"></canvas><div class="percent-text" id="tAte">0%</div></div>
-                        <span class="chart-label">ATENDIDAS %</span>
-                    </div>
-                    <div class="comp-item">
-                        <div class="chart-container"><canvas id="cCere"></canvas><div class="percent-text" id="tCer">0%</div></div>
-                        <span class="chart-label">CERRADO %</span>
-                    </div>
-                    <div class="comp-item">
-                        <div class="chart-container"><canvas id="cPen"></canvas><div class="percent-text" id="tPen">0%</div></div>
-                        <span class="chart-label">POR ATENDER %</span>
-                    </div>
+                <div class="comp-item">
+                    <div class="chart-container"><canvas id="cCere"></canvas><div class="percent-text" id="tCer" style="color: var(--secondary)">0%</div></div>
+                    <span class="chart-label">CERRADO %</span>
+                </div>
+                <div class="comp-item">
+                    <div class="chart-container"><canvas id="cPen"></canvas><div class="percent-text" id="tPen" style="color: var(--accent)">0%</div></div>
+                    <span class="chart-label">POR ATENDER %</span>
                 </div>
             </div>
         </div>
 
         <div class="panel">
-            <div class="panel-title">Desglose de Estatus (Ranking Operativo)</div>
+            <div class="panel-title">Desglose por Estatus Operativo</div>
             <div class="status-list" id="status-bars">
                 </div>
         </div>
+
+        <div style="height: 50px;"></div>
     </main>
 </div>
 
@@ -160,7 +151,7 @@
             const res = await fetch(url);
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
-            const headers = json.table.cols.map(c => c.label ? c.label.toUpperCase() : "");
+            const headers = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
             rawData = json.table.rows.map(r => {
                 let obj = {};
@@ -210,7 +201,7 @@
         charts[id] = new Chart(document.getElementById(id), {
             type: 'doughnut',
             data: { datasets: [{ data: [perc, 100 - perc], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }] },
-            options: { cutout: '80%', plugins: { legend: false, tooltip: false }, maintainAspectRatio: false }
+            options: { cutout: '82%', plugins: { legend: false, tooltip: false }, maintainAspectRatio: false }
         });
     }
 
@@ -219,7 +210,7 @@
         const items = [
             { label: 'CERRADAS', val: s.cer, color: '#1e3a8a' },
             { label: 'INSPECCIONADAS', val: s.ins, color: '#3b82f6' },
-            { label: 'POR APROBACIÓN', val: s.apr, color: '#f59e0b' },
+            { label: 'POR APROBACIÓN FISCALIZACIÓN', val: s.apr, color: '#f59e0b' },
             { label: 'DESESTIMADAS', val: s.des, color: '#ef4444' },
             { label: 'PROCESO CONCILIATORIO', val: s.con, color: '#10b981' }
         ];
