@@ -168,12 +168,12 @@
         document.getElementById('val-pendientes').innerText = s.pen.toLocaleString();
 
         const statusItems = [
-            { label: 'Cerradas', val: s.cer, icon: 'fa-check-double', color: '#1e3a8a' },
+            { label: 'Denuncias Cerradas', val: s.cer, icon: 'fa-check-double', color: '#1e3a8a' },
             { label: 'Inspeccionadas', val: s.ins, icon: 'fa-search', color: '#3b82f6' },
-            { label: 'Por Aprobar', val: s.apr, icon: 'fa-clock', color: '#f59e0b' },
-            { label: 'Desestimadas', val: s.des, icon: 'fa-times-circle', color: '#ef4444' },
-            { label: 'Conciliatorio', val: s.con, icon: 'fa-handshake', color: '#10b981' },
-            { label: 'Admitidas', val: s.adm, icon: 'fa-file-import', color: '#8b5cf6' }
+            { label: 'Por Aprobar fiscalización', val: s.apr, icon: 'fa-clock', color: '#f59e0b' },
+            { label: 'Denuncias Desestimadas', val: s.des, icon: 'fa-times-circle', color: '#ef4444' },
+            { label: 'Proceso Conciliatorio', val: s.con, icon: 'fa-handshake', color: '#10b981' },
+            { label: 'Denuncias Admitidas', val: s.adm, icon: 'fa-file-import', color: '#8b5cf6' }
         ];
 
         document.getElementById('status-cards-container').innerHTML = statusItems.map(item => `
@@ -206,3 +206,4 @@
 </script>
 </body>
 </html>
+
