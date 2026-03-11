@@ -17,69 +17,73 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         .app-container { display: flex; height: 100vh; position: relative; }
 
+        /* SIDEBAR */
         .sidebar { 
             width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
             display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
         }
 
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
+        /* VIEWPORT CON SCROLL CONTROLADO */
+        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; height: 100vh; box-sizing: border-box; }
 
         .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
+            background: var(--primary); color: white; padding: 15px 20px; border-radius: 12px; 
+            margin-bottom: 20px; box-shadow: var(--shadow);
         }
-        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .banner h1 { margin: 0; font-size: 1.1rem; text-transform: uppercase; }
 
         .menu-btn {
             display: none; position: fixed; bottom: 20px; right: 20px;
-            background: var(--primary); color: white; width: 60px; height: 60px;
+            background: var(--primary); color: white; width: 55px; height: 55px;
             border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 2000; cursor: pointer; font-size: 1.5rem;
+            z-index: 2000; cursor: pointer; font-size: 1.3rem;
         }
 
+        /* GRIDS COMPACTOS */
         .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 12px; margin-bottom: 20px; 
         }
 
         .card { 
-            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
+            background: var(--white); padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 5px;
         }
-        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
-        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.8s ease; }
-
+        .card-head { display: flex; justify-content: space-between; align-items: center; }
+        .card-label { font-size: 0.6rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.3rem; font-weight: 800; }
+        
         .section-title { 
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
-            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
+            font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
+            margin: 20px 0 10px 0; display: flex; align-items: center; gap: 8px;
         }
-        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
+        .section-title::before { content: ''; width: 3px; height: 14px; background: var(--warning); border-radius: 2px; }
 
-        /* Contenedor especial para los gráficos circulares */
+        /* SECCIÓN DE GRÁFICOS CORREGIDA */
         .chart-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
         }
         .chart-container {
-            background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow); text-align: center; min-height: 320px;
+            background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow); text-align: center; 
+            height: 260px; /* Altura fija para evitar el efecto infinito */
+            display: flex; flex-direction: column;
         }
-        .chart-container h3 { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; }
+        .chart-container h3 { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+        .chart-wrapper { flex-grow: 1; position: relative; }
 
         @media (max-width: 768px) {
             .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
             .sidebar.open { transform: translateX(0); }
             .menu-btn { display: block; }
             .grid { grid-template-columns: 1fr; }
-            .main-view { padding: 15px; }
+            .chart-grid { grid-template-columns: 1fr; }
         }
 
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+        .state-item { padding: 10px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
         #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
@@ -88,13 +92,13 @@
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
+<div id="loader"><i class="fas fa-sync fa-spin fa-2x" style="color: var(--primary)"></i></div>
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
+        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee; font-size: 0.8rem;">UBICACIONES</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
             <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
         </div>
@@ -103,38 +107,34 @@
     <main class="main-view">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;">Sala de Programación y Monitoreo</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">Monitoreo Consolidado</div>
         </div>
 
-        <div class="section-title">Indicadores Críticos</div>
+        <div class="section-title">Resumen Crítico</div>
         <div class="grid" id="grid-criticos"></div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="section-title">Estatus Operativo</div>
         <div class="grid" id="grid-estatus"></div>
 
-        <div class="section-title">Asignación y Dependencias</div>
+        <div class="section-title">Fiscales y Dependencias</div>
         <div class="grid" id="grid-fiscales"></div>
 
-        <div class="section-title">Rendimiento y Eficiencia</div>
-        <div class="grid" id="grid-metricas"></div>
-
-        <div class="section-title">Comparativa Visual de Gestión</div>
+        <div class="section-title">Comparativas de Gestión</div>
         <div class="chart-grid">
             <div class="chart-container">
                 <h3>Atendidas vs No atendidas</h3>
-                <canvas id="chartAtencion"></canvas>
+                <div class="chart-wrapper"><canvas id="chartAtencion"></canvas></div>
             </div>
             <div class="chart-container">
                 <h3>Admitidas vs No Admitidas</h3>
-                <canvas id="chartAdmision"></canvas>
+                <div class="chart-wrapper"><canvas id="chartAdmision"></canvas></div>
             </div>
             <div class="chart-container">
                 <h3>Asignación de Fiscales</h3>
-                <canvas id="chartFiscales"></canvas>
+                <div class="chart-wrapper"><canvas id="chartFiscales"></canvas></div>
             </div>
         </div>
-
-        <div style="height: 60px;"></div>
+        <div style="height: 20px;"></div>
     </main>
 </div>
 
@@ -182,92 +182,69 @@
         });
     }
 
-    function createCard(label, value, icon, color, isPercent = false) {
-        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
+    function createCard(label, value, icon, color) {
         return `
             <div class="card">
                 <div class="card-head">
                     <span class="card-label">${label}</span>
-                    <i class="fas ${icon}" style="color:${color}"></i>
+                    <i class="fas ${icon}" style="color:${color}; font-size: 0.8rem;"></i>
                 </div>
-                <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
+                <div class="card-val" style="color:${color}">${Number(value).toLocaleString()}</div>
             </div>`;
     }
 
-    // Función para manejar la creación/actualización de gráficos
     function updateCharts(s) {
-        const config = (labels, data, colors) => ({
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } 
             }
+        };
+
+        const chartData = [
+            { id: 'chartAtencion', labels: ['Atendidas', 'No Atendidas'], data: [s["ATENDIDAS"], s["POR ATENDER"]], colors: ['#22c55e', '#ef4444'] },
+            { id: 'chartAdmision', labels: ['Admitidas', 'No Admitidas'], data: [s["DENUNCIAS ADMITIDAS"], s["DENUNCIAS NO ADMITIDAS"]], colors: ['#8b5cf6', '#64748b'] },
+            { id: 'chartFiscales', labels: ['Asignado', 'Por Asignar'], data: [s["CON FISCAL ASIGNADO"], s["POR ASIGNAR FISCAL"]], colors: ['#059669', '#d97706'] }
+        ];
+
+        chartData.forEach(c => {
+            if (charts[c.id]) charts[c.id].destroy();
+            charts[c.id] = new Chart(document.getElementById(c.id), {
+                type: 'doughnut',
+                data: {
+                    labels: c.labels,
+                    datasets: [{ data: c.data, backgroundColor: c.colors, borderWeight: 1 }]
+                },
+                options: commonOptions
+            });
         });
-
-        const dataAtencion = [s["ATENDIDAS"], s["POR ATENDER"]];
-        const dataAdmision = [s["DENUNCIAS ADMITIDAS"], s["DENUNCIAS NO ADMITIDAS"]];
-        const dataFiscales = [s["CON FISCAL ASIGNADO"], s["POR ASIGNAR FISCAL"]];
-
-        if (charts.atencion) charts.atencion.destroy();
-        if (charts.admision) charts.admision.destroy();
-        if (charts.fiscales) charts.fiscales.destroy();
-
-        charts.atencion = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'No Atendidas'], dataAtencion, ['#22c55e', '#ef4444']));
-        charts.admision = new Chart(document.getElementById('chartAdmision'), config(['Admitidas', 'No Admitidas'], dataAdmision, ['#8b5cf6', '#64748b']));
-        charts.fiscales = new Chart(document.getElementById('chartFiscales'), config(['Asignado', 'Por Asignar'], dataFiscales, ['#059669', '#d97706']));
     }
 
     function updateDashboard(data, title = "VENEZUELA") {
         let s = {};
-        const columns = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", 
-            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", 
-            "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", 
-            "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
-            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
-        ];
+        const columns = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "DIRECTOR DE FISCALIZACIÓN", "OTRA DEPENDENCI"];
         columns.forEach(c => s[c] = 0);
         data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
 
         document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
-            createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
+            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
+            createCard("Atendidas", s["ATENDIDAS"], "fa-check", "#22c55e") +
+            createCard("Pendientes", s["POR ATENDER"], "fa-clock", "#ef4444");
 
         document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
             createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
             createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
-            createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
-            createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
-            createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
-            createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
             createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
 
         document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
-            createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
-            createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
+            createCard("Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+            createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
+            createCard("Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
 
-        const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        document.getElementById('grid-metricas').innerHTML = 
-            createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
-            createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
-
-        // Actualizar los gráficos circulares con los nuevos totales
         updateCharts(s);
     }
 
