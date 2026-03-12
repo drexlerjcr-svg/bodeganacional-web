@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Programación y Monitoreo</title>
+    <title>Sala de Mando Operativa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -17,13 +17,11 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         .app-container { display: flex; height: 100vh; position: relative; }
 
-        /* SIDEBAR */
         .sidebar { 
             width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
             display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
         }
 
-        /* VIEWPORT */
         .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; height: 100vh; box-sizing: border-box; }
 
         .banner { 
@@ -39,7 +37,6 @@
             z-index: 2000; cursor: pointer; font-size: 1.3rem;
         }
 
-        /* GRIDS */
         .grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
             gap: 12px; margin-bottom: 20px; 
@@ -59,7 +56,6 @@
         }
         .section-title::before { content: ''; width: 3px; height: 14px; background: var(--warning); border-radius: 2px; }
 
-        /* GRÁFICOS COMPACTOS */
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -84,14 +80,18 @@
 
         .state-item { padding: 10px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
-<div id="loader"><i class="fas fa-lock fa-spin fa-2x" style="color: var(--primary)"></i></div>
+<div id="loader">
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p id="loader-text" style="margin-top: 15px; font-weight: 600; color: var(--muted);">Cargando Sistema...</p>
+</div>
+
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
@@ -106,7 +106,7 @@
     <main class="main-view">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.7rem; opacity: 0.8;">Programación y Monitoreo</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">Monitoreo Consolidado de Fiscalización</div>
         </div>
 
         <div class="section-title">Indicadores Críticos</div>
@@ -121,7 +121,7 @@
         <div class="section-title">Comparativas Visuales</div>
         <div class="chart-grid">
             <div class="chart-container">
-                <h3>Atendidas vs Pendientes</h3>
+                <h3>Atendidas vs Por Atender</h3>
                 <div class="chart-wrapper"><canvas id="chartAtencion"></canvas></div>
             </div>
             <div class="chart-container">
@@ -138,8 +138,8 @@
 </div>
 
 <script>
-    // URL Ofuscada en Base64
-    const _0x5a2e = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    // URL Ofuscada (Base64)
+    const _u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     
     let rawData = [];
     let charts = {};
@@ -151,22 +151,31 @@
 
     async function init() {
         try {
-            // Decodificamos la URL en el momento de la llamada
-            const res = await fetch(atob(_0x5a2e));
+            const res = await fetch(atob(_u));
+            if (!res.ok) throw new Error("No se pudo conectar con la base de datos.");
+            
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
             rawData = json.table.rows.map(r => {
                 let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+                r.c.forEach((cell, i) => { 
+                    if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; 
+                });
                 return obj;
             });
+
+            if (rawData.length === 0) throw new Error("El archivo está vacío.");
 
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error("Error cargando datos seguros:", e); }
+        } catch (e) { 
+            console.error(e); 
+            document.getElementById('loader-text').innerText = "Error: " + e.message;
+            document.getElementById('loader-text').style.color = "var(--danger)";
+        }
     }
 
     function renderSidebar() {
@@ -198,43 +207,49 @@
     }
 
     function updateCharts(s) {
-        const commonOptions = {
+        const opt = {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } }
         };
 
-        const chartConfigs = [
-            { id: 'chartAtencion', labels: ['Atendidas', 'No Atendidas'], data: [s["ATENDIDAS"], s["POR ATENDER"]], colors: ['#22c55e', '#ef4444'] },
+        const config = [
+            { id: 'chartAtencion', labels: ['Atendidas', 'Por Atender'], data: [s["ATENDIDAS"], s["POR ATENDER"]], colors: ['#22c55e', '#ef4444'] },
             { id: 'chartAdmision', labels: ['Admitidas', 'No Admitidas'], data: [s["DENUNCIAS ADMITIDAS"], s["DENUNCIAS NO ADMITIDAS"]], colors: ['#8b5cf6', '#64748b'] },
             { id: 'chartFiscales', labels: ['Con Fiscal', 'Por Asignar'], data: [s["CON FISCAL ASIGNADO"], s["POR ASIGNAR FISCAL"]], colors: ['#059669', '#d97706'] }
         ];
 
-        chartConfigs.forEach(c => {
+        config.forEach(c => {
             if (charts[c.id]) charts[c.id].destroy();
-            charts[c.id] = new Chart(document.getElementById(c.id), {
+            const ctx = document.getElementById(c.id).getContext('2d');
+            charts[c.id] = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: c.labels,
                     datasets: [{ data: c.data, backgroundColor: c.colors, borderWeight: 1 }]
                 },
-                options: commonOptions
+                options: opt
             });
         });
     }
 
     function updateDashboard(data, title = "VENEZUELA") {
         let s = {};
-        const columns = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
-        columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
+        // Columnas exactas que usa tu script
+        const cols = [
+            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", 
+            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "CERRADO", "POR ASIGNAR FISCAL", 
+            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
+        ];
+        cols.forEach(c => s[c] = 0);
+        data.forEach(d => cols.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
 
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-database", "#1e3a8a") +
             createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "#22c55e") +
-            createCard("Pendientes", s["POR ATENDER"], "fa-exclamation-triangle", "#ef4444");
+            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
 
         document.getElementById('grid-estatus').innerHTML = 
             createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-medical", "#8b5cf6") +
@@ -245,7 +260,7 @@
         document.getElementById('grid-fiscales').innerHTML = 
             createCard("Asignado", s["CON FISCAL ASIGNADO"], "fa-user-shield", "#059669") +
             createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-clock", "#d97706") +
-            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-building", "#4338ca");
+            createCard("Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
 
         updateCharts(s);
     }
@@ -257,8 +272,7 @@
         if(window.innerWidth <= 768) toggleMenu();
     }
 
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
-
