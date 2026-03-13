@@ -3,277 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Programación y Monitoreo</title>
+    <title>S.M.O. - Sala de Mando Operativa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
             --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
             --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
-
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         
-        /* Pantalla de Bloqueo */
-        #lock-screen {
-            position: fixed; inset: 0; background: var(--primary);
-            display: flex; justify-content: center; align-items: center; z-index: 5000;
-        }
-        .lock-box { 
-            background: white; padding: 40px; border-radius: 20px; text-align: center; 
-            width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-        }
-        .lock-box input { 
-            width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0; 
-            border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box;
-        }
-        .lock-box button { 
-            background: var(--primary); color: white; border: none; padding: 12px; 
-            width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; 
-        }
+        /* Login */
+        #lock-screen { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 5000; }
+        .lock-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .lock-box input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box; }
+        .lock-box button { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* Layout */
-        .app-container { display: none; height: 100vh; position: relative; }
-
-        /* Sidebar Responsive */
-        .sidebar { 
-            width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
-            display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
-        }
-
-        /* Viewport */
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
-
-        /* Header */
-        .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
-        }
-        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Mobile Nav */
-        .menu-btn {
-            display: none; position: fixed; bottom: 20px; right: 20px;
-            background: var(--primary); color: white; width: 60px; height: 60px;
-            border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 2000; cursor: pointer; font-size: 1.5rem;
-        }
-
-        /* Grids Adaptativos */
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; 
-        }
-
-        /* Estilo de Card */
-        .card { 
-            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
-        }
-        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
-        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.8s ease; }
-
-        .section-title { 
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
-            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
-        }
+        /* Dashboard Layout */
+        .app-container { display: none; height: 100vh; }
+        .sidebar { width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        
+        .banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 10px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
-            .sidebar.open { transform: translateX(0); }
-            .menu-btn { display: block; }
-            .grid { grid-template-columns: 1fr; }
-            .main-view { padding: 15px; }
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { background: var(--white); padding: 15px; border-radius: 12px; border-top: 4px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.8rem; font-weight: 800; margin-top: 5px; }
 
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 3000; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .overlay.active { display: block; }
+        #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
     <div class="lock-box">
-        <i class="fas fa-user-shield fa-3x" style="color: var(--primary)"></i>
-        <h2 style="margin-top:15px; font-size: 1.2rem;">S.M.O. Acceso</h2>
+        <i class="fas fa-shield-alt fa-3x" style="color:var(--primary)"></i>
+        <h2>Acceso S.M.O.</h2>
         <input type="password" id="passInput" placeholder="Contraseña">
-        <button onclick="verifyKey()">ENTRAR</button>
-        <p id="error-msg" style="color:red; display:none; margin-top:10px; font-size:0.8rem">Clave incorrecta</p>
+        <button onclick="verify()">INGRESAR</button>
+        <p id="err" style="color:red; display:none; margin-top:10px;">Contraseña incorrecta</p>
     </div>
 </div>
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
-<button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div id="loader">
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color:var(--primary)"></i>
+    <p>Conectando con base de datos...</p>
+</div>
 
 <div class="app-container" id="app">
-    <aside class="sidebar" id="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
+    <aside class="sidebar">
+        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9;">UBICACIONES</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
+            <div class="state-item active" onclick="filterData('TOTAL')">NACIONAL (TOTAL)</div>
         </div>
     </aside>
 
     <main class="main-view">
         <div class="banner">
-            <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;">Sala de Programación y Monitoreo</div>
+            <h1 id="v-title" style="margin:0; font-size:1.5rem;">VENEZUELA</h1>
+            <p style="margin:5px 0 0 0; opacity:0.8; font-size:0.8rem">Sala de Seguimiento y Control Operativo</p>
         </div>
 
         <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="grid-criticos"></div>
+        <div class="grid" id="g-criticos"></div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div class="grid" id="grid-estatus"></div>
+        <div class="section-title">Estatus del Flujo</div>
+        <div class="grid" id="g-estatus"></div>
 
-        <div class="section-title">Asignación y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
-
-        <div class="section-title">Rendimiento y Eficiencia</div>
-        <div class="grid" id="grid-metricas"></div>
-
-        <div style="height: 60px;"></div>
+        <div class="section-title">Fiscalización</div>
+        <div class="grid" id="g-fiscal"></div>
     </main>
 </div>
 
 <script>
-    // URL Ofuscada (Base64)
-    const _uD = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
-    // Contraseña "123456" en Base64
-    const _kD = "MTIzNDU2";
+    // Configuración Encriptada (Contraseña 123456)
+    const _c = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZXhwb3J0P2Zvcm1hdD1jc3Y=";
+    const _p = "MTIzNDU2";
 
-    function verifyKey() {
-        const input = document.getElementById('passInput').value;
-        if (btoa(input) === _kD) {
+    let db = [];
+
+    function verify() {
+        if (btoa(document.getElementById('passInput').value) === _p) {
             document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
             document.getElementById('loader').style.display = 'flex';
-            init();
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
-        }
+            load();
+        } else { document.getElementById('err').style.display = 'block'; }
     }
 
-    // Permitir Enter en el input de contraseña
-    document.getElementById('passInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') verifyKey();
-    });
-
-    let rawData = [];
-
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('active');
-    }
-
-    async function init() {
+    async function load() {
         try {
-            const res = await fetch(atob(_uD));
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            rawData = json.table.rows.map(r => {
-                let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
-                return obj;
-            });
-            renderSidebar();
-            updateDashboard(rawData);
+            const r = await fetch(atob(_c));
+            const t = await r.text();
+            const rows = t.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+            const heads = rows[0].map(h => h.replace(/"/g, '').trim().toUpperCase());
+            
+            db = rows.slice(1).map(row => {
+                let o = {};
+                heads.forEach((h, i) => {
+                    let v = row[i] ? row[i].replace(/"/g, '').trim() : "0";
+                    o[h] = isNaN(v) || v === "" ? v : Number(v);
+                });
+                return o;
+            }).filter(d => d.ESTADO);
+
+            renderMenu();
+            update('TOTAL');
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error(e);
-            alert("Error al cargar los datos desde la nube.");
+            document.getElementById('app').style.display = 'flex';
+        } catch (e) {
+            alert("Error crítico de conexión. Verifique que el Excel sea público.");
         }
     }
 
-    function renderSidebar() {
-        const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
+    function renderMenu() {
+        const container = document.getElementById('sidebar-list');
+        const states = [...new Set(db.map(d => d.ESTADO))].filter(Boolean).sort();
         states.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'state-item';
-            div.innerText = s;
-            div.onclick = () => {
-                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
+            const d = document.createElement('div');
+            d.className = 'state-item';
+            d.innerText = s;
+            d.onclick = () => {
+                filterData(s);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                div.classList.add('active');
-                if(window.innerWidth <= 768) toggleMenu();
+                d.classList.add('active');
             };
-            list.appendChild(div);
+            container.appendChild(d);
         });
     }
 
-    function createCard(label, value, icon, color, isPercent = false) {
-        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
-        return `
-            <div class="card">
-                <div class="card-head">
-                    <span class="card-label">${label}</span>
-                    <i class="fas ${icon}" style="color:${color}"></i>
-                </div>
-                <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
-            </div>`;
+    function createC(l, v, c) {
+        return `<div class="card" style="border-color:${c}">
+            <div class="card-label">${l}</div>
+            <div class="card-val" style="color:${c}">${Number(v).toLocaleString()}</div>
+        </div>`;
     }
 
-    function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const columns = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", 
-            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", 
-            "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", 
-            "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
-            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
-        ];
-        columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
-
-        document.getElementById('view-title').innerText = title;
-
-        document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
-            createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
-
-        document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
-            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
-            createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
-            createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
-            createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
-            createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
-            createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
-        document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
-            createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
-            createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
-
-        const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        document.getElementById('grid-metricas').innerHTML = 
-            createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
-            createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
+    function filterData(s) {
+        update(s);
     }
 
-    function resetFilter(el) {
-        updateDashboard(rawData);
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        if(window.innerWidth <= 768) toggleMenu();
+    function update(filter) {
+        const data = filter === 'TOTAL' ? db : db.filter(d => d.ESTADO === filter);
+        document.getElementById('v-title').innerText = filter === 'TOTAL' ? "VENEZUELA" : filter;
+
+        let s = { rec:0, ate:0, pen:0, adm:0, nadm:0, insp:0, cer:0, pfis:0, f_asig:0, f_nac:0 };
+
+        data.forEach(d => {
+            s.rec += (d["REGISTROS RECIBIDOS"] || 0);
+            s.ate += (d["ATENDIDAS"] || 0);
+            s.pen += (d["POR ATENDER"] || 0);
+            s.adm += (d["DENUNCIAS ADMITIDAS"] || 0);
+            s.nadm += (d["DENUNCIAS NO ADMITIDAS"] || 0);
+            s.insp += (d["INSPECCIONADO"] || 0);
+            s.cer += (d["CERRADO"] || 0);
+            s.pfis += (d["POR FISCALIZAR"] || 0);
+            s.f_asig += (d["CON FISCAL ASIGNADO"] || 0);
+            s.f_nac += (d["CON FISCAL NACIONAL"] || 0);
+        });
+
+        document.getElementById('g-criticos').innerHTML = 
+            createC("REGISTROS RECIBIDOS", s.rec, "#1e3a8a") +
+            createC("ATENDIDAS", s.ate, "#22c55e") +
+            createC("POR ATENDER", s.pen, "#ef4444");
+
+        document.getElementById('g-estatus').innerHTML = 
+            createC("ADMITIDAS", s.adm, "#8b5cf6") +
+            createC("NO ADMITIDAS", s.nadm, "#64748b") +
+            createC("INSPECCIONADAS", s.insp, "#0ea5e9") +
+            createC("CERRADAS", s.cer, "#1e293b");
+
+        document.getElementById('g-fiscal').innerHTML = 
+            createC("POR FISCALIZAR", s.pfis, "#f59e0b") +
+            createC("CON FISCAL ASIGNADO", s.f_asig, "#059669") +
+            createC("CON FISCAL NACIONAL", s.f_nac, "#4338ca");
     }
 </script>
 </body>
