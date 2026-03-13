@@ -1,0 +1,5 @@
+{
+  "name": "Sala de Mando Operativa",
+  "description": "Panel de control y monitoreo de denuncias y procesos operativos con integración de Google Sheets.",
+  "requestFramePermissions": []
+}
