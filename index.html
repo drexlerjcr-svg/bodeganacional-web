@@ -33,93 +33,53 @@
             background: var(--accent); color: white; border: none; padding: 12px 30px;
             border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
-        .login-card button:hover { background: #2563eb; }
 
-        /* Layout Principal (Oculto inicialmente) */
+        /* Layout Principal */
         .app-container { display: none; height: 100vh; position: relative; }
-
-        /* Sidebar Responsive */
         .sidebar { 
             width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
             display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
         }
-
-        /* Viewport */
         .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
+        .banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow); }
+        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; }
 
-        /* Header */
-        .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
-        }
-        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Mobile Nav */
-        .menu-btn {
-            display: none; position: fixed; bottom: 20px; right: 20px;
-            background: var(--primary); color: white; width: 60px; height: 60px;
-            border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 2000; cursor: pointer; font-size: 1.5rem;
-        }
-
-        /* Grids Adaptativos */
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; 
-        }
-
-        /* Estilo de Card */
-        .card { 
-            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
-        }
-        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+        /* Grids */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+        .card-val { font-size: 1.5rem; font-weight: 800; }
         .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
         .progress-fill { height: 100%; transition: width 0.8s ease; }
 
-        .section-title { 
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
-            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
-        }
+        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
-            .sidebar.open { transform: translateX(0); }
-            .menu-btn { display: block; }
-            .grid { grid-template-columns: 1fr; }
-            .main-view { padding: 15px; }
-        }
-
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 3000; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-card">
-        <i class="fas fa-shield-halved"></i>
-        <h2>Acceso Restringido</h2>
-        <p style="color: #666; font-size: 0.9rem;">Ingrese su clave de autorización</p>
+        <i class="fas fa-user-shield"></i>
+        <h2>Acceso al Dashboard</h2>
         <input type="password" id="passInput" placeholder="Contraseña">
-        <button onclick="checkAccess()">Entrar al Panel</button>
-        <p id="error-msg" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 10px;">Clave incorrecta</p>
+        <button onclick="checkAccess()">Entrar</button>
+        <p id="error-msg" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 10px;">Contraseña incorrecta</p>
     </div>
 </div>
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
-<button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div id="loader">
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p id="loader-status" style="margin-top: 15px; font-weight: 600;">Cargando base de datos...</p>
+</div>
 
 <div class="app-container" id="mainApp">
-    <aside class="sidebar" id="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
+    <aside class="sidebar">
+        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">FILTRO ESTADAL</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
             <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
         </div>
@@ -128,157 +88,113 @@
     <main class="main-view">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;">Sala de Programación y Monitoreo</div>
+            <div style="font-size: 0.75rem; opacity: 0.8;">Sistema de Seguimiento y Control Operativo</div>
         </div>
 
         <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="section-title">Desglose de Estatus Acumulado</div>
         <div class="grid" id="grid-estatus"></div>
-
-        <div class="section-title">Asignación y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
-
-        <div class="section-title">Rendimiento y Eficiencia</div>
-        <div class="grid" id="grid-metricas"></div>
-
-        <div style="height: 60px;"></div>
     </main>
 </div>
 
 <script>
-    // URL Ofuscada en Base64 para ocultar el ID del Google Sheet
-    const _0x4f2a = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
-    
-    // Contraseña (puedes cambiar '1234' por la que prefieras)
-    const SECRET_KEY = "1234";
+    // URL Ofuscada (Base64)
+    const _secretUrl = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    const SECRET_KEY = "1234"; // Cambia esto
 
     function checkAccess() {
         const input = document.getElementById('passInput').value;
-        const error = document.getElementById('error-msg');
-        
         if (input === SECRET_KEY) {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('mainApp').style.display = 'flex';
             document.getElementById('loader').style.display = 'flex';
-            init();
+            loadData();
         } else {
-            error.style.display = 'block';
-            document.getElementById('passInput').value = '';
+            document.getElementById('error-msg').style.display = 'block';
         }
     }
 
-    // Permitir entrar con la tecla Enter
-    document.getElementById('passInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkAccess();
-    });
-
-    let rawData = [];
-
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('active');
-    }
-
-    async function init() {
+    async function loadData() {
+        const status = document.getElementById('loader-status');
         try {
-            // Decodificamos la URL en tiempo real usando atob()
-            const res = await fetch(atob(_0x4f2a));
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            rawData = json.table.rows.map(r => {
+            // Decodificación segura
+            const decodedUrl = atob(_secretUrl);
+            const response = await fetch(decodedUrl);
+            
+            if (!response.ok) throw new Error("Error en la respuesta del servidor");
+            
+            const text = await response.text();
+            // Limpiar el JSON de Google
+            const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+            
+            const cols = jsonData.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            window.rawData = jsonData.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
                 return obj;
             });
+
             renderSidebar();
-            updateDashboard(rawData);
+            updateDashboard(window.rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            status.innerText = "Error: No se pudo cargar el Excel. Verifique que sea público.";
+            status.style.color = "red";
+        }
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
+        const states = [...new Set(window.rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
         states.forEach(s => {
             const div = document.createElement('div');
             div.className = 'state-item';
             div.innerText = s;
             div.onclick = () => {
-                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
+                updateDashboard(window.rawData.filter(d => d['ESTADO'] === s), s);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
-                if(window.innerWidth <= 768) toggleMenu();
             };
             list.appendChild(div);
         });
     }
 
-    function createCard(label, value, icon, color, isPercent = false) {
-        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
+    function createCard(label, value, color) {
         return `
             <div class="card">
-                <div class="card-head">
-                    <span class="card-label">${label}</span>
-                    <i class="fas ${icon}" style="color:${color}"></i>
-                </div>
-                <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
+                <span class="card-label">${label}</span>
+                <div class="card-val" style="color:${color}">${Number(value).toLocaleString()}</div>
+                <div class="progress-bar"><div class="progress-fill" style="width:100%; background:${color}"></div></div>
             </div>`;
     }
 
     function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const columns = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", 
-            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", 
-            "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", 
-            "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
-            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
-        ];
-        columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
+        let s = { "REGISTROS RECIBIDOS": 0, "ATENDIDAS": 0, "POR ATENDER": 0, "CERRADAS": 0, "INSPECCIONADAS": 0, "DESESTIMADAS": 0 };
+        
+        data.forEach(d => {
+            for (let key in s) { s[key] += Number(d[key]) || 0; }
+        });
 
         document.getElementById('view-title').innerText = title;
-
+        
         document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
-            createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
+            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "var(--primary)") +
+            createCard("Atendidas", s["ATENDIDAS"], "var(--success)") +
+            createCard("Por Atender", s["POR ATENDER"], "var(--danger)");
 
         document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
-            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
-            createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
-            createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
-            createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
-            createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
-            createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
-        document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
-            createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
-            createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
-
-        const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        document.getElementById('grid-metricas').innerHTML = 
-            createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
-            createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
+            createCard("Cerradas", s["CERRADAS"], "#1e293b") +
+            createCard("Inspeccionadas", s["INSPECCIONADAS"], "#3b82f6") +
+            createCard("Desestimadas", s["DESESTIMADAS"], "#ef4444");
     }
 
     function resetFilter(el) {
-        updateDashboard(rawData);
+        updateDashboard(window.rawData);
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        if(window.innerWidth <= 768) toggleMenu();
     }
 </script>
 </body>
