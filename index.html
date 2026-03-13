@@ -15,8 +15,28 @@
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         
-        /* Layout */
-        .app-container { display: flex; height: 100vh; position: relative; }
+        /* Pantalla de Login */
+        #login-overlay {
+            position: fixed; inset: 0; background: var(--primary); 
+            display: flex; justify-content: center; align-items: center; z-index: 5000;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center; width: 90%; max-width: 400px;
+        }
+        .login-card i { font-size: 3rem; color: var(--primary); margin-bottom: 20px; }
+        .login-card input {
+            width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #eee;
+            border-radius: 8px; font-size: 1rem; text-align: center; box-sizing: border-box;
+        }
+        .login-card button {
+            background: var(--accent); color: white; border: none; padding: 12px 30px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .login-card button:hover { background: #2563eb; }
+
+        /* Layout Principal (Oculto inicialmente) */
+        .app-container { display: none; height: 100vh; position: relative; }
 
         /* Sidebar Responsive */
         .sidebar { 
@@ -65,7 +85,6 @@
         }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        /* Media Queries */
         @media (max-width: 768px) {
             .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
             .sidebar.open { transform: translateX(0); }
@@ -76,18 +95,29 @@
 
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 3000; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
+<div id="login-overlay">
+    <div class="login-card">
+        <i class="fas fa-shield-halved"></i>
+        <h2>Acceso Restringido</h2>
+        <p style="color: #666; font-size: 0.9rem;">Ingrese su clave de autorización</p>
+        <input type="password" id="passInput" placeholder="Contraseña">
+        <button onclick="checkAccess()">Entrar al Panel</button>
+        <p id="error-msg" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 10px;">Clave incorrecta</p>
+    </div>
+</div>
+
 <div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<div class="app-container">
+<div class="app-container" id="mainApp">
     <aside class="sidebar" id="sidebar">
         <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
@@ -118,7 +148,32 @@
 </div>
 
 <script>
-    const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja 1";
+    // URL Ofuscada en Base64 para ocultar el ID del Google Sheet
+    const _0x4f2a = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    
+    // Contraseña (puedes cambiar '1234' por la que prefieras)
+    const SECRET_KEY = "1234";
+
+    function checkAccess() {
+        const input = document.getElementById('passInput').value;
+        const error = document.getElementById('error-msg');
+        
+        if (input === SECRET_KEY) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('loader').style.display = 'flex';
+            init();
+        } else {
+            error.style.display = 'block';
+            document.getElementById('passInput').value = '';
+        }
+    }
+
+    // Permitir entrar con la tecla Enter
+    document.getElementById('passInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkAccess();
+    });
+
     let rawData = [];
 
     function toggleMenu() {
@@ -128,7 +183,8 @@
 
     async function init() {
         try {
-            const res = await fetch(url);
+            // Decodificamos la URL en tiempo real usando atob()
+            const res = await fetch(atob(_0x4f2a));
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
@@ -187,13 +243,11 @@
 
         document.getElementById('view-title').innerText = title;
 
-        // CRITICOS
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
             createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
             createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
 
-        // ESTATUS
         document.getElementById('grid-estatus').innerHTML = 
             createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
             createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
@@ -206,7 +260,6 @@
             createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
             createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
 
-        // FISCALES
         document.getElementById('grid-fiscales').innerHTML = 
             createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
             createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
@@ -214,7 +267,6 @@
             createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
             createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
 
-        // METRICAS
         const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
         const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
         document.getElementById('grid-metricas').innerHTML = 
@@ -228,8 +280,6 @@
         el.classList.add('active');
         if(window.innerWidth <= 768) toggleMenu();
     }
-
-    init();
 </script>
 </body>
 </html>
