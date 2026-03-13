@@ -3,46 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.M.O. - Acceso Seguro</title>
+    <title>S.M.O. - Sala de Mando Operativa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
             --danger: #ef4444; --warning: #f59e0b; --bg: #f1f5f9; --white: #ffffff;
+            --text: #1e293b; --muted: #64748b;
         }
-
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; overflow: hidden; color: var(--text); }
         
-        /* Pantalla de Bloqueo */
+        /* Pantalla de Login */
         #lock-screen {
             position: fixed; inset: 0; background: var(--primary);
             display: flex; justify-content: center; align-items: center; z-index: 5000;
         }
-        .lock-box {
-            background: white; padding: 40px; border-radius: 20px; text-align: center;
-            box-shadow: 0 20px 25px rgba(0,0,0,0.2); width: 320px;
-        }
-        .lock-box i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
-        .lock-box input {
-            width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0;
-            border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box;
-        }
-        .lock-box button {
-            background: var(--primary); color: white; border: none; padding: 12px;
-            width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer;
-        }
+        .lock-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .lock-box input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box; }
+        .lock-box button { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* App container oculto */
+        /* Estructura App */
         .app-container { display: none; height: 100vh; }
         .sidebar { width: 260px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; }
+        
         .banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
-        .card-val { font-size: 1.5rem; font-weight: 800; margin-top: 5px; }
+        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: #64748b; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.6rem; font-weight: 800; margin-top: 5px; }
+
+        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item.active { background: var(--primary); color: white; }
         #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
     </style>
@@ -51,22 +45,22 @@
 
 <div id="lock-screen">
     <div class="lock-box">
-        <i class="fas fa-lock"></i>
-        <h2>Sala de Mando</h2>
+        <i class="fas fa-shield-alt fa-3x" style="color:var(--primary)"></i>
+        <h2 style="margin-top:15px">S.M.O. Acceso</h2>
         <input type="password" id="passInput" placeholder="Contraseña">
-        <button onclick="verifyKey()">ENTRAR</button>
+        <button onclick="verifyKey()">INGRESAR</button>
         <p id="error-msg" style="color:red; display:none; margin-top:10px; font-size:0.8rem">Clave incorrecta</p>
     </div>
 </div>
 
 <div id="loader">
-    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top:15px; font-weight:bold">Cargando datos...</p>
+    <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p style="margin-top:15px; font-weight:bold">Sincronizando con Google Sheets...</p>
 </div>
 
 <div class="app-container" id="app">
     <aside class="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
+        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 2px solid #f1f5f9;">UBICACIONES</div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
             <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
         </div>
@@ -74,77 +68,70 @@
 
     <main class="main-view">
         <div class="banner">
-            <h1 id="view-title">VENEZUELA</h1>
-            <p style="margin:5px 0 0 0; opacity:0.8; font-size:0.75rem">Sala de Programación y Monitoreo</p>
+            <h1 id="view-title" style="margin:0">VENEZUELA</h1>
+            <p style="margin:5px 0 0 0; opacity:0.8; font-size:0.8rem">Sala de Seguimiento y Control Operativo</p>
         </div>
 
-        <div style="font-weight:800; color:var(--primary); margin: 20px 0 10px 0; font-size:0.75rem">INDICADORES CRÍTICOS</div>
+        <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
 
-        <div style="font-weight:800; color:var(--primary); margin: 20px 0 10px 0; font-size:0.75rem">FLUJO DE DENUNCIA</div>
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
         <div class="grid" id="grid-estatus"></div>
 
-        <div style="font-weight:800; color:var(--primary); margin: 20px 0 10px 0; font-size:0.75rem">FISCALIZACIÓN</div>
-        <div class="grid" id="grid-fiscales"></div>
+        <div class="section-title">Fiscalización y Asignación</div>
+        <div class="grid" id="grid-fiscal"></div>
     </main>
 </div>
 
 <script>
-    // URL Ofuscada (Base64)
-    const _sh = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
-    
-    // Contraseña: '1234' en Base64 es 'MTIzNA=='
-    const _kh = "MTIzNA=="; 
+    // URL Exportada a CSV para evitar errores de carga
+    const _csvUrl = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/export?format=csv&gid=0";
+    const _kh = "MTIzNA=="; // '1234' en Base64
 
     function verifyKey() {
-        const input = document.getElementById('passInput').value;
-        if (btoa(input) === _kh) {
+        if (btoa(document.getElementById('passInput').value) === _kh) {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             document.getElementById('loader').style.display = 'flex';
-            init();
+            fetchData();
         } else {
             document.getElementById('error-msg').style.display = 'block';
         }
     }
 
-    document.getElementById('passInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') verifyKey();
-    });
-
-    let rawData = [];
-
-    async function init() {
+    async function fetchData() {
         try {
-            const res = await fetch(atob(_sh));
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            const response = await fetch(_csvUrl);
+            const data = await response.text();
+            const rows = data.split('\n').map(row => row.split(','));
+            const headers = rows[0].map(h => h.trim().toUpperCase());
             
-            rawData = json.table.rows.map(r => {
+            window.rawData = rows.slice(1).map(row => {
                 let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+                headers.forEach((header, i) => {
+                    let val = row[i] ? row[i].replace(/"/g, '').trim() : "0";
+                    obj[header] = isNaN(val) ? val : Number(val);
+                });
                 return obj;
-            });
+            }).filter(d => d.ESTADO);
 
             renderSidebar();
-            updateDashboard(rawData);
+            updateDashboard(window.rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error(e);
-            alert("Error al conectar con Google Sheets.");
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
         }
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
+        const states = [...new Set(window.rawData.map(d => d.ESTADO))].filter(Boolean).sort();
         states.forEach(s => {
             const div = document.createElement('div');
             div.className = 'state-item';
             div.innerText = s;
             div.onclick = () => {
-                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
+                updateDashboard(window.rawData.filter(d => d.ESTADO === s), s);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
             };
@@ -156,42 +143,52 @@
         return `
             <div class="card">
                 <div class="card-label">${label}</div>
-                <div class="card-val" style="color:${color}">${Number(value).toLocaleString()}</div>
+                <div class="card-val" style="color:${color}">${(value || 0).toLocaleString()}</div>
             </div>`;
     }
 
     function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const columns = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", 
-            "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", 
-            "POR FISCALIZAR", "CERRADO", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"
-        ];
+        let s = { 
+            RECIBIDOS: 0, ATENDIDAS: 0, PENDIENTES: 0, 
+            ADMITIDAS: 0, NO_ADMITIDAS: 0, INSPECCIONADAS: 0, CERRADAS: 0,
+            FISCAL_ASIG: 0, FISCAL_NAC: 0, POR_FISCALIZAR: 0
+        };
         
-        columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
+        data.forEach(d => {
+            s.RECIBIDOS += (d["REGISTROS RECIBIDOS"] || 0);
+            s.ATENDIDAS += (d["ATENDIDAS"] || 0);
+            s.PENDIENTES += (d["POR ATENDER"] || 0);
+            s.ADMITIDAS += (d["DENUNCIAS ADMITIDAS"] || 0);
+            s.NO_ADMITIDAS += (d["DENUNCIAS NO ADMITIDAS"] || 0);
+            s.INSPECCIONADAS += (d["INSPECCIONADO"] || 0);
+            s.CERRADAS += (d["CERRADO"] || 0);
+            s.FISCAL_ASIG += (d["CON FISCAL ASIGNADO"] || 0);
+            s.FISCAL_NAC += (d["CON FISCAL NACIONAL"] || 0);
+            s.POR_FISCALIZAR += (d["POR FISCALIZAR"] || 0);
+        });
 
         document.getElementById('view-title').innerText = title;
-
+        
+        // GRIDS
         document.getElementById('grid-criticos').innerHTML = 
-            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "var(--primary)") +
-            createCard("Atendidas", s["ATENDIDAS"], "var(--success)") +
-            createCard("Por Atender", s["POR ATENDER"], "var(--danger)");
+            createCard("Registros Recibidos", s.RECIBIDOS, "var(--primary)") +
+            createCard("Atendidas", s.ATENDIDAS, "var(--success)") +
+            createCard("Por Atender", s.PENDIENTES, "var(--danger)");
 
         document.getElementById('grid-estatus').innerHTML = 
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "#8b5cf6") +
-            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "#64748b") +
-            createCard("Inspeccionado", s["INSPECCIONADO"], "#0ea5e9") +
-            createCard("Cerrado", s["CERRADO"], "#1e293b");
+            createCard("Admitidas", s.ADMITIDAS, "#8b5cf6") +
+            createCard("No Admitidas", s.NO_ADMITIDAS, "#64748b") +
+            createCard("Inspeccionadas", s.INSPECCIONADAS, "#0ea5e9") +
+            createCard("Cerradas", s.CERRADAS, "#1e293b");
 
-        document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "var(--warning)") +
-            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "var(--accent)") +
-            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "var(--primary)");
+        document.getElementById('grid-fiscal').innerHTML = 
+            createCard("Por Fiscalizar", s.POR_FISCALIZAR, "var(--warning)") +
+            createCard("Con Fiscal Asignado", s.FISCAL_ASIG, "var(--accent)") +
+            createCard("Con Fiscal Nacional", s.FISCAL_NAC, "var(--primary)");
     }
 
     function resetFilter(el) {
-        updateDashboard(rawData);
+        updateDashboard(window.rawData);
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
     }
