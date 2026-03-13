@@ -133,11 +133,11 @@
 </div>
 
 <script>
-    // Datos Ofuscados (Base64)
-    // URL de Google Sheets final con el endpoint JSON
-    const _u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGJ5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSAx";
-    // Contraseña "123456"
+    // URL y Contraseña Ofuscadas
+    // Contraseña: "123456"
     const _p = "MTIzNDU2";
+    // URL de la Hoja de Google (Codificada)
+    const _u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGJ5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24=";
 
     let rawData = [];
 
@@ -162,27 +162,44 @@
 
     async function init() {
         try {
-            // Desofuscamos la URL para el fetch
-            const res = await fetch(atob(_u));
-            const text = await res.text();
+            // Decodificamos y llamamos a la URL
+            const response = await fetch(atob(_u));
+            if (!response.ok) throw new Error("Error en respuesta de red");
+            
+            const text = await response.text();
+            // Limpieza del JSON que devuelve Google
             const json = JSON.parse(text.substring(47).slice(0, -2));
+            
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            
             rawData = json.table.rows.map(r => {
                 let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+                r.c.forEach((cell, i) => { 
+                    if(cols[i]) {
+                        // Extraer el valor real de la celda
+                        obj[cols[i]] = cell ? (cell.f || cell.v) : 0;
+                    }
+                });
                 return obj;
             });
+
+            if(rawData.length === 0) throw new Error("No hay datos en la hoja");
+
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) { 
-            console.error(e);
-            alert("Error al cargar datos. Verifique la conexión.");
+            console.error("Detalle del error:", e);
+            alert("Error al conectar con Google Sheets. Asegúrate de que el archivo esté compartido como 'Cualquier persona con el enlace'.");
+            document.getElementById('loader').style.display = 'none';
         }
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
+        // Limpiar lista por si acaso
+        list.innerHTML = '<div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>';
+        
         const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
         states.forEach(s => {
             const div = document.createElement('div');
@@ -199,7 +216,8 @@
     }
 
     function createCard(label, value, icon, color, isPercent = false) {
-        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
+        let valNum = parseFloat(value) || 0;
+        const valStr = isPercent ? valNum.toFixed(1) + '%' : Math.floor(valNum).toLocaleString();
         return `
             <div class="card">
                 <div class="card-head">
@@ -207,7 +225,7 @@
                     <i class="fas ${icon}" style="color:${color}"></i>
                 </div>
                 <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? (valNum > 100 ? 100 : valNum) : 100}%; background:${color}"></div></div>
             </div>`;
     }
 
@@ -220,8 +238,15 @@
             "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
             "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
         ];
+        
         columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
+        data.forEach(d => {
+            columns.forEach(c => {
+                let val = d[c];
+                if (typeof val === 'string') val = val.replace(/[^0-9.-]+/g,"");
+                s[c] += parseFloat(val) || 0;
+            });
+        });
 
         document.getElementById('view-title').innerText = title;
 
