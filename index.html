@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.M.O. - Sala de Mando Operativa</title>
+    <title>Sala de Mando - Programación y Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -46,7 +46,7 @@
 <div id="lock-screen">
     <div class="lock-box">
         <i class="fas fa-shield-alt fa-3x" style="color:var(--primary)"></i>
-        <h2 style="margin-top:15px">S.M.O. Acceso</h2>
+        <h2 style="margin-top:15px">Sala de Monitoreo - Intendencia de Protección</h2>
         <input type="password" id="passInput" placeholder="Contraseña">
         <button onclick="verifyKey()">INGRESAR</button>
         <p id="error-msg" style="color:red; display:none; margin-top:10px; font-size:0.8rem">Clave incorrecta</p>
@@ -55,7 +55,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top:15px; font-weight:bold">Sincronizando con Google Sheets...</p>
+    <p style="margin-top:15px; font-weight:bold">Sincronizando...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -84,12 +84,15 @@
 </div>
 
 <script>
-    // URL Exportada a CSV para evitar errores de carga
-    const _csvUrl = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/export?format=csv&gid=0";
-    const _kh = "MTIzNA=="; // '1234' en Base64
+    // DATOS ENCRIPTADOS (Base64)
+    // URL: export?format=csv
+    const _shD = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTA=";
+    // Key: 1234
+    const _khD = "MTIzNA==";
 
     function verifyKey() {
-        if (btoa(document.getElementById('passInput').value) === _kh) {
+        // btoa convierte el input a Base64 para comparar con la clave encriptada
+        if (btoa(document.getElementById('passInput').value) === _khD) {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             document.getElementById('loader').style.display = 'flex';
@@ -99,18 +102,30 @@
         }
     }
 
+    // Permitir ingreso con tecla Enter
+    document.getElementById('passInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') verifyKey();
+    });
+
     async function fetchData() {
         try {
-            const response = await fetch(_csvUrl);
+            // atob desencripta la URL en tiempo de ejecución
+            const response = await fetch(atob(_shD));
             const data = await response.text();
-            const rows = data.split('\n').map(row => row.split(','));
-            const headers = rows[0].map(h => h.trim().toUpperCase());
+            
+            // Procesamiento de CSV (Manual para evitar librerías externas)
+            const rows = data.split('\n').map(row => {
+                // Regex para manejar comas dentro de comillas en el CSV
+                return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            });
+
+            const headers = rows[0].map(h => h.replace(/"/g, '').trim().toUpperCase());
             
             window.rawData = rows.slice(1).map(row => {
                 let obj = {};
                 headers.forEach((header, i) => {
                     let val = row[i] ? row[i].replace(/"/g, '').trim() : "0";
-                    obj[header] = isNaN(val) ? val : Number(val);
+                    obj[header] = isNaN(val) || val === "" ? val : Number(val);
                 });
                 return obj;
             }).filter(d => d.ESTADO);
@@ -119,7 +134,8 @@
             updateDashboard(window.rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            console.error(e);
+            alert("Error de conexión: No se pudo obtener la información.");
         }
     }
 
@@ -155,21 +171,20 @@
         };
         
         data.forEach(d => {
-            s.RECIBIDOS += (d["REGISTROS RECIBIDOS"] || 0);
-            s.ATENDIDAS += (d["ATENDIDAS"] || 0);
-            s.PENDIENTES += (d["POR ATENDER"] || 0);
-            s.ADMITIDAS += (d["DENUNCIAS ADMITIDAS"] || 0);
-            s.NO_ADMITIDAS += (d["DENUNCIAS NO ADMITIDAS"] || 0);
-            s.INSPECCIONADAS += (d["INSPECCIONADO"] || 0);
-            s.CERRADAS += (d["CERRADO"] || 0);
-            s.FISCAL_ASIG += (d["CON FISCAL ASIGNADO"] || 0);
-            s.FISCAL_NAC += (d["CON FISCAL NACIONAL"] || 0);
-            s.POR_FISCALIZAR += (d["POR FISCALIZAR"] || 0);
+            s.RECIBIDOS += (Number(d["REGISTROS RECIBIDOS"]) || 0);
+            s.ATENDIDAS += (Number(d["ATENDIDAS"]) || 0);
+            s.PENDIENTES += (Number(d["POR ATENDER"]) || 0);
+            s.ADMITIDAS += (Number(d["DENUNCIAS ADMITIDAS"]) || 0);
+            s.NO_ADMITIDAS += (Number(d["DENUNCIAS NO ADMITIDAS"]) || 0);
+            s.INSPECCIONADAS += (Number(d["INSPECCIONADO"]) || 0);
+            s.CERRADAS += (Number(d["CERRADO"]) || 0);
+            s.FISCAL_ASIG += (Number(d["CON FISCAL ASIGNADO"]) || 0);
+            s.FISCAL_NAC += (Number(d["CON FISCAL NACIONAL"]) || 0);
+            s.POR_FISCALIZAR += (Number(d["POR FISCALIZAR"]) || 0);
         });
 
         document.getElementById('view-title').innerText = title;
         
-        // GRIDS
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s.RECIBIDOS, "var(--primary)") +
             createCard("Atendidas", s.ATENDIDAS, "var(--success)") +
