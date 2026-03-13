@@ -1,187 +1,250 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.M.O. - Sala de Mando Operativa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
-            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
-            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        
-        /* Login */
-        #lock-screen { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 5000; }
-        .lock-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .lock-box input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box; }
-        .lock-box button { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+&nbsp; &nbsp; &lt;meta charset="UTF-8"&gt;
+&nbsp; &nbsp; &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&nbsp; &nbsp; &lt;title&gt;Sala de Mando Operativa - Programación y Monitoreo&lt;/title&gt;
+&nbsp; &nbsp; &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"&gt;
+&nbsp; &nbsp; &lt;style&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; :root {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e;&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+&nbsp; &nbsp; &nbsp; &nbsp; }
 
-        /* Dashboard Layout */
-        .app-container { display: none; height: 100vh; }
-        .sidebar { width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; }
-        
-        .banner { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 10px 0; display: flex; align-items: center; gap: 10px; }
-        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
+&nbsp; &nbsp; &nbsp; &nbsp; body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; /* Layout */
+&nbsp; &nbsp; &nbsp; &nbsp; .app-container { display: flex; height: 100vh; position: relative; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: var(--white); padding: 15px; border-radius: 12px; border-top: 4px solid var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.8rem; font-weight: 800; margin-top: 5px; }
+&nbsp; &nbsp; &nbsp; &nbsp; /* Sidebar Responsive */
+&nbsp; &nbsp; &nbsp; &nbsp; .sidebar {&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
+&nbsp; &nbsp; &nbsp; &nbsp; }
 
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
-        .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
-    </style>
-</head>
-<body>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Viewport */
+&nbsp; &nbsp; &nbsp; &nbsp; .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
 
-<div id="lock-screen">
-    <div class="lock-box">
-        <i class="fas fa-shield-alt fa-3x" style="color:var(--primary)"></i>
-        <h2>Acceso S.M.O.</h2>
-        <input type="password" id="passInput" placeholder="Contraseña">
-        <button onclick="verify()">INGRESAR</button>
-        <p id="err" style="color:red; display:none; margin-top:10px;">Contraseña incorrecta</p>
-    </div>
-</div>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Header */
+&nbsp; &nbsp; &nbsp; &nbsp; .banner {&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: var(--primary); color: white; padding: 20px; border-radius: 12px;&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; margin-bottom: 25px; box-shadow: var(--shadow);
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; &nbsp; &nbsp; .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
 
-<div id="loader">
-    <i class="fas fa-circle-notch fa-spin fa-3x" style="color:var(--primary)"></i>
-    <p>Conectando con base de datos...</p>
-</div>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Mobile Nav */
+&nbsp; &nbsp; &nbsp; &nbsp; .menu-btn {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; display: none; position: fixed; bottom: 20px; right: 20px;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: var(--primary); color: white; width: 60px; height: 60px;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; z-index: 2000; cursor: pointer; font-size: 1.5rem;
+&nbsp; &nbsp; &nbsp; &nbsp; }
 
-<div class="app-container" id="app">
-    <aside class="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #f1f5f9;">UBICACIONES</div>
-        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="filterData('TOTAL')">NACIONAL (TOTAL)</div>
-        </div>
-    </aside>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Grids Adaptativos */
+&nbsp; &nbsp; &nbsp; &nbsp; .grid {&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; gap: 15px; margin-bottom: 30px;&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; }
 
-    <main class="main-view">
-        <div class="banner">
-            <h1 id="v-title" style="margin:0; font-size:1.5rem;">VENEZUELA</h1>
-            <p style="margin:5px 0 0 0; opacity:0.8; font-size:0.8rem">Sala de Seguimiento y Control Operativo</p>
-        </div>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Estilo de Card */
+&nbsp; &nbsp; &nbsp; &nbsp; .card {&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; &nbsp; &nbsp; .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+&nbsp; &nbsp; &nbsp; &nbsp; .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+&nbsp; &nbsp; &nbsp; &nbsp; .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+&nbsp; &nbsp; &nbsp; &nbsp; .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+&nbsp; &nbsp; &nbsp; &nbsp; .progress-fill { height: 100%; transition: width 0.8s ease; }
 
-        <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="g-criticos"></div>
+&nbsp; &nbsp; &nbsp; &nbsp; .section-title {&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase;&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; &nbsp; &nbsp; .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        <div class="section-title">Estatus del Flujo</div>
-        <div class="grid" id="g-estatus"></div>
+&nbsp; &nbsp; &nbsp; &nbsp; /* Media Queries */
+&nbsp; &nbsp; &nbsp; &nbsp; @media (max-width: 768px) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .sidebar.open { transform: translateX(0); }
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .menu-btn { display: block; }
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .grid { grid-template-columns: 1fr; }
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .main-view { padding: 15px; }
+&nbsp; &nbsp; &nbsp; &nbsp; }
 
-        <div class="section-title">Fiscalización</div>
-        <div class="grid" id="g-fiscal"></div>
-    </main>
-</div>
+&nbsp; &nbsp; &nbsp; &nbsp; .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+&nbsp; &nbsp; &nbsp; &nbsp; .state-item.active { background: var(--primary); color: white; }
+&nbsp; &nbsp; &nbsp; &nbsp; #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+&nbsp; &nbsp; &nbsp; &nbsp; .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+&nbsp; &nbsp; &nbsp; &nbsp; .overlay.active { display: block; }
+&nbsp; &nbsp; &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
 
-<script>
-    // Configuración Encriptada (Contraseña 123456)
-    const _c = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMazAvZXhwb3J0P2Zvcm1hdD1jc3Y=";
-    const _p = "MTIzNDU2";
+&lt;div id="loader"&gt;&lt;i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"&gt;
+&lt;button class="menu-btn" onclick="toggleMenu()"&gt;&lt;i class="fas fa-map-marker-alt"&gt;&lt;/button&gt;
+&lt;div class="overlay" id="overlay" onclick="toggleMenu()"&gt;
 
-    let db = [];
+&lt;div class="app-container"&gt;
+&nbsp; &nbsp; &lt;aside class="sidebar" id="sidebar"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;"&gt;UBICACIONES
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="state-item active" onclick="resetFilter(this)"&gt;NACIONAL (TOTAL)
+&nbsp; &nbsp; &nbsp; &nbsp; 
+&nbsp; &nbsp; &lt;/aside&gt;
 
-    function verify() {
-        if (btoa(document.getElementById('passInput').value) === _p) {
-            document.getElementById('lock-screen').style.display = 'none';
-            document.getElementById('loader').style.display = 'flex';
-            load();
-        } else { document.getElementById('err').style.display = 'block'; }
-    }
+&nbsp; &nbsp; &lt;main class="main-view"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="banner"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;h1 id="view-title"&gt;VENEZUELA
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;"&gt;Sala de Programación y Monitoreo
+&nbsp; &nbsp; &nbsp; &nbsp; 
 
-    async function load() {
-        try {
-            const r = await fetch(atob(_c));
-            const t = await r.text();
-            const rows = t.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-            const heads = rows[0].map(h => h.replace(/"/g, '').trim().toUpperCase());
-            
-            db = rows.slice(1).map(row => {
-                let o = {};
-                heads.forEach((h, i) => {
-                    let v = row[i] ? row[i].replace(/"/g, '').trim() : "0";
-                    o[h] = isNaN(v) || v === "" ? v : Number(v);
-                });
-                return o;
-            }).filter(d => d.ESTADO);
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="section-title"&gt;Indicadores Críticos
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="grid" id="grid-criticos"&gt;
 
-            renderMenu();
-            update('TOTAL');
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-        } catch (e) {
-            alert("Error crítico de conexión. Verifique que el Excel sea público.");
-        }
-    }
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="section-title"&gt;Estatus del Flujo de Denuncia
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="grid" id="grid-estatus"&gt;
 
-    function renderMenu() {
-        const container = document.getElementById('sidebar-list');
-        const states = [...new Set(db.map(d => d.ESTADO))].filter(Boolean).sort();
-        states.forEach(s => {
-            const d = document.createElement('div');
-            d.className = 'state-item';
-            d.innerText = s;
-            d.onclick = () => {
-                filterData(s);
-                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                d.classList.add('active');
-            };
-            container.appendChild(d);
-        });
-    }
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="section-title"&gt;Asignación y Dependencias
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="grid" id="grid-fiscales"&gt;
 
-    function createC(l, v, c) {
-        return `<div class="card" style="border-color:${c}">
-            <div class="card-label">${l}</div>
-            <div class="card-val" style="color:${c}">${Number(v).toLocaleString()}</div>
-        </div>`;
-    }
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="section-title"&gt;Rendimiento y Eficiencia
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="grid" id="grid-metricas"&gt;
 
-    function filterData(s) {
-        update(s);
-    }
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;div style="height: 60px;"&gt;
+&nbsp; &nbsp; &lt;/main&gt;
 
-    function update(filter) {
-        const data = filter === 'TOTAL' ? db : db.filter(d => d.ESTADO === filter);
-        document.getElementById('v-title').innerText = filter === 'TOTAL' ? "VENEZUELA" : filter;
 
-        let s = { rec:0, ate:0, pen:0, adm:0, nadm:0, insp:0, cer:0, pfis:0, f_asig:0, f_nac:0 };
+&lt;script&gt;
+&nbsp; &nbsp; // URL y contraseña codificadas en Base64
+&nbsp; &nbsp; const encodedUrl = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTDk4TGNkYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXE9b3V0Ompzb24mc2hlZXQ9SG9qYSAx";
+&nbsp; &nbsp; const encodedPassword = "MTIzNDU2";
 
-        data.forEach(d => {
-            s.rec += (d["REGISTROS RECIBIDOS"] || 0);
-            s.ate += (d["ATENDIDAS"] || 0);
-            s.pen += (d["POR ATENDER"] || 0);
-            s.adm += (d["DENUNCIAS ADMITIDAS"] || 0);
-            s.nadm += (d["DENUNCIAS NO ADMITIDAS"] || 0);
-            s.insp += (d["INSPECCIONADO"] || 0);
-            s.cer += (d["CERRADO"] || 0);
-            s.pfis += (d["POR FISCALIZAR"] || 0);
-            s.f_asig += (d["CON FISCAL ASIGNADO"] || 0);
-            s.f_nac += (d["CON FISCAL NACIONAL"] || 0);
-        });
+&nbsp; &nbsp; // Función para decodificar Base64
+&nbsp; &nbsp; function decodeBase64(str) {
+&nbsp; &nbsp; &nbsp; &nbsp; return decodeURIComponent(escape(window.atob(str)));
+&nbsp; &nbsp; }
 
-        document.getElementById('g-criticos').innerHTML = 
-            createC("REGISTROS RECIBIDOS", s.rec, "#1e3a8a") +
-            createC("ATENDIDAS", s.ate, "#22c55e") +
-            createC("POR ATENDER", s.pen, "#ef4444");
+&nbsp; &nbsp; const url = decodeBase64(encodedUrl);
+&nbsp; &nbsp; const password = decodeBase64(encodedPassword);
 
-        document.getElementById('g-estatus').innerHTML = 
-            createC("ADMITIDAS", s.adm, "#8b5cf6") +
-            createC("NO ADMITIDAS", s.nadm, "#64748b") +
-            createC("INSPECCIONADAS", s.insp, "#0ea5e9") +
-            createC("CERRADAS", s.cer, "#1e293b");
+&nbsp; &nbsp; let rawData = [];
 
-        document.getElementById('g-fiscal').innerHTML = 
-            createC("POR FISCALIZAR", s.pfis, "#f59e0b") +
-            createC("CON FISCAL ASIGNADO", s.f_asig, "#059669") +
-            createC("CON FISCAL NACIONAL", s.f_nac, "#4338ca");
-    }
-</script>
-</body>
-</html>
+&nbsp; &nbsp; function toggleMenu() {
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('sidebar').classList.toggle('open');
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('overlay').classList.toggle('active');
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; async function init() {
+&nbsp; &nbsp; &nbsp; &nbsp; try {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Se usa la URL decodificada para la petición
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const res = await fetch(url);
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const text = await res.text();
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const json = JSON.parse(text.substring(47).slice(0, -2));
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const cols = json.table.cols.map(c =&gt; c.label ? c.label.toUpperCase().trim() : "");
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; rawData = json.table.rows.map(r =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; let obj = {};
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; r.c.forEach((cell, i) =&gt; { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return obj;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; });
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; renderSidebar();
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; updateDashboard(rawData);
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('loader').style.display = 'none';
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; // Aquí podrías usar la contraseña decodificada para autenticación o lo que necesites
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; console.log("Contraseña decodificada:", password);
+&nbsp; &nbsp; &nbsp; &nbsp; } catch (e) { console.error(e); }
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; function renderSidebar() {
+&nbsp; &nbsp; &nbsp; &nbsp; const list = document.getElementById('sidebar-list');
+&nbsp; &nbsp; &nbsp; &nbsp; const states = [...new Set(rawData.map(d =&gt; d['ESTADO']))].filter(Boolean).sort();
+&nbsp; &nbsp; &nbsp; &nbsp; states.forEach(s =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; const div = document.createElement('div');
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; div.className = 'state-item';
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; div.innerText = s;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; div.onclick = () =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; updateDashboard(rawData.filter(d =&gt; d['ESTADO'] === s), s);
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.querySelectorAll('.state-item').forEach(i =&gt; i.classList.remove('active'));
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; div.classList.add('active');
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if(window.innerWidth &lt;= 768) toggleMenu();
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; };
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; list.appendChild(div);
+&nbsp; &nbsp; &nbsp; &nbsp; });
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; function createCard(label, value, icon, color, isPercent = false) {
+&nbsp; &nbsp; &nbsp; &nbsp; const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
+&nbsp; &nbsp; &nbsp; &nbsp; return `
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="card"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="card-head"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;span class="card-label"&gt;${label}
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;i class="fas ${icon}" style="color:${color}"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="card-val" style="color:${color}"&gt;${valStr}
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;div class="progress-bar"&gt;&lt;div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `;
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; function updateDashboard(data, title = "VENEZUELA") {
+&nbsp; &nbsp; &nbsp; &nbsp; let s = {};
+&nbsp; &nbsp; &nbsp; &nbsp; const columns = [
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO",&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA",&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO",&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN",&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
+&nbsp; &nbsp; &nbsp; &nbsp; ];
+&nbsp; &nbsp; &nbsp; &nbsp; columns.forEach(c =&gt; s[c] = 0);
+&nbsp; &nbsp; &nbsp; &nbsp; data.forEach(d =&gt; columns.forEach(c =&gt; s[c] += Number(d[c]) || 0));
+
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('view-title').innerText = title;
+
+&nbsp; &nbsp; &nbsp; &nbsp; // CRITICOS
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('grid-criticos').innerHTML =&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
+
+&nbsp; &nbsp; &nbsp; &nbsp; // ESTATUS
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('grid-estatus').innerHTML =&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+
+&nbsp; &nbsp; &nbsp; &nbsp; // FISCALES
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('grid-fiscales').innerHTML =&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
+
+&nbsp; &nbsp; &nbsp; &nbsp; // METRICAS
+&nbsp; &nbsp; &nbsp; &nbsp; const pAte = s["REGISTROS RECIBIDOS"] &gt; 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
+&nbsp; &nbsp; &nbsp; &nbsp; const pPen = s["REGISTROS RECIBIDOS"] &gt; 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
+&nbsp; &nbsp; &nbsp; &nbsp; document.getElementById('grid-metricas').innerHTML =&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; function resetFilter(el) {
+&nbsp; &nbsp; &nbsp; &nbsp; updateDashboard(rawData);
+&nbsp; &nbsp; &nbsp; &nbsp; document.querySelectorAll('.state-item').forEach(i =&gt; i.classList.remove('active'));
+&nbsp; &nbsp; &nbsp; &nbsp; el.classList.add('active');
+&nbsp; &nbsp; &nbsp; &nbsp; if(window.innerWidth &lt;= 768) toggleMenu();
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; init();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
