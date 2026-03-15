@@ -108,7 +108,7 @@
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
             <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
-                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | Sala de Programación y Monitoreo
+                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="date-info">Consolidado Histórico</span>
             </div>
         </div>
 
@@ -131,6 +131,7 @@
 <script>
     const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201";
     let rawData = [];
+    let dateColumnName = "";
 
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -146,6 +147,9 @@
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
+            // Identificamos el nombre de la columna 2 (índice 1) para filtrar por fecha
+            dateColumnName = cols[1];
+
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
@@ -169,11 +173,15 @@
             div.className = 'state-item';
             div.innerText = s;
             div.onclick = () => {
-                // CAMBIO AQUÍ: Filtramos por estado y tomamos SOLO la última fila registrada
-                const stateData = rawData.filter(d => d['ESTADO'] === s);
-                const lastRow = stateData.slice(-1); 
+                const stateRows = rawData.filter(d => d['ESTADO'] === s);
                 
-                updateDashboard(lastRow, s);
+                // LÓGICA DE FECHA: Buscamos la fecha más reciente en la columna 2 para ese estado
+                if (stateRows.length > 0) {
+                    const lastDate = stateRows[stateRows.length - 1][dateColumnName];
+                    const lastDayData = stateRows.filter(d => d[dateColumnName] === lastDate);
+                    
+                    updateDashboard(lastDayData, s, lastDate);
+                }
                 
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
@@ -199,7 +207,7 @@
             </div>`;
     }
 
-    function updateDashboard(data, title = "VENEZUELA") {
+    function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
         let s = {};
         const columnsToSum = [
             "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", 
@@ -213,6 +221,7 @@
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
+        document.getElementById('date-info').innerText = dateLabel ? `Corte del día: ${dateLabel}` : "Consolidado Histórico";
 
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
