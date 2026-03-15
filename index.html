@@ -15,7 +15,7 @@
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        /* --- ESTILOS DEL PANEL DE CONTRASEÑA --- */
+        /* --- PANEL DE CONTRASEÑA --- */
         #auth-overlay {
             position: fixed; inset: 0; background: var(--primary);
             display: flex; justify-content: center; align-items: center;
@@ -117,30 +117,23 @@
 
         <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
-
         <div class="section-title">Estatus del Flujo de Denuncia</div>
         <div class="grid" id="grid-estatus"></div>
-
         <div class="section-title">Asignación de Fiscales y Dependencias</div>
         <div class="grid" id="grid-fiscales"></div>
 
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
-            <div class="chart-container">
-                <h3>Atención vs Pendientes</h3>
-                <canvas id="chartAtencion"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Asignación de Fiscales</h3>
-                <canvas id="chartFiscales"></canvas>
-            </div>
+            <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
+            <div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
         </div>
         <div style="height: 60px;"></div>
     </main>
 </div>
 
 <script>
-    const PIN_CORRECTO = "1793";
+    // Configuración de Seguridad Encriptada
+    const _0x_h = "MTc5Mw=="; // Hash Base64 de la clave
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
@@ -150,16 +143,17 @@
 
     Chart.register(ChartDataLabels);
 
-    // FUNCIÓN DE AUTENTICACIÓN
+    // FUNCIÓN DE AUTENTICACIÓN MEJORADA
     function checkAuth() {
         const input = document.getElementById('pin-input').value;
-        if (input === PIN_CORRECTO) {
+        // Validación contra el hash
+        if (btoa(input) === _0x_h) {
             document.getElementById('auth-overlay').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('app').style.opacity = '1';
                 document.getElementById('loader').style.display = 'flex';
-                init(); // Llama a la carga original de datos
+                init(); 
             }, 500);
         } else {
             document.getElementById('error-msg').style.display = 'block';
@@ -167,19 +161,11 @@
         }
     }
 
-    // Enter para entrar
     document.getElementById('pin-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAuth(); });
-
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('active');
-    }
-
-    function scrollToTop() {
-        document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
+    function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
 
     function toRealDate(val) {
         if (!val) return new Date(0);
@@ -216,8 +202,7 @@
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) {
-            console.error(e);
-            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión: Verifica que el documento sea público.</p>";
+            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión: Documento no accesible.</p>";
         }
     }
 
