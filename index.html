@@ -18,6 +18,7 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
         
+        /* SIDEBAR */
         .sidebar { 
             width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
@@ -26,14 +27,8 @@
         .sidebar.collapsed { margin-left: -280px; }
         
         .sidebar-header { 
-            padding: 20px; 
-            background: var(--primary); 
-            color: white; 
-            font-weight: 800; 
-            font-size: 1.2rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px;
+            padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; 
+            display: flex; align-items: center; gap: 15px;
         }
         .sidebar-header i { cursor: pointer; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
@@ -91,7 +86,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">SINCRONIZANDO DATOS...</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">SINCRONIZANDO DATOS REALES...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -101,7 +96,7 @@
             <span>ESTADOS</span>
         </div>
         <div class="sidebar-content" id="sidebar-list">
-            <div class="state-item active" onclick="resetFilter(this)">
+            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
                 <i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)
             </div>
         </div>
@@ -112,7 +107,7 @@
     <main class="main-view" id="main-scroll-container">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">ACTUALIZANDO...</div>
+            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CARGANDO...</div>
         </div>
 
         <div class="section-title">Indicadores Críticos</div>
@@ -132,7 +127,6 @@
 
         <div class="section-title">Eficiencia por Estados (Top 10)</div>
         <div id="ranking-container" class="ranking-card"></div>
-        <div style="height: 60px;"></div>
     </main>
 </div>
 
@@ -141,7 +135,6 @@
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
-    let allData = [];
     let rawData = [];
     let chartA, chartF;
 
@@ -158,6 +151,14 @@
         }
     }
 
+    // FUNCIÓN CRÍTICA: Convierte cualquier entrada (texto con puntos/comas) a un Número real
+    function cleanNum(val) {
+        if (!val) return 0;
+        let s = String(val).replace(/\./g, '').replace(/,/g, '.').replace(/[^\d.-]/g, '');
+        let n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+    }
+
     function parseShortDate(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return new Date(0);
         const parts = dateStr.split('/');
@@ -171,7 +172,7 @@
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
-            allData = json.table.rows.map(r => {
+            const allFetched = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
                     let val = cell ? (cell.f ? cell.f : cell.v) : 0;
@@ -180,37 +181,45 @@
                 return obj;
             }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
-            if (allData.length > 0) {
-                const dataWithTimestamps = allData.map(d => ({...d, ts: parseShortDate(d['FECHA']).getTime()}));
-                const maxTs = Math.max(...dataWithTimestamps.map(d => d.ts));
-                rawData = dataWithTimestamps.filter(d => d.ts === maxTs);
-                document.getElementById('date-info').innerText = `REPORTE AL: ${rawData[0]['FECHA']}`;
-            }
+            // Filtrar estrictamente por la fecha más reciente (08/03/2026)
+            const dataWithTs = allFetched.map(d => ({...d, ts: parseShortDate(d['FECHA']).getTime()}));
+            const maxTs = Math.max(...dataWithTs.map(d => d.ts));
+            rawData = dataWithTs.filter(d => d.ts === maxTs);
 
+            document.getElementById('date-info').innerText = `REPORTE AL: ${rawData[0]['FECHA']}`;
+            
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) { console.error(e); }
     }
 
-    function createCard(label, value, icon, color) {
-        return `<div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <span class="card-label">${label}</span>
-                <i class="fas ${icon}" style="color:${color}"></i>
-            </div>
-            <div class="card-val" style="color:${color}">${Number(value).toLocaleString('es-ES')}</div>
-        </div>`;
+    function updateDashboard(data, title = "VENEZUELA") {
+        let s = {};
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+        
+        // SUMA REAL CON LIMPIEZA DE NÚMEROS
+        cols.forEach(c => {
+            s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0);
+        });
+
+        document.getElementById('view-title').innerText = title;
+        initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        renderRanking(data);
+
+        const createCard = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div><div class="card-val" style="color:${c}">${Math.round(v).toLocaleString('es-ES')}</div></div>`;
+
+        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Centralizada", s["CENTRALIZADA"], "fa-network-wired", "#6366f1") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899") + createCard("Desestimada", s["DESESTIMADA"], "fa-thumbs-down", "#64748b");
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") + createCard("Otras Depend.", s["OTRA DEPENDENCI"], "fa-share-alt", "#94a3b8");
     }
 
     function initCharts(ate, pen, pas, cas) {
         const cfg = (lb, da, co) => ({
             type: 'doughnut',
             data: { labels: lb, datasets: [{ data: da, backgroundColor: co, borderWidth: 2 }] },
-            options: { 
-                responsive: true, maintainAspectRatio: false, cutout: '75%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } }, datalabels: { display: false } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } }, datalabels: { display: false } } }
         });
         if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), cfg(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
@@ -223,33 +232,14 @@
         const states = [...new Set(data.map(d => d['ESTADO']))];
         const ranking = states.map(s => {
             const rows = data.filter(r => r['ESTADO'] === s);
-            const rec = rows.reduce((acc, curr) => acc + (Number(curr['REGISTROS RECIBIDOS']) || 0), 0);
-            const ate = rows.reduce((acc, curr) => acc + (Number(curr['ATENDIDAS']) || 0), 0);
+            const rec = rows.reduce((acc, curr) => acc + cleanNum(curr['REGISTROS RECIBIDOS']), 0);
+            const ate = rows.reduce((acc, curr) => acc + cleanNum(curr['ATENDIDAS']), 0);
             return { s, p: rec > 0 ? (ate/rec*100) : 0 };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
 
         ranking.forEach(item => {
-            container.innerHTML += `<div class="ranking-item">
-                <div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div>
-                <div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div>
-            </div>`;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
         });
-    }
-
-    function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
-        cols.forEach(c => s[c] = data.reduce((acc, curr) => acc + (Number(curr[c]) || 0), 0));
-
-        document.getElementById('view-title').innerText = title;
-        initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderRanking(data);
-        document.getElementById('main-scroll-container').scrollTop = 0;
-
-        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Centralizada", s["CENTRALIZADA"], "fa-network-wired", "#6366f1") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899") + createCard("Desestimada", s["DESESTIMADA"], "fa-thumbs-down", "#64748b");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") + createCard("Otras Depend.", s["OTRA DEPENDENCI"], "fa-share-alt", "#94a3b8");
     }
 
     function renderSidebar() {
