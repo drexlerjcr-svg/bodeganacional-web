@@ -74,11 +74,11 @@
             </div>
         </div>
         <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="grid-criticos"></div>
+        <div id="grid-criticos" class="grid"></div>
         <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div class="grid" id="grid-estatus"></div>
+        <div id="grid-estatus" class="grid"></div>
         <div class="section-title">Asignación de Fiscales y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
+        <div id="grid-fiscales" class="grid"></div>
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
             <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
@@ -89,9 +89,15 @@
 </div>
 
 <script>
-    // URL Ofuscada (Base64)
-    const _db = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZLUT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    // ID Ofuscado para mayor seguridad (solo el ID de la hoja)
+    const _key = "MTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZLUQ==";
     
+    // Construcción de la URL de forma dinámica
+    const getSheetUrl = () => {
+        const id = atob(_key);
+        return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=Hoja%201`;
+    };
+
     let rawData = [];
     let dateColumnName = "";
     let chartA, chartF;
@@ -125,12 +131,10 @@
 
     async function init() {
         try {
-            // Decodificación directa y limpia
-            const uri = atob(_db.replace(/\s/g, ''));
-            const res = await fetch(uri);
-            if (!res.ok) throw new Error();
+            const response = await fetch(getSheetUrl());
+            const text = await response.text();
             
-            const text = await res.text();
+            // Extraer el JSON puro del formato de Google
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             dateColumnName = cols[1];
@@ -147,9 +151,15 @@
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error(e);
-            document.getElementById('loader').innerHTML = "<div style='text-align:center; color:red; font-weight:bold;'><i class='fas fa-exclamation-triangle fa-2x'></i><br><br>Error de enlace con la base de datos.<br>Verifique su conexión.</div>";
+        } catch (e) {
+            console.error("Error en carga:", e);
+            document.getElementById('loader').innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle fa-3x" style="color:var(--danger)"></i>
+                    <h2 style="margin-top:20px">Error de Conexión</h2>
+                    <p>No se pudo sincronizar con la base de datos.</p>
+                    <button onclick="location.reload()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer">Reintentar</button>
+                </div>`;
         }
     }
 
@@ -213,12 +223,15 @@
 
     function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
         let s = {};
-        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
-        columnsToSum.forEach(c => s[c] = 0);
-        data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+        cols.forEach(c => s[c] = 0);
+        data.forEach(d => cols.forEach(c => s[c] += Number(d[c]) || 0));
+        
         document.getElementById('view-title').innerText = title;
         document.getElementById('date-info').innerText = dateLabel ? `Reporte del: ${dateLabel}` : "Consolidado Histórico";
+        
         initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        
         document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
