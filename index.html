@@ -65,14 +65,17 @@
         .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
         
-        /* --- ESTILOS DEL MAPA --- */
-        .map-wrapper { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 30px; position: relative; text-align: center; }
-        #venezuela-map { width: 100%; max-width: 600px; height: auto; margin: 0 auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
-        .state-path { fill: #e2e8f0; stroke: #fff; stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
-        .state-path:hover { fill: var(--accent); stroke-width: 2; }
-        .map-tooltip { position: absolute; background: rgba(30, 58, 138, 0.95); color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; pointer-events: none; display: none; z-index: 2000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); }
+        /* --- ESTILOS DEL MAPA ACTUALIZADOS --- */
+        .map-wrapper { background: var(--white); border-radius: 12px; padding: 40px 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 30px; position: relative; overflow: visible; }
+        #venezuela-map { width: 100%; max-width: 850px; height: auto; margin: 0 auto; display: block; overflow: visible; }
+        .state-point { fill: var(--primary); stroke: #fff; stroke-width: 2; cursor: pointer; transition: all 0.3s; }
+        .state-point:hover { fill: var(--warning); r: 10; }
+        .connector-line { stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; }
+        .state-label-text { font-size: 11px; font-weight: 800; fill: var(--muted); cursor: pointer; transition: fill 0.3s; text-transform: uppercase; }
+        .state-label-text:hover { fill: var(--accent); }
+        .map-tooltip { position: absolute; background: rgba(30, 58, 138, 0.95); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; pointer-events: none; display: none; z-index: 2000; box-shadow: 0 8px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); text-align: center; }
 
-        @media (max-width: 768px) { .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; } .sidebar.open { transform: translateX(0); } .menu-btn { display: block; } .grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .chart-container { height: 240px; } }
+        @media (max-width: 768px) { .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; } .sidebar.open { transform: translateX(0); } .menu-btn { display: block; } .grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .chart-container { height: 240px; } .map-wrapper { padding: 10px; } }
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; }
@@ -96,7 +99,7 @@
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos con URL Corregida...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Sincronizando Datos Geográficos...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -126,11 +129,13 @@
         <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
 
-        <div class="section-title">Mapa de Gestión Estadal (% Atención)</div>
+        <div class="section-title">Distribución Geográfica (% Atención)</div>
         <div class="map-wrapper" id="map-area">
             <div id="tooltip" class="map-tooltip"></div>
-            <svg id="venezuela-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                <g id="states-layer"></g>
+            <svg id="venezuela-map" viewBox="0 0 900 650" xmlns="http://www.w3.org/2000/svg">
+                <g id="map-connectors"></g>
+                <g id="map-points"></g>
+                <g id="map-labels"></g>
             </svg>
         </div>
 
@@ -157,14 +162,32 @@
     let dateColumnName = "";
     let chartA, chartF;
 
-    // Coordenadas simplificadas para Tooltips de estados (puntos clave)
-    const stateCoords = {
-        "ZULIA": {x:150, y:120}, "MIRANDA": {x:460, y:100}, "CARACAS": {x:440, y:85}, "BOLIVAR": {x:600, y:350},
-        "CARABOBO": {x:400, y:110}, "ARAGUA": {x:425, y:110}, "LARA": {x:300, y:120}, "ANZOATEGUI": {x:550, y:180},
-        "FALCON": {x:280, y:60}, "TACHIRA": {x:150, y:280}, "MERIDA": {x:200, y:230}, "BARINAS": {x:280, y:240},
-        "GUARICO": {x:430, y:220}, "PORTUGUESA": {x:320, y:180}, "MONAGAS": {x:640, y:160}, "SUCRE": {x:600, y:80},
-        "NUEVA ESPARTA": {x:580, y:50}, "APURE": {x:350, y:330}, "YARACUY": {x:360, y:100}, "TRUJILLO": {x:240, y:180},
-        "COJEDES": {x:380, y:180}, "DELTA AMACURO": {x:700, y:200}, "AMAZONAS": {x:450, y:450}, "VARGAS": {x:450, y:75}
+    // Posiciones Geográficas (Puntos) y Posiciones de Etiquetas (Alejadas con líneas)
+    const geoData = {
+        "ZULIA": {px:180, py:120, lx:80, ly:80},
+        "FALCON": {px:300, py:70, lx:250, ly:20},
+        "LARA": {px:320, py:130, lx:240, ly:160},
+        "YARACUY": {px:380, py:110, lx:380, ly:40},
+        "CARABOBO": {px:410, py:120, lx:410, ly:160},
+        "ARAGUA": {px:440, py:120, lx:460, ly:40},
+        "CARACAS": {px:465, py:100, lx:480, ly:70},
+        "MIRANDA": {px:490, py:115, lx:550, ly:60},
+        "VARGAS": {px:470, py:85, lx:500, ly:20},
+        "ANZOATEGUI": {px:580, py:180, lx:680, ly:120},
+        "SUCRE": {px:650, py:90, lx:750, ly:40},
+        "MONAGAS": {px:670, py:170, lx:780, ly:180},
+        "DELTA AMACURO": {px:750, py:210, lx:850, ly:250},
+        "BOLIVAR": {px:620, py:350, lx:780, ly:450},
+        "AMAZONAS": {px:480, py:480, lx:350, ly:580},
+        "APURE": {px:380, py:330, lx:280, ly:400},
+        "TACHIRA": {px:180, py:280, lx:80, ly:320},
+        "MERIDA": {px:220, py:230, lx:120, ly:200},
+        "TRUJILLO": {px:260, py:180, lx:180, ly:220},
+        "BARINAS": {px:300, py:240, lx:200, ly:280},
+        "PORTUGUESA": {px:340, py:190, lx:300, ly:160},
+        "COJEDES": {px:400, py:190, lx:430, ly:240},
+        "GUARICO": {px:460, py:230, lx:550, ly:300},
+        "NUEVA ESPARTA": {px:630, py:50, lx:750, ly:90}
     };
 
     Chart.register(ChartDataLabels);
@@ -184,12 +207,6 @@
             document.getElementById('pin-input').value = '';
         }
     }
-
-    document.getElementById('pin-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAuth(); });
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
-    function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
 
     async function init() {
         try {
@@ -212,82 +229,75 @@
             renderMap();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) {
-            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión.</p>";
-        }
+        } catch (e) { document.getElementById('loader').innerHTML = "<p style='color:red'>Error.</p>"; }
     }
 
     function renderMap() {
-        const layer = document.getElementById('states-layer');
+        const pointsLayer = document.getElementById('map-points');
+        const linesLayer = document.getElementById('map-connectors');
+        const labelsLayer = document.getElementById('map-labels');
         const tooltip = document.getElementById('tooltip');
         
-        // Generamos círculos interactivos por cada estado para representar el mapa (Simplificado para compatibilidad)
-        Object.keys(stateCoords).forEach(stateName => {
-            const coord = stateCoords[stateName];
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", coord.x);
-            circle.setAttribute("cy", coord.y);
-            circle.setAttribute("r", "12");
-            circle.setAttribute("class", "state-path");
-            circle.setAttribute("id", `map-${stateName.replace(/\s+/g, '')}`);
+        Object.keys(geoData).forEach(state => {
+            const d = geoData[state];
             
-            circle.onmousemove = (e) => {
-                const data = rawData.filter(d => d['ESTADO'] === stateName);
+            // Línea de conexión
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", d.px); line.setAttribute("y1", d.py);
+            line.setAttribute("x2", d.lx); line.setAttribute("y2", d.ly);
+            line.setAttribute("class", "connector-line");
+            linesLayer.appendChild(line);
+
+            // Punto Geográfico
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", d.px); circle.setAttribute("cy", d.py); circle.setAttribute("r", "7");
+            circle.setAttribute("class", "state-point");
+            
+            // Etiqueta de texto alejada
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", d.lx); text.setAttribute("y", d.ly);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("class", "state-label-text");
+            text.textContent = state;
+
+            const showInfo = (e) => {
+                const stateRows = rawData.filter(row => row['ESTADO'] === state);
                 let rec = 0, ate = 0;
-                data.forEach(d => { rec += Number(d["REGISTROS RECIBIDOS"]) || 0; ate += Number(d["ATENDIDAS"]) || 0; });
+                stateRows.forEach(r => { rec += Number(r["REGISTROS RECIBIDOS"]) || 0; ate += Number(r["ATENDIDAS"]) || 0; });
                 const porc = rec > 0 ? ((ate / rec) * 100).toFixed(1) : "0.0";
                 
                 tooltip.style.display = "block";
                 tooltip.style.left = (e.pageX - document.getElementById('map-area').offsetLeft + 15) + "px";
-                tooltip.style.top = (e.pageY - document.getElementById('map-area').offsetTop - 30) + "px";
-                tooltip.innerHTML = `<strong>${stateName}</strong><br>Atención: ${porc}%`;
-                circle.setAttribute("r", "16");
-                circle.style.fill = "var(--success)";
+                tooltip.style.top = (e.pageY - document.getElementById('map-area').offsetTop - 40) + "px";
+                tooltip.innerHTML = `<strong>${state}</strong><br><span style="color:var(--success)">${porc}% Efectividad</span>`;
+                circle.style.fill = "var(--warning)";
             };
 
-            circle.onmouseleave = () => {
-                tooltip.style.display = "none";
-                circle.setAttribute("r", "12");
-                circle.style.fill = "#e2e8f0";
-            };
+            const hideInfo = () => { tooltip.style.display = "none"; circle.style.fill = "var(--primary)"; };
 
-            circle.onclick = () => {
-                const el = Array.from(document.querySelectorAll('.state-item')).find(i => i.innerText === stateName);
-                if(el) el.click();
-            };
+            [circle, text].forEach(el => {
+                el.onmousemove = showInfo;
+                el.onmouseleave = hideInfo;
+                el.onclick = () => {
+                    const sideEl = Array.from(document.querySelectorAll('.state-item')).find(i => i.innerText === state);
+                    if(sideEl) sideEl.click();
+                };
+            });
 
-            layer.appendChild(circle);
-            
-            // Texto pequeño debajo del punto
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", coord.x);
-            text.setAttribute("y", coord.y + 25);
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("style", "font-size: 10px; font-weight: bold; fill: var(--muted); pointer-events: none;");
-            text.textContent = stateName.substring(0, 5);
-            layer.appendChild(text);
+            pointsLayer.appendChild(circle);
+            labelsLayer.appendChild(text);
         });
     }
 
-    // Funciones de utilidad de la v2.6 (Mantenidas idénticas)
-    function toRealDate(val) {
-        if (!val) return new Date(0);
-        if (typeof val === 'string' && val.includes('Date')) {
-            const p = val.match(/\d+/g); return new Date(p[0], p[1], p[2]);
-        }
-        const d = new Date(val); return isNaN(d.getTime()) ? new Date(0) : d;
-    }
-
+    // Funciones Base (v2.6)
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
         const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
         states.forEach(s => {
             const div = document.createElement('div');
-            div.className = 'state-item';
-            div.innerText = s;
+            div.className = 'state-item'; div.innerText = s;
             div.onclick = () => {
-                const stateRows = rawData.filter(d => d['ESTADO'] === s);
-                updateDashboard(stateRows, s);
+                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
                 if(window.innerWidth <= 768) toggleMenu();
@@ -303,32 +313,31 @@
         return `<div class="card"><div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div><div class="card-val" style="color:${color}">${valStr}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div></div>`;
     }
 
-    function initCharts(atendidas, porAtender, porAsignar, conFiscal) {
-        const config = (labels, data, colors) => ({
-            type: 'doughnut',
-            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } }, datalabels: { display: false } } }
-        });
-        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Por Atender'], [atendidas, porAtender], ['#22c55e', '#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal', 'Con Fiscal Asignado'], [porAsignar, conFiscal], ['#f97316', '#059669']));
-    }
-
-    function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
+    function updateDashboard(data, title = "VENEZUELA") {
         let s = {};
-        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
+        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "DIRECTOR DE FISCALIZACIÓN"];
         columnsToSum.forEach(c => s[c] = 0);
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
-
         document.getElementById('view-title').innerText = title;
-        initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
 
-        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+        initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
     }
 
+    function initCharts(ate, pat, pas, con) {
+        const conf = (l, d, c) => ({ type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } }, datalabels: { display: false } } } });
+        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
+        chartA = new Chart(document.getElementById('chartAtencion'), conf(['Atendidas', 'Pendientes'], [ate, pat], ['#22c55e', '#ef4444']));
+        chartF = new Chart(document.getElementById('chartFiscales'), conf(['Por Asignar', 'Asignados'], [pas, con], ['#f97316', '#059669']));
+    }
+
+    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
+    function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
     function resetFilter(el) { updateDashboard(rawData); document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); if(window.innerWidth <= 768) toggleMenu(); scrollToTop(); }
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 </script>
 </body>
 </html>
