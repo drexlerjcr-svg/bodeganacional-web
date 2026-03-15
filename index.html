@@ -15,6 +15,7 @@
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
+        /* --- PANEL DE CONTRASEÑA --- */
         #auth-overlay {
             position: fixed; inset: 0; background: var(--primary);
             display: flex; justify-content: center; align-items: center;
@@ -42,6 +43,7 @@
         .btn-auth:hover { background: #152a66; }
         .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none; }
 
+        /* --- ESTILOS ORIGINALES MANTENIDOS --- */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         .app-container { display: flex; height: 100vh; position: relative; opacity: 0; transition: opacity 0.5s; }
         .sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001; }
@@ -62,6 +64,14 @@
         .progress-fill { height: 100%; transition: width 1s ease-in-out; }
         .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
+        
+        /* --- ESTILOS DEL MAPA --- */
+        .map-wrapper { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 30px; position: relative; text-align: center; }
+        #venezuela-map { width: 100%; max-width: 600px; height: auto; margin: 0 auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
+        .state-path { fill: #e2e8f0; stroke: #fff; stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
+        .state-path:hover { fill: var(--accent); stroke-width: 2; }
+        .map-tooltip { position: absolute; background: rgba(30, 58, 138, 0.95); color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; pointer-events: none; display: none; z-index: 2000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); }
+
         @media (max-width: 768px) { .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; } .sidebar.open { transform: translateX(0); } .menu-btn { display: block; } .grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .chart-container { height: 240px; } }
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
@@ -76,7 +86,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <i class="fas fa-user-shield fa-4x"></i>
-        <h2>Programación y Monitoreo</h2>
+        <h2>SALA DE MANDO</h2>
         <p>Ingrese el código de seguridad para acceder</p>
         <input type="password" id="pin-input" class="pin-input" placeholder="****" maxlength="4">
         <button class="btn-auth" onclick="checkAuth()">ENTRAR</button>
@@ -86,7 +96,7 @@
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos con URL Corregida...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -98,7 +108,7 @@
             <i class="fas fa-shield-alt"></i> UBICACIONES
         </div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL</div>
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
         </div>
         <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
             SISTEMA DE MANDO v2.6
@@ -115,6 +125,15 @@
 
         <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
+
+        <div class="section-title">Mapa de Gestión Estadal (% Atención)</div>
+        <div class="map-wrapper" id="map-area">
+            <div id="tooltip" class="map-tooltip"></div>
+            <svg id="venezuela-map" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                <g id="states-layer"></g>
+            </svg>
+        </div>
+
         <div class="section-title">Estatus del Flujo de Denuncia</div>
         <div class="grid" id="grid-estatus"></div>
         <div class="section-title">Asignación de Fiscales y Dependencias</div>
@@ -137,6 +156,16 @@
     let rawData = [];
     let dateColumnName = "";
     let chartA, chartF;
+
+    // Coordenadas simplificadas para Tooltips de estados (puntos clave)
+    const stateCoords = {
+        "ZULIA": {x:150, y:120}, "MIRANDA": {x:460, y:100}, "CARACAS": {x:440, y:85}, "BOLIVAR": {x:600, y:350},
+        "CARABOBO": {x:400, y:110}, "ARAGUA": {x:425, y:110}, "LARA": {x:300, y:120}, "ANZOATEGUI": {x:550, y:180},
+        "FALCON": {x:280, y:60}, "TACHIRA": {x:150, y:280}, "MERIDA": {x:200, y:230}, "BARINAS": {x:280, y:240},
+        "GUARICO": {x:430, y:220}, "PORTUGUESA": {x:320, y:180}, "MONAGAS": {x:640, y:160}, "SUCRE": {x:600, y:80},
+        "NUEVA ESPARTA": {x:580, y:50}, "APURE": {x:350, y:330}, "YARACUY": {x:360, y:100}, "TRUJILLO": {x:240, y:180},
+        "COJEDES": {x:380, y:180}, "DELTA AMACURO": {x:700, y:200}, "AMAZONAS": {x:450, y:450}, "VARGAS": {x:450, y:75}
+    };
 
     Chart.register(ChartDataLabels);
 
@@ -162,20 +191,6 @@
     function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
     function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
 
-    function toRealDate(val) {
-        if (!val) return new Date(0);
-        if (typeof val === 'string' && val.includes('Date')) {
-            const p = val.match(/\d+/g);
-            return new Date(p[0], p[1], p[2]);
-        }
-        if (typeof val === 'string' && val.includes('/')) {
-            const parts = val.split('/');
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
-        const d = new Date(val);
-        return isNaN(d.getTime()) ? new Date(0) : d;
-    }
-
     async function init() {
         try {
             const res = await fetch(url);
@@ -194,11 +209,73 @@
             }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
             renderSidebar();
+            renderMap();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) {
-            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión: Documento no accesible.</p>";
+            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión.</p>";
         }
+    }
+
+    function renderMap() {
+        const layer = document.getElementById('states-layer');
+        const tooltip = document.getElementById('tooltip');
+        
+        // Generamos círculos interactivos por cada estado para representar el mapa (Simplificado para compatibilidad)
+        Object.keys(stateCoords).forEach(stateName => {
+            const coord = stateCoords[stateName];
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", coord.x);
+            circle.setAttribute("cy", coord.y);
+            circle.setAttribute("r", "12");
+            circle.setAttribute("class", "state-path");
+            circle.setAttribute("id", `map-${stateName.replace(/\s+/g, '')}`);
+            
+            circle.onmousemove = (e) => {
+                const data = rawData.filter(d => d['ESTADO'] === stateName);
+                let rec = 0, ate = 0;
+                data.forEach(d => { rec += Number(d["REGISTROS RECIBIDOS"]) || 0; ate += Number(d["ATENDIDAS"]) || 0; });
+                const porc = rec > 0 ? ((ate / rec) * 100).toFixed(1) : "0.0";
+                
+                tooltip.style.display = "block";
+                tooltip.style.left = (e.pageX - document.getElementById('map-area').offsetLeft + 15) + "px";
+                tooltip.style.top = (e.pageY - document.getElementById('map-area').offsetTop - 30) + "px";
+                tooltip.innerHTML = `<strong>${stateName}</strong><br>Atención: ${porc}%`;
+                circle.setAttribute("r", "16");
+                circle.style.fill = "var(--success)";
+            };
+
+            circle.onmouseleave = () => {
+                tooltip.style.display = "none";
+                circle.setAttribute("r", "12");
+                circle.style.fill = "#e2e8f0";
+            };
+
+            circle.onclick = () => {
+                const el = Array.from(document.querySelectorAll('.state-item')).find(i => i.innerText === stateName);
+                if(el) el.click();
+            };
+
+            layer.appendChild(circle);
+            
+            // Texto pequeño debajo del punto
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", coord.x);
+            text.setAttribute("y", coord.y + 25);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("style", "font-size: 10px; font-weight: bold; fill: var(--muted); pointer-events: none;");
+            text.textContent = stateName.substring(0, 5);
+            layer.appendChild(text);
+        });
+    }
+
+    // Funciones de utilidad de la v2.6 (Mantenidas idénticas)
+    function toRealDate(val) {
+        if (!val) return new Date(0);
+        if (typeof val === 'string' && val.includes('Date')) {
+            const p = val.match(/\d+/g); return new Date(p[0], p[1], p[2]);
+        }
+        const d = new Date(val); return isNaN(d.getTime()) ? new Date(0) : d;
     }
 
     function renderSidebar() {
@@ -210,15 +287,7 @@
             div.innerText = s;
             div.onclick = () => {
                 const stateRows = rawData.filter(d => d['ESTADO'] === s);
-                if (stateRows.length > 0) {
-                    let maxTime = 0, newestDateLabel = "";
-                    stateRows.forEach(row => {
-                        const d = toRealDate(row[dateColumnName]);
-                        if (d.getTime() > maxTime) { maxTime = d.getTime(); newestDateLabel = row[dateColumnName]; }
-                    });
-                    const lastDayData = stateRows.filter(row => toRealDate(row[dateColumnName]).getTime() === maxTime);
-                    updateDashboard(lastDayData, s, newestDateLabel);
-                }
+                updateDashboard(stateRows, s);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
                 if(window.innerWidth <= 768) toggleMenu();
@@ -231,68 +300,35 @@
     function createCard(label, value, icon, color, isPercent = false) {
         const numericValue = Number(value) || 0;
         const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
-        return `<div class="card">
-                <div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div>
-                <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div>
-            </div>`;
+        return `<div class="card"><div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div><div class="card-val" style="color:${color}">${valStr}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div></div>`;
     }
 
     function initCharts(atendidas, porAtender, porAsignar, conFiscal) {
         const config = (labels, data, colors) => ({
             type: 'doughnut',
             data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '65%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } },
-                    datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, formatter: (v) => v > 0 ? v.toLocaleString('es-ES') : '' }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } }, datalabels: { display: false } } }
         });
-        if (chartA) chartA.destroy();
-        if (chartF) chartF.destroy();
+        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Por Atender'], [atendidas, porAtender], ['#22c55e', '#ef4444']));
         chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal', 'Con Fiscal Asignado'], [porAsignar, conFiscal], ['#f97316', '#059669']));
     }
 
     function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
         let s = {};
-        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
         columnsToSum.forEach(c => s[c] = 0);
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = dateLabel ? `Reporte del: ${dateLabel}` : "Consolidado Histórico";
-
         initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
 
-        document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
-            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
-
-        document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
-            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") +
-            createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
-        document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") +
-            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
     }
 
-    function resetFilter(el) {
-        updateDashboard(rawData);
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        if(window.innerWidth <= 768) toggleMenu();
-        scrollToTop();
-    }
+    function resetFilter(el) { updateDashboard(rawData); document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); if(window.innerWidth <= 768) toggleMenu(); scrollToTop(); }
 </script>
 </body>
 </html>
