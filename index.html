@@ -14,10 +14,8 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        
         .app-container { display: flex; height: 100vh; position: relative; }
 
-        /* Sidebar */
         .sidebar { 
             width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
             display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
@@ -25,11 +23,9 @@
 
         .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
 
-        /* Banner */
         .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow);
         }
         .banner h1 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
 
@@ -40,19 +36,12 @@
             z-index: 2000; cursor: pointer; font-size: 1.5rem;
         }
 
-        /* Grid System */
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
 
-        /* Card Style */
         .card { 
             background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
             box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
-            transition: transform 0.2s;
         }
-        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
         .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
@@ -72,7 +61,7 @@
             .grid { grid-template-columns: 1fr; }
         }
 
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); transition: 0.2s; }
+        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; }
         
@@ -93,7 +82,7 @@
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
             <i class="fas fa-shield-alt"></i> UBICACIONES
         </div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
@@ -140,15 +129,20 @@
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    // Función auxiliar para parsear fechas de Google Sheets (Date(2025,0,29) o strings)
-    function parseDate(dateVal) {
-        if (!dateVal) return new Date(0);
-        if (typeof dateVal === 'string' && dateVal.includes('Date')) {
-            const parts = dateVal.match(/\d+/g);
-            return new Date(parts[0], parts[1], parts[2]);
+    // Convierte cualquier formato de fecha de Google Sheets a un objeto Date real
+    function toRealDate(val) {
+        if (!val) return new Date(0);
+        if (typeof val === 'string' && val.includes('Date')) {
+            const p = val.match(/\d+/g);
+            return new Date(p[0], p[1], p[2]);
         }
-        const d = new Date(dateVal);
-        return isNaN(d) ? new Date(0) : d;
+        // Intentar parsear si viene como "DD/MM/YYYY"
+        if (typeof val === 'string' && val.includes('/')) {
+            const parts = val.split('/');
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? new Date(0) : d;
     }
 
     async function init() {
@@ -157,13 +151,13 @@
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            
             dateColumnName = cols[1];
 
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
-                    let val = cell ? (cell.f ? cell.f : cell.v) : 0; // Usamos .f si existe para obtener el texto formateado de la fecha
+                    // Guardamos tanto el valor real como el formateado para asegurar la compatibilidad
+                    let val = cell ? (cell.f ? cell.f : cell.v) : 0;
                     if(cols[i]) obj[cols[i]] = val;
                 });
                 return obj;
@@ -186,15 +180,24 @@
                 const stateRows = rawData.filter(d => d['ESTADO'] === s);
                 
                 if (stateRows.length > 0) {
-                    // Buscamos la fecha máxima real convirtiendo los valores
-                    const sortedByDate = [...stateRows].sort((a, b) => {
-                        return parseDate(b[dateColumnName]) - parseDate(a[dateColumnName]);
+                    // 1. Encontrar la fecha más alta (reciente)
+                    let maxTime = 0;
+                    let newestDateLabel = "";
+
+                    stateRows.forEach(row => {
+                        const d = toRealDate(row[dateColumnName]);
+                        if (d.getTime() > maxTime) {
+                            maxTime = d.getTime();
+                            newestDateLabel = row[dateColumnName];
+                        }
                     });
 
-                    const mostRecentDate = sortedByDate[0][dateColumnName];
-                    const lastDayData = stateRows.filter(d => d[dateColumnName] === mostRecentDate);
+                    // 2. Filtrar todas las filas que tengan esa misma fecha exacta
+                    const lastDayData = stateRows.filter(row => {
+                        return toRealDate(row[dateColumnName]).getTime() === maxTime;
+                    });
                     
-                    updateDashboard(lastDayData, s, mostRecentDate);
+                    updateDashboard(lastDayData, s, newestDateLabel);
                 }
                 
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
@@ -208,16 +211,10 @@
     function createCard(label, value, icon, color, isPercent = false) {
         const numericValue = Number(value) || 0;
         const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
-        return `
-            <div class="card">
-                <div class="card-head">
-                    <span class="card-label">${label}</span>
-                    <i class="fas ${icon}" style="color:${color}"></i>
-                </div>
+        return `<div class="card">
+                <div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div>
                 <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div>
-                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div>
             </div>`;
     }
 
@@ -235,11 +232,11 @@
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = dateLabel ? `Última Actualización: ${dateLabel}` : "Consolidado Histórico";
+        document.getElementById('date-info').innerText = dateLabel ? `Reporte del: ${dateLabel}` : "Consolidado Histórico";
 
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
-            createCard("Atendidas (Cerradas)", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
             createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
 
         document.getElementById('grid-estatus').innerHTML = 
@@ -259,12 +256,9 @@
             createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
 
         const total = s["REGISTROS RECIBIDOS"];
-        const pAte = total > 0 ? (s["ATENDIDAS"] / total) * 100 : 0;
-        const pPen = total > 0 ? (s["POR ATENDER"] / total) * 100 : 0;
-
         document.getElementById('grid-metricas').innerHTML = 
-            createCard("Índice de Atención", pAte, "fa-chart-line", "var(--success)", true) +
-            createCard("Índice de Pendientes", pPen, "fa-chart-pie", "var(--danger)", true);
+            createCard("Atención", total > 0 ? (s["ATENDIDAS"]/total)*100 : 0, "fa-chart-line", "var(--success)", true) +
+            createCard("Pendientes", total > 0 ? (s["POR ATENDER"]/total)*100 : 0, "fa-chart-pie", "var(--danger)", true);
     }
 
     function resetFilter(el) {
