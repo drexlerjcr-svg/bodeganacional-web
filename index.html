@@ -1,235 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Programación y Monitoreo</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
-            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
-            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        
-        /* Layout */
-        .app-container { display: flex; height: 100vh; position: relative; }
-
-        /* Sidebar Responsive */
-        .sidebar { 
-            width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
-            display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
-        }
-
-        /* Viewport */
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
-
-        /* Header */
-        .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
-        }
-        .banner h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Mobile Nav */
-        .menu-btn {
-            display: none; position: fixed; bottom: 20px; right: 20px;
-            background: var(--primary); color: white; width: 60px; height: 60px;
-            border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 2000; cursor: pointer; font-size: 1.5rem;
-        }
-
-        /* Grids Adaptativos */
-        .grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; 
-        }
-
-        /* Estilo de Card */
-        .card { 
-            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
-        }
-        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
-        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.8s ease; }
-
-        .section-title { 
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
-            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
-        }
-        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
-
-        /* Media Queries */
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
-            .sidebar.open { transform: translateX(0); }
-            .menu-btn { display: block; }
-            .grid { grid-template-columns: 1fr; }
-            .main-view { padding: 15px; }
-        }
-
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
-        .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 3000; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .overlay.active { display: block; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Real-Time | Gestión de Reclamaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .purple-gradient { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%); }
+    </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-<div id="loader"><i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary)"></i></div>
-<button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-map-marker-alt"></i></button>
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 italic uppercase">Dashboard de Control Operativo</h1>
+            <p class="text-sm text-gray-500">Fuente: Google Sheets (Hoja 1)</p>
+        </div>
+        <div id="last-update" class="text-xs text-gray-400 font-mono"></div>
+    </div>
 
-<div class="app-container">
-    <aside class="sidebar" id="sidebar">
-        <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid #eee;">UBICACIONES</div>
-        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
-        </div>
-    </aside>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="card border-t-4 border-indigo-600">
+            <p class="text-xs font-bold text-gray-400 uppercase">Recibidas</p>
+            <h2 id="kpi-recibidas" class="text-3xl font-black text-gray-800">0</h2>
+        </div>
+        <div class="card border-t-4 border-emerald-500">
+            <p class="text-xs font-bold text-gray-400 uppercase">Atendidas</p>
+            <h2 id="kpi-atendidas" class="text-3xl font-black text-emerald-600">0</h2>
+        </div>
+        <div class="card border-t-4 border-orange-500">
+            <p class="text-xs font-bold text-gray-400 uppercase">Por Atender</p>
+            <h2 id="kpi-pendientes" class="text-3xl font-black text-orange-600">0</h2>
+        </div>
+        <div class="card border-t-4 border-purple-600">
+            <p class="text-xs font-bold text-gray-400 uppercase">% Eficiencia</p>
+            <h2 id="kpi-eficiencia" class="text-3xl font-black text-purple-600">0%</h2>
+        </div>
+    </div>
 
-    <main class="main-view">
-        <div class="banner">
-            <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 4px;">Sala de Programación y Monitoreo</div>
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 card">
+            <h3 class="text-sm font-bold text-gray-700 mb-6 uppercase border-b pb-2">Estado de Atención</h3>
+            <div id="chart-pie"></div>
+        </div>
 
-        <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="grid-criticos"></div>
+        <div class="lg:col-span-8 card">
+            <h3 class="text-sm font-bold text-gray-700 mb-6 uppercase border-b pb-2">Distribución por Estado (Top 15)</h3>
+            <div id="chart-bar"></div>
+        </div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div class="grid" id="grid-estatus"></div>
+        <div class="lg:col-span-12 card">
+            <h3 class="text-sm font-bold text-gray-700 mb-6 uppercase border-b pb-2">Seguimiento de Etapas</h3>
+            <div id="chart-area"></div>
+        </div>
+    </div>
 
-        <div class="section-title">Asignación y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
+    <script>
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201';
 
-        <div class="section-title">Rendimiento y Eficiencia</div>
-        <div class="grid" id="grid-metricas"></div>
+        async function fetchData() {
+            const response = await fetch(SHEET_URL);
+            const text = await response.text();
+            // Limpiar el formato JSON de Google que viene con basura al inicio
+            const json = JSON.parse(text.substr(47).slice(0, -2));
+            processData(json.table);
+        }
 
-        <div style="height: 60px;"></div>
-    </main>
-</div>
+        function processData(table) {
+            const rows = table.rows;
+            
+            // Asumiendo el orden de columnas en tu Hoja 1:
+            // Col 0: Estado, Col 4: Recibidas, Col 12: Atendidas, Col 13: Por Atender...
+            // Ajustado según la estructura estándar de tu sheet "BaseDeDatos"
+            
+            let totalRecibidas = 0;
+            let totalAtendidas = 0;
+            let totalPendientes = 0;
+            let etapaInsp = 0, etapaConc = 0, etapaFisc = 0;
 
-<script>
-    const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja 1";
-    let rawData = [];
+            const labels = [];
+            const valuesRecibidas = [];
 
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('active');
-    }
+            rows.forEach(row => {
+                const r = row.c;
+                if(r[0] && r[0].v !== "ESTADO") { // Evitar cabeceras
+                    labels.push(r[0].v);
+                    const recib = r[4] ? r[4].v : 0;
+                    const atend = r[12] ? r[12].v : 0;
+                    const pend = r[13] ? r[13].v : 0;
+                    
+                    totalRecibidas += recib;
+                    totalAtendidas += atend;
+                    totalPendientes += pend;
+                    
+                    // Etapas (basado en posiciones probables de tu sheet)
+                    etapaInsp += r[9] ? r[9].v : 0;
+                    etapaConc += r[10] ? r[10].v : 0;
+                    etapaFisc += r[11] ? r[11].v : 0;
 
-    async function init() {
-        try {
-            const res = await fetch(url);
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            rawData = json.table.rows.map(r => {
-                let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
-                return obj;
-            });
-            renderSidebar();
-            updateDashboard(rawData);
-            document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error(e); }
-    }
+                    valuesRecibidas.push(recib);
+                }
+            });
 
-    function renderSidebar() {
-        const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
-        states.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'state-item';
-            div.innerText = s;
-            div.onclick = () => {
-                updateDashboard(rawData.filter(d => d['ESTADO'] === s), s);
-                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                div.classList.add('active');
-                if(window.innerWidth <= 768) toggleMenu();
-            };
-            list.appendChild(div);
-        });
-    }
+            // Actualizar KPIs
+            document.getElementById('kpi-recibidas').innerText = totalRecibidas.toLocaleString();
+            document.getElementById('kpi-atendidas').innerText = totalAtendidas.toLocaleString();
+            document.getElementById('kpi-pendientes').innerText = totalPendientes.toLocaleString();
+            document.getElementById('kpi-eficiencia').innerText = ((totalAtendidas/totalRecibidas)*100).toFixed(1) + "%";
+            document.getElementById('last-update').innerText = "Última sincronización: " + new Date().toLocaleTimeString();
 
-    function createCard(label, value, icon, color, isPercent = false) {
-        const valStr = isPercent ? Number(value).toFixed(1) + '%' : Number(value).toLocaleString();
-        return `
-            <div class="card">
-                <div class="card-head">
-                    <span class="card-label">${label}</span>
-                    <i class="fas ${icon}" style="color:${color}"></i>
-                </div>
-                <div class="card-val" style="color:${color}">${valStr}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${isPercent ? value : 100}%; background:${color}"></div></div>
-            </div>`;
-    }
+            // Gráfico Circular
+            new ApexCharts(document.querySelector("#chart-pie"), {
+                series: [totalAtendidas, totalPendientes],
+                chart: { type: 'donut', height: 350 },
+                labels: ['Atendidas', 'Por Atender'],
+                colors: ['#10b981', '#f97316'],
+                plotOptions: { pie: { donut: { size: '70%' } } },
+                legend: { position: 'bottom' }
+            }).render();
 
-    function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const columns = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS NO ADMITIDAS", "NUEVO", 
-            "DENUNCIAS ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", 
-            "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", 
-            "ATENDIDA", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", 
-            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
-        ];
-        columns.forEach(c => s[c] = 0);
-        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
+            // Gráfico de Barras
+            new ApexCharts(document.querySelector("#chart-bar"), {
+                series: [{ name: 'Denuncias', data: valuesRecibidas.slice(0,15) }],
+                chart: { type: 'bar', height: 350, toolbar: {show: false} },
+                xaxis: { categories: labels.slice(0,15) },
+                colors: ['#6366f1'],
+                plotOptions: { bar: { borderRadius: 4, horizontal: false } }
+            }).render();
 
-        document.getElementById('view-title').innerText = title;
+            // Gráfico de Etapas (Área)
+            new ApexCharts(document.querySelector("#chart-area"), {
+                series: [{ name: 'Casos', data: [etapaInsp, etapaConc, etapaFisc] }],
+                chart: { type: 'area', height: 200, toolbar: {show: false} },
+                xaxis: { categories: ['Inspección', 'Conciliación', 'Fiscalización'] },
+                colors: ['#8b5cf6'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.3 } }
+            }).render();
+        }
 
-        // CRITICOS
-        document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-copy", "#1e3a8a") +
-            createCard("Atendidas (Total)", s["ATENDIDAS"], "fa-check-double", "#22c55e") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "#ef4444");
-
-        // ESTATUS
-        document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevo", s["NUEVO"], "fa-plus-circle", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
-            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#64748b") +
-            createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#0ea5e9") +
-            createCard("Conciliatorio", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
-            createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-user-check", "#f59e0b") +
-            createCard("Desestimada", s["DESESTIMADA"], "fa-times-circle", "#f43f5e") +
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#6366f1") +
-            createCard("Proceso Culminado", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
-        // FISCALES
-        document.getElementById('grid-fiscales').innerHTML = 
-            createCard("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#d97706") +
-            createCard("Con Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Con Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Director Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") +
-            createCard("Otra Dependencia", s["OTRA DEPENDENCI"], "fa-external-link-alt", "#475569");
-
-        // METRICAS
-        const pAte = s["REGISTROS RECIBIDOS"] > 0 ? (s["ATENDIDAS"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        const pPen = s["REGISTROS RECIBIDOS"] > 0 ? (s["POR ATENDER"] / s["REGISTROS RECIBIDOS"]) * 100 : 0;
-        document.getElementById('grid-metricas').innerHTML = 
-            createCard("Atención %", pAte, "fa-percentage", "#22c55e", true) +
-            createCard("Por Atender %", pPen, "fa-percentage", "#ef4444", true);
-    }
-
-    function resetFilter(el) {
-        updateDashboard(rawData);
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        if(window.innerWidth <= 768) toggleMenu();
-    }
-
-    init();
-</script>
+        fetchData();
+    </script>
 </body>
 </html>
