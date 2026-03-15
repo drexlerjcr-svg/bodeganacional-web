@@ -40,13 +40,12 @@
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
 
-        /* Contenedor de Gráficos Ajustado */
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .chart-container { 
             background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; 
             box-shadow: var(--shadow); height: 260px; display: flex; flex-direction: column; align-items: center; 
         }
         .chart-container h3 { font-size: 0.65rem; margin: 0 0 10px 0; color: var(--muted); text-transform: uppercase; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         canvas { max-width: 100% !important; max-height: 100% !important; }
 
         .card { 
@@ -106,7 +105,7 @@
         </div>
     </aside>
 
-    <main class="main-view">
+    <main class="main-view" id="main-scroll-container">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
             <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
@@ -152,6 +151,10 @@
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function scrollToTop() {
+        document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function toRealDate(val) {
@@ -212,6 +215,7 @@
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
                 if(window.innerWidth <= 768) toggleMenu();
+                scrollToTop();
             };
             list.appendChild(div);
         });
@@ -232,24 +236,13 @@
             type: 'doughnut',
             data: {
                 labels: labels,
-                datasets: [{ 
-                    data: data, 
-                    backgroundColor: colors, 
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
+                datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '65%',
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
                 plugins: {
                     legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } },
-                    datalabels: {
-                        color: '#fff',
-                        font: { weight: 'bold', size: 11 },
-                        formatter: (value) => value > 0 ? value.toLocaleString('es-ES') : ''
-                    }
+                    datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, formatter: (value) => value > 0 ? value.toLocaleString('es-ES') : '' }
                 }
             }
         });
@@ -257,7 +250,6 @@
         if (chartA) chartA.destroy();
         if (chartF) chartF.destroy();
 
-        // Nombres de etiquetas actualizados a petición
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Por Atender'], [atendidas, porAtender], ['#22c55e', '#ef4444']));
         chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal', 'Con Fiscal Asignado'], [porAsignar, conFiscal], ['#f97316', '#059669']));
     }
@@ -298,6 +290,7 @@
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         if(window.innerWidth <= 768) toggleMenu();
+        scrollToTop();
     }
 
     init();
