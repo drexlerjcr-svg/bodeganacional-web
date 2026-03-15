@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Monitoreo en Tiempo Real</title>
+    <title>Sala de Mando Operativa - Monitoreo 24h</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         :root {
             --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
@@ -14,7 +15,6 @@
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        
         .app-container { display: flex; height: 100vh; position: relative; }
 
         /* Sidebar */
@@ -27,9 +27,8 @@
 
         /* Banner */
         .banner { 
-            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
-            margin-bottom: 25px; box-shadow: var(--shadow);
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow);
         }
         .banner h1 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
 
@@ -46,13 +45,10 @@
             gap: 15px; margin-bottom: 30px; 
         }
 
-        /* Card Style */
         .card { 
             background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
             box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
-            transition: transform 0.2s;
         }
-        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
         .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
@@ -65,12 +61,7 @@
         }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
 
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
-            .sidebar.open { transform: translateX(0); }
-            .menu-btn { display: block; }
-            .grid { grid-template-columns: 1fr; }
-        }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
 
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); transition: 0.2s; }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
@@ -79,13 +70,20 @@
         #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .overlay.active { display: block; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
+            .sidebar.open { transform: translateX(0); }
+            .menu-btn { display: block; }
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos Operativos...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Analizando registros recientes...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -93,82 +91,65 @@
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-shield-alt"></i> UBICACIONES
+        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
+            <i class="fas fa-map-marked-alt"></i> UBICACIONES
         </div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
-        </div>
-        <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
-            SISTEMA DE MANDO v2.5
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (HISTÓRICO)</div>
         </div>
     </aside>
 
     <main class="main-view">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
-                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | Sala de Programación y Monitoreo
+            <div id="view-subtitle" style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px;">Sala de Programación y Monitoreo</div>
+        </div>
+
+        <div id="trend-section" style="display: none;">
+            <div class="section-title">Tendencia Últimos 24 Registros</div>
+            <div class="chart-container">
+                <div id="chart-timeline"></div>
             </div>
         </div>
 
-        <div class="section-title">Indicadores Críticos (Generales)</div>
+        <div class="section-title">Indicadores Críticos</div>
         <div class="grid" id="grid-criticos"></div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="section-title">Estatus del Flujo</div>
         <div class="grid" id="grid-estatus"></div>
 
-        <div class="section-title">Asignación de Fiscales y Dependencias</div>
+        <div class="section-title">Fiscalía y Dependencias</div>
         <div class="grid" id="grid-fiscales"></div>
 
-        <div class="section-title">Métricas de Rendimiento</div>
+        <div class="section-title">Rendimiento Operativo</div>
         <div class="grid" id="grid-metricas"></div>
-
-        <div style="height: 60px;"></div>
     </main>
 </div>
 
 <script>
-    // URL apuntando a la pestaña Hoja 1
     const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201";
     let rawData = [];
-
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('active');
-    }
+    let timelineChart = null;
 
     async function init() {
         try {
             const res = await fetch(url);
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
-            
-            // Mapeo dinámico de columnas por nombre
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
-                    let val = 0;
-                    if(cell) {
-                        val = cell.v;
-                        // Si es un porcentaje en el sheet (ej: 0.85), Google lo manda como número.
-                    }
-                    if(cols[i]) obj[cols[i]] = val;
+                    if(cols[i]) obj[cols[i]] = cell ? cell.v : 0;
                 });
                 return obj;
             }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
             renderSidebar();
-            updateDashboard(rawData);
+            updateDashboard(rawData, "VENEZUELA (HISTÓRICO)");
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error("Error cargando datos:", e);
-            alert("No se pudo conectar con la base de datos. Verifica la publicación del Sheet.");
-        }
+        } catch (e) { console.error(e); }
     }
 
     function renderSidebar() {
@@ -179,8 +160,11 @@
             div.className = 'state-item';
             div.innerText = s;
             div.onclick = () => {
-                const filtered = rawData.filter(d => d['ESTADO'] === s);
-                updateDashboard(filtered, s);
+                const stateData = rawData.filter(d => d['ESTADO'] === s);
+                const recentData = stateData.slice(-24); // ÚLTIMAS 24 FILAS
+                
+                updateDashboard(recentData, s, true);
+                
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
                 if(window.innerWidth <= 768) toggleMenu();
@@ -192,8 +176,6 @@
     function createCard(label, value, icon, color, isPercent = false) {
         const numericValue = Number(value) || 0;
         const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
-        const progress = isPercent ? numericValue : 100;
-
         return `
             <div class="card">
                 <div class="card-head">
@@ -202,60 +184,74 @@
                 </div>
                 <div class="card-val" style="color:${color}">${valStr}</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width:${Math.min(progress, 100)}%; background:${color}"></div>
+                    <div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div>
                 </div>
             </div>`;
     }
 
-    function updateDashboard(data, title = "VENEZUELA") {
+    function updateDashboard(data, title, isRecent = false) {
         let s = {};
-        const columnsToSum = [
-            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", 
-            "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", 
-            "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", 
-            "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN",
-            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
-        ];
+        const columns = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "DIRECTOR DE FISCALIZACIÓN"];
 
-        columnsToSum.forEach(c => s[c] = 0);
-        data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
+        columns.forEach(c => s[c] = 0);
+        data.forEach(d => columns.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
+        document.getElementById('view-subtitle').innerText = isRecent ? "Monitoreo: Últimos 24 registros de este estado" : "Consolidado Histórico Nacional";
+        
+        // Mostrar u ocultar gráfico de tendencia
+        const trendSection = document.getElementById('trend-section');
+        if(isRecent) {
+            trendSection.style.display = 'block';
+            renderTimeline(data);
+        } else {
+            trendSection.style.display = 'none';
+        }
 
-        // GRIDS - Insertando HTML dinámico
+        // Renderizado de Grids
         document.getElementById('grid-criticos').innerHTML = 
-            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
-            createCard("Atendidas (Cerradas)", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+            createCard("Recibidas", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
+            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--danger)");
 
         document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") +
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
+            createCard("Nuevas", s["NUEVO"], "fa-plus", "#3b82f6") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "#8b5cf6") +
             createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") +
-            createCard("Inspección", s["INSPECCIONADO"], "fa- binoculars", "#06b6d4") +
+            createCard("Inspección", s["INSPECCIONADO"], "fa-search", "#06b6d4") +
             createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
-            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#f59e0b") +
             createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
             createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
 
         document.getElementById('grid-fiscales').innerHTML = 
             createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") +
             createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
-            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
-            createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
 
-        // Cálculo de Eficiencia
         const total = s["REGISTROS RECIBIDOS"];
-        const pAte = total > 0 ? (s["ATENDIDAS"] / total) * 100 : 0;
-        const pPen = total > 0 ? (s["POR ATENDER"] / total) * 100 : 0;
-
         document.getElementById('grid-metricas').innerHTML = 
-            createCard("Índice de Atención", pAte, "fa-chart-line", "var(--success)", true) +
-            createCard("Índice de Pendientes", pPen, "fa-chart-pie", "var(--danger)", true);
+            createCard("Eficiencia", total > 0 ? (s["ATENDIDAS"]/total)*100 : 0, "fa-chart-line", "var(--success)", true) +
+            createCard("Mora", total > 0 ? (s["POR ATENDER"]/total)*100 : 0, "fa-chart-pie", "var(--danger)", true);
+    }
+
+    function renderTimeline(data) {
+        const options = {
+            series: [{ name: 'Recibidas', data: data.map(d => d['REGISTROS RECIBIDOS']) }, 
+                     { name: 'Atendidas', data: data.map(d => d['ATENDIDAS']) }],
+            chart: { height: 250, type: 'line', toolbar: {show: false}, zoom: {enabled: false} },
+            colors: ['#3b82f6', '#22c55e'],
+            stroke: { curve: 'smooth', width: 3 },
+            xaxis: { categories: data.map((_, i) => i + 1), title: {text: 'Secuencia de registros'} },
+            legend: { position: 'top' }
+        };
+
+        if(timelineChart) timelineChart.destroy();
+        timelineChart = new ApexCharts(document.querySelector("#chart-timeline"), options);
+        timelineChart.render();
     }
 
     function resetFilter(el) {
-        updateDashboard(rawData);
+        updateDashboard(rawData, "NACIONAL");
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         if(window.innerWidth <= 768) toggleMenu();
