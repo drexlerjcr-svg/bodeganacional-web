@@ -18,7 +18,6 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
         
-        /* SIDEBAR ACTUALIZADO SEGÚN IMAGEN */
         .sidebar { 
             width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
@@ -34,19 +33,16 @@
             font-size: 1.2rem; 
             display: flex; 
             align-items: center; 
-            gap: 15px; /* Espacio entre hamburguesa y texto */
+            gap: 15px;
         }
         .sidebar-header i { cursor: pointer; }
-
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
 
-        /* MAIN VIEW */
         .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
         
-        /* Botón flotante para cuando el sidebar está cerrado */
         .floating-toggle {
             position: fixed; top: 18px; left: 20px; z-index: 999;
-            background: transparent; color: white; border: none; font-size: 1.2rem; cursor: pointer;
+            background: transparent; border: none; font-size: 1.2rem; cursor: pointer;
             display: none;
         }
         .sidebar.collapsed ~ .floating-toggle { display: block; color: var(--primary); }
@@ -127,11 +123,13 @@
         <div id="grid-procesos" class="grid"></div>
         <div class="section-title">Asignación de Fiscales y Dependencias</div>
         <div id="grid-fiscales" class="grid"></div>
+
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
             <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
             <div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
         </div>
+
         <div class="section-title">Eficiencia por Estados (Top 10)</div>
         <div id="ranking-container" class="ranking-card"></div>
         <div style="height: 60px;"></div>
@@ -160,13 +158,10 @@
         }
     }
 
-    // FUNCIÓN DE PARSEO DE FECHA CORTA (DD/MM/YYYY)
     function parseShortDate(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return new Date(0);
         const parts = dateStr.split('/');
-        if (parts.length !== 3) return new Date(0);
-        // Formato esperado: día, mes, año
-        return new Date(parts[2], parts[1] - 1, parts[0]);
+        return parts.length !== 3 ? new Date(0) : new Date(parts[2], parts[1] - 1, parts[0]);
     }
 
     async function init() {
@@ -185,33 +180,19 @@
                 return obj;
             }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
-            // CORRECCIÓN DE FILTRADO POR FECHA MÁS CERCANA
             if (allData.length > 0) {
-                // Mapeamos a objetos con valor de tiempo para encontrar el máximo real
-                const dataWithTimestamps = allData.map(d => ({
-                    ...d,
-                    timestamp: parseShortDate(d['FECHA']).getTime()
-                }));
-
-                const maxTimestamp = Math.max(...dataWithTimestamps.map(d => d.timestamp));
-                
-                // Filtramos los datos originales que coincidan con ese timestamp exacto
-                rawData = dataWithTimestamps.filter(d => d.timestamp === maxTimestamp);
-                
-                // Obtenemos la fecha en texto de uno de los registros filtrados para mostrarla
-                const displayDate = rawData[0]['FECHA'];
-                document.getElementById('date-info').innerText = `REPORTE AL: ${displayDate}`;
+                const dataWithTimestamps = allData.map(d => ({...d, ts: parseShortDate(d['FECHA']).getTime()}));
+                const maxTs = Math.max(...dataWithTimestamps.map(d => d.ts));
+                rawData = dataWithTimestamps.filter(d => d.ts === maxTs);
+                document.getElementById('date-info').innerText = `REPORTE AL: ${rawData[0]['FECHA']}`;
             }
 
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error("Error cargando datos:", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // Funciones auxiliares de renderizado (se mantienen igual para no romper nada)
     function createCard(label, value, icon, color) {
         return `<div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center">
@@ -239,11 +220,11 @@
     function renderRanking(data) {
         const container = document.getElementById('ranking-container');
         container.innerHTML = "";
-        const states = [...new Set(rawData.map(d => d['ESTADO']))];
+        const states = [...new Set(data.map(d => d['ESTADO']))];
         const ranking = states.map(s => {
-            const row = rawData.find(r => r['ESTADO'] === s);
-            const rec = Number(row['REGISTROS RECIBIDOS']) || 0;
-            const ate = Number(row['ATENDIDAS']) || 0;
+            const rows = data.filter(r => r['ESTADO'] === s);
+            const rec = rows.reduce((acc, curr) => acc + (Number(curr['REGISTROS RECIBIDOS']) || 0), 0);
+            const ate = rows.reduce((acc, curr) => acc + (Number(curr['ATENDIDAS']) || 0), 0);
             return { s, p: rec > 0 ? (ate/rec*100) : 0 };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
 
