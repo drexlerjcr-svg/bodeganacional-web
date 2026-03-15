@@ -32,18 +32,20 @@
         .sidebar-header i { cursor: pointer; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
 
-        .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
-        
-        .floating-toggle {
-            position: fixed; top: 18px; left: 20px; z-index: 999;
-            background: transparent; border: none; font-size: 1.2rem; cursor: pointer;
-            display: none;
-        }
-        .sidebar.collapsed ~ .floating-toggle { display: block; color: var(--primary); }
-
-        .state-item { padding: 12px 20px; margin: 4px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        /* ESTILOS SUBMENÚ */
+        .state-group { border-bottom: 1px solid #f1f5f9; }
+        .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .state-item:hover { background: #f1f5f9; }
         .state-item.active { background: var(--primary); color: white; }
-        .state-item:hover:not(.active) { background: #f1f5f9; }
+        
+        .submenu { display: none; background: #f8fafc; margin: 0 12px 8px 12px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; }
+        .submenu-item { padding: 10px 15px 10px 35px; font-size: 0.75rem; color: var(--muted); cursor: pointer; font-weight: 500; transition: 0.2s; border-radius: 4px; }
+        .submenu-item:hover { color: var(--primary); background: #f1f5f9; }
+        .submenu-item.active-sub { color: var(--primary); font-weight: 800; background: #e0e7ff; }
+
+        .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: transparent; border: none; font-size: 1.2rem; cursor: pointer; display: none; }
+        .sidebar.collapsed ~ .floating-toggle { display: block; color: var(--primary); }
 
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); }
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
@@ -85,7 +87,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">CONSOLIDANDO TOTALES...</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">PREPARANDO MENÚS...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -96,7 +98,7 @@
         </div>
         <div class="sidebar-content" id="sidebar-list">
             <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)
+                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
             </div>
         </div>
     </aside>
@@ -134,8 +136,8 @@
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
-    let allFetched = []; // Toda la data histórica
-    let rawData = [];    // Data filtrada por la última fecha
+    let allFetched = []; 
+    let rawData = [];    
     let chartA, chartF;
 
     Chart.register(ChartDataLabels);
@@ -184,7 +186,6 @@
                 return est && est !== 'TOTALES' && est !== 'TOTAL' && est !== '0';
             });
 
-            // Preparar data filtrada por fecha más reciente para los estados
             if (allFetched.length > 0) {
                 const dataWithTs = allFetched.map(d => ({...d, ts: parseShortDate(d['FECHA']).getTime()}));
                 const maxTs = Math.max(...dataWithTs.map(d => d.ts));
@@ -192,33 +193,24 @@
             }
 
             renderSidebar();
-            resetFilter(document.getElementById('btn-nacional')); // Iniciar con Nacional (Total)
+            resetFilter(document.getElementById('btn-nacional'));
             document.getElementById('loader').style.display = 'none';
         } catch (e) { console.error(e); }
     }
 
-    function updateDashboard(data, title = "VENEZUELA", isNational = false) {
+    function updateDashboard(data, title = "VENEZUELA", subtitle = "REPORTE") {
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
         
-        cols.forEach(c => {
-            s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0);
-        });
+        cols.forEach(c => s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = isNational ? "REPORTE HISTÓRICO CONSOLIDADO" : `REPORTE AL: ${data[0]['FECHA']}`;
+        document.getElementById('date-info').innerText = subtitle;
         
         initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderRanking(data);
 
-        const createCard = (l, v, i, c) => `
-            <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}"></i>
-                </div>
-                <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString('es-ES')}</div>
-            </div>`;
+        const createCard = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div><div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString('es-ES')}</div></div>`;
 
         document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
@@ -256,23 +248,54 @@
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
         const states = [...new Set(allFetched.map(d => d['ESTADO']))].sort();
+        
         states.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'state-item';
-            div.innerHTML = `<i class="fas fa-chevron-right"></i> ${s}`;
-            div.onclick = () => {
-                // Al filtrar por estado, usamos rawData (última fecha)
-                updateDashboard(rawData.filter(r => r['ESTADO'] === s), s, false);
+            const group = document.createElement('div');
+            group.className = 'state-group';
+            
+            const btn = document.createElement('div');
+            btn.className = 'state-item';
+            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span> <i class="fas fa-chevron-down" style="font-size:0.7rem"></i>`;
+            
+            const sub = document.createElement('div');
+            sub.className = 'submenu';
+            sub.id = `sub-${s.replace(/\s+/g, '')}`;
+            sub.innerHTML = `
+                <div class="submenu-item" onclick="filterState('${s}', 'global', this)"> <i class="fas fa-history"></i> Global del Estado</div>
+                <div class="submenu-item" onclick="filterState('${s}', 'latest', this)"> <i class="fas fa-clock"></i> Último Reporte</div>
+            `;
+
+            btn.onclick = () => {
+                const isVisible = sub.style.display === 'block';
+                document.querySelectorAll('.submenu').forEach(m => m.style.display = 'none');
+                sub.style.display = isVisible ? 'none' : 'block';
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                div.classList.add('active');
+                btn.classList.add('active');
             };
-            list.appendChild(div);
+
+            group.appendChild(btn);
+            group.appendChild(sub);
+            list.appendChild(group);
         });
     }
 
+    function filterState(stateName, type, element) {
+        document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active-sub'));
+        element.classList.add('active-sub');
+        
+        if(type === 'global') {
+            const data = allFetched.filter(r => r['ESTADO'] === stateName);
+            updateDashboard(data, stateName, "HISTÓRICO TOTAL DEL ESTADO");
+        } else {
+            const data = rawData.filter(r => r['ESTADO'] === stateName);
+            updateDashboard(data, stateName, `REPORTE AL: ${data[0]['FECHA']}`);
+        }
+    }
+
     function resetFilter(el) {
-        // Al resetear (Nacional), usamos allFetched (toda la data histórico)
-        updateDashboard(allFetched, "VENEZUELA", true);
+        document.querySelectorAll('.submenu').forEach(m => m.style.display = 'none');
+        document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active-sub'));
+        updateDashboard(allFetched, "VENEZUELA", "REPORTE HISTÓRICO CONSOLIDADO");
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
     }
