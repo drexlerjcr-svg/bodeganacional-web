@@ -71,7 +71,7 @@
             .menu-btn { display: block; }
             .grid { grid-template-columns: 1fr; }
             .charts-row { grid-template-columns: 1fr; }
-            .chart-container { height: 220px; } /* Más pequeño en móvil para no scrollear tanto */
+            .chart-container { height: 240px; }
         }
 
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
@@ -114,6 +114,15 @@
             </div>
         </div>
 
+        <div class="section-title">Indicadores Críticos</div>
+        <div class="grid" id="grid-criticos"></div>
+
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="grid" id="grid-estatus"></div>
+
+        <div class="section-title">Asignación de Fiscales y Dependencias</div>
+        <div class="grid" id="grid-fiscales"></div>
+
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
             <div class="chart-container">
@@ -126,15 +135,6 @@
             </div>
         </div>
 
-        <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="grid-criticos"></div>
-
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div class="grid" id="grid-estatus"></div>
-
-        <div class="section-title">Asignación de Fiscales y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
-
         <div style="height: 60px;"></div>
     </main>
 </div>
@@ -145,7 +145,6 @@
     let dateColumnName = "";
     let chartA, chartF;
 
-    // Registrar el plugin de etiquetas de datos
     Chart.register(ChartDataLabels);
 
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -258,8 +257,9 @@
         if (chartA) chartA.destroy();
         if (chartF) chartF.destroy();
 
+        // Nombres de etiquetas actualizados a petición
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Por Atender'], [atendidas, porAtender], ['#22c55e', '#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Con Fiscal'], [porAsignar, conFiscal], ['#f97316', '#059669']));
+        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal', 'Con Fiscal Asignado'], [porAsignar, conFiscal], ['#f97316', '#059669']));
     }
 
     function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
