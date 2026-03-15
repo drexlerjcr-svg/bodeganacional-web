@@ -85,7 +85,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">SINCRO FINAL DE DATOS...</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">CONSOLIDANDO TOTALES...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -134,7 +134,8 @@
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
-    let rawData = [];
+    let allFetched = []; // Toda la data histórica
+    let rawData = [];    // Data filtrada por la última fecha
     let chartA, chartF;
 
     Chart.register(ChartDataLabels);
@@ -152,9 +153,7 @@
 
     function cleanNum(val) {
         if (val === null || val === undefined || val === '') return 0;
-        // Si ya es un número, lo devolvemos
         if (typeof val === 'number') return val;
-        // Si es texto, limpiamos puntos (miles) y convertimos coma a punto (decimal)
         let s = String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
         let n = parseFloat(s);
         return isNaN(n) ? 0 : n;
@@ -173,7 +172,7 @@
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
-            const allFetched = json.table.rows.map(r => {
+            allFetched = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
                     let val = cell ? (cell.f ? cell.f : cell.v) : 0;
@@ -185,22 +184,21 @@
                 return est && est !== 'TOTALES' && est !== 'TOTAL' && est !== '0';
             });
 
+            // Preparar data filtrada por fecha más reciente para los estados
             if (allFetched.length > 0) {
                 const dataWithTs = allFetched.map(d => ({...d, ts: parseShortDate(d['FECHA']).getTime()}));
                 const maxTs = Math.max(...dataWithTs.map(d => d.ts));
                 rawData = dataWithTs.filter(d => d.ts === maxTs);
-                document.getElementById('date-info').innerText = `REPORTE AL: ${rawData[0]['FECHA']}`;
             }
 
             renderSidebar();
-            updateDashboard(rawData);
+            resetFilter(document.getElementById('btn-nacional')); // Iniciar con Nacional (Total)
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error("Error en carga:", e); }
+        } catch (e) { console.error(e); }
     }
 
-    function updateDashboard(data, title = "VENEZUELA") {
+    function updateDashboard(data, title = "VENEZUELA", isNational = false) {
         let s = {};
-        // Nombres de columnas exactos para asegurar el match
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
         
         cols.forEach(c => {
@@ -208,6 +206,8 @@
         });
 
         document.getElementById('view-title').innerText = title;
+        document.getElementById('date-info').innerText = isNational ? "REPORTE HISTÓRICO CONSOLIDADO" : `REPORTE AL: ${data[0]['FECHA']}`;
+        
         initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderRanking(data);
 
@@ -255,13 +255,14 @@
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].sort();
+        const states = [...new Set(allFetched.map(d => d['ESTADO']))].sort();
         states.forEach(s => {
             const div = document.createElement('div');
             div.className = 'state-item';
             div.innerHTML = `<i class="fas fa-chevron-right"></i> ${s}`;
             div.onclick = () => {
-                updateDashboard(rawData.filter(r => r['ESTADO'] === s), s);
+                // Al filtrar por estado, usamos rawData (última fecha)
+                updateDashboard(rawData.filter(r => r['ESTADO'] === s), s, false);
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
             };
@@ -270,7 +271,8 @@
     }
 
     function resetFilter(el) {
-        updateDashboard(rawData);
+        // Al resetear (Nacional), usamos allFetched (toda la data histórico)
+        updateDashboard(allFetched, "VENEZUELA", true);
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
     }
