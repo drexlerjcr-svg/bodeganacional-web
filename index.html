@@ -2,160 +2,266 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte Detallado de Gestión | Base de Datos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Mando Operativa - Monitoreo en Tiempo Real</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
+            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
+            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
+        
+        .app-container { display: flex; height: 100vh; position: relative; }
+
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001;
+        }
+
+        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+
+        /* Banner */
+        .banner { 
+            background: var(--primary); color: white; padding: 20px; border-radius: 12px; 
+            margin-bottom: 25px; box-shadow: var(--shadow);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        .banner h1 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+
+        .menu-btn {
+            display: none; position: fixed; bottom: 20px; right: 20px;
+            background: var(--primary); color: white; width: 60px; height: 60px;
+            border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2000; cursor: pointer; font-size: 1.5rem;
+        }
+
+        /* Grid System */
+        .grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 15px; margin-bottom: 30px; 
+        }
+
+        /* Card Style */
+        .card { 
+            background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px;
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 1s ease-in-out; }
+
+        .section-title { 
+            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; 
+            margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; }
+            .sidebar.open { transform: translateX(0); }
+            .menu-btn { display: block; }
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); transition: 0.2s; }
+        .state-item:hover { background: #f8fafc; color: var(--primary); }
+        .state-item.active { background: var(--primary); color: white; }
+        
+        #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .overlay.active { display: block; }
+    </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-10">
+<body>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="mb-10 text-center md:text-left">
-            <h1 class="text-4xl font-black text-slate-800 uppercase tracking-tighter">Panel de Control General</h1>
-            <p class="text-slate-500 font-medium">Visualización completa de datos por zona geográfica</p>
+<div id="loader">
+    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos Operativos...</p>
+</div>
+
+<button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="app-container">
+    <aside class="sidebar" id="sidebar">
+        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-shield-alt"></i> UBICACIONES
+        </div>
+        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
+        </div>
+        <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
+            SISTEMA DE MANDO v2.5
+        </div>
+    </aside>
+
+    <main class="main-view">
+        <div class="banner">
+            <h1 id="view-title">VENEZUELA</h1>
+            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
+                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | Sala de Programación y Monitoreo
+            </div>
         </div>
 
-        <div id="global-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            </div>
+        <div class="section-title">Indicadores Críticos (Generales)</div>
+        <div class="grid" id="grid-criticos"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <h3 class="font-bold text-slate-700 mb-4 uppercase text-xs tracking-widest">Resumen Atenciones</h3>
-                <div id="main-donut"></div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <h3 class="font-bold text-slate-700 mb-4 uppercase text-xs tracking-widest">Carga por Estado (Recibidas)</h3>
-                <div id="main-bar"></div>
-            </div>
-        </div>
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="grid" id="grid-estatus"></div>
 
-        <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <i class="fas fa-list-ul text-indigo-600"></i> Desglose Detallado por Estado
-        </h2>
-        <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-    </div>
+        <div class="section-title">Asignación de Fiscales y Dependencias</div>
+        <div class="grid" id="grid-fiscales"></div>
 
-    <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201';
+        <div class="section-title">Métricas de Rendimiento</div>
+        <div class="grid" id="grid-metricas"></div>
 
-        async function init() {
-            const res = await fetch(SHEET_URL);
+        <div style="height: 60px;"></div>
+    </main>
+</div>
+
+<script>
+    // URL apuntando a la pestaña Hoja 1
+    const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201";
+    let rawData = [];
+
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    async function init() {
+        try {
+            const res = await fetch(url);
             const text = await res.text();
-            const json = JSON.parse(text.substring(47, text.length - 2));
-            render(json.table.rows);
-        }
-
-        function n(val) {
-            if (!val || val.v === null) return 0;
-            return typeof val.v === 'number' ? val.v : parseFloat(val.v.toString().replace(/[^0-9.]/g, '')) || 0;
-        }
-
-        function render(rows) {
-            const container = document.getElementById('cards-container');
-            const kpiContainer = document.getElementById('global-kpis');
+            const json = JSON.parse(text.substring(47).slice(0, -2));
             
-            let gRec = 0, gAtend = 0, gPend = 0, gAdm = 0;
-            const estadosArr = [], recibidasArr = [];
+            // Mapeo dinámico de columnas por nombre
+            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            
+            rawData = json.table.rows.map(r => {
+                let obj = {};
+                r.c.forEach((cell, i) => {
+                    let val = 0;
+                    if(cell) {
+                        val = cell.v;
+                        // Si es un porcentaje en el sheet (ej: 0.85), Google lo manda como número.
+                    }
+                    if(cols[i]) obj[cols[i]] = val;
+                });
+                return obj;
+            }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
-            rows.forEach((row) => {
-                const c = row.c;
-                const nombre = c[0] ? c[0].v : "";
-
-                // Filtrar solo filas con datos reales de estados
-                if (nombre && !["ESTADO", "TOTALES", "TOTAL"].includes(nombre.toUpperCase())) {
-                    const rec = n(c[4]), adm = n(c[5]), noAdm = n(c[6]), arch = n(c[8]), insp = n(c[9]), conc = n(c[10]), fisc = n(c[11]), atend = n(c[12]), pend = n(c[13]);
-
-                    gRec += rec; gAtend += atend; gPend += pend; gAdm += adm;
-                    estadosArr.push(nombre);
-                    recibidasArr.push(rec);
-
-                    // Crear Card para este estado
-                    container.innerHTML += `
-                        <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100">
-                            <div class="bg-slate-800 p-4">
-                                <h3 class="text-white font-bold uppercase tracking-tight">${nombre}</h3>
-                            </div>
-                            <div class="p-5">
-                                <div class="flex justify-between items-end mb-4">
-                                    <div>
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">Recibidas</p>
-                                        <p class="text-2xl font-black text-slate-800">${rec.toLocaleString()}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase leading-none">Eficiencia</p>
-                                        <p class="text-lg font-bold text-indigo-600">${rec > 0 ? ((atend/rec)*100).toFixed(1) : 0}%</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="space-y-3">
-                                    <div class="flex justify-between text-sm border-b pb-1">
-                                        <span class="text-gray-500"><i class="fas fa-check-double text-emerald-500 mr-2"></i>Atendidas</span>
-                                        <span class="font-bold text-slate-700">${atend.toLocaleString()}</span>
-                                    </div>
-                                    <div class="flex justify-between text-sm border-b pb-1">
-                                        <span class="text-gray-500"><i class="fas fa-clock text-orange-500 mr-2"></i>Por Atender</span>
-                                        <span class="font-bold text-slate-700">${pend.toLocaleString()}</span>
-                                    </div>
-                                    <div class="flex justify-between text-sm border-b pb-1">
-                                        <span class="text-gray-500"><i class="fas fa-file-signature text-blue-500 mr-2"></i>Admitidas</span>
-                                        <span class="font-bold text-slate-700">${adm.toLocaleString()}</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 grid grid-cols-3 gap-2 text-center pt-2">
-                                    <div class="bg-gray-50 p-2 rounded-lg">
-                                        <p class="text-[9px] font-bold text-gray-400 uppercase">Insp.</p>
-                                        <p class="font-bold text-slate-700 text-xs">${insp}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-2 rounded-lg">
-                                        <p class="text-[9px] font-bold text-gray-400 uppercase">Conc.</p>
-                                        <p class="font-bold text-slate-700 text-xs">${conc}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-2 rounded-lg">
-                                        <p class="text-[9px] font-bold text-gray-400 uppercase">Fisc.</p>
-                                        <p class="font-bold text-slate-700 text-xs">${fisc}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            // Pintar KPIs Globales
-            const kpiData = [
-                {lab: 'Recibidas', val: gRec, col: 'indigo'},
-                {lab: 'Atendidas', val: gAtend, col: 'emerald'},
-                {lab: 'Por Atender', val: gPend, col: 'orange'},
-                {lab: 'Admitidas', val: gAdm, col: 'blue'}
-            ];
-            kpiContainer.innerHTML = kpiData.map(k => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border-b-4 border-${k.col}-500">
-                    <p class="text-xs font-bold text-gray-400 uppercase">${k.lab}</p>
-                    <p class="text-3xl font-black text-slate-800">${k.val.toLocaleString()}</p>
-                </div>
-            `).join('');
-
-            // Gráficos
-            new ApexCharts(document.querySelector("#main-donut"), {
-                series: [gAtend, gPend],
-                chart: { type: 'donut', height: 300 },
-                labels: ['Atendidas', 'Pendientes'],
-                colors: ['#10b981', '#f97316'],
-                legend: { position: 'bottom' }
-            }).render();
-
-            new ApexCharts(document.querySelector("#main-bar"), {
-                series: [{ name: 'Recibidas', data: recibidasArr }],
-                chart: { type: 'bar', height: 300, toolbar: {show:false} },
-                xaxis: { categories: estadosArr },
-                colors: ['#6366f1'],
-                plotOptions: { bar: { borderRadius: 4 } }
-            }).render();
+            renderSidebar();
+            updateDashboard(rawData);
+            document.getElementById('loader').style.display = 'none';
+        } catch (e) { 
+            console.error("Error cargando datos:", e);
+            alert("No se pudo conectar con la base de datos. Verifica la publicación del Sheet.");
         }
+    }
 
-        init();
-    </script>
+    function renderSidebar() {
+        const list = document.getElementById('sidebar-list');
+        const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
+        states.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'state-item';
+            div.innerText = s;
+            div.onclick = () => {
+                const filtered = rawData.filter(d => d['ESTADO'] === s);
+                updateDashboard(filtered, s);
+                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+                div.classList.add('active');
+                if(window.innerWidth <= 768) toggleMenu();
+            };
+            list.appendChild(div);
+        });
+    }
+
+    function createCard(label, value, icon, color, isPercent = false) {
+        const numericValue = Number(value) || 0;
+        const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
+        const progress = isPercent ? numericValue : 100;
+
+        return `
+            <div class="card">
+                <div class="card-head">
+                    <span class="card-label">${label}</span>
+                    <i class="fas ${icon}" style="color:${color}"></i>
+                </div>
+                <div class="card-val" style="color:${color}">${valStr}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${Math.min(progress, 100)}%; background:${color}"></div>
+                </div>
+            </div>`;
+    }
+
+    function updateDashboard(data, title = "VENEZUELA") {
+        let s = {};
+        const columnsToSum = [
+            "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", 
+            "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", 
+            "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", 
+            "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN",
+            "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"
+        ];
+
+        columnsToSum.forEach(c => s[c] = 0);
+        data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
+
+        document.getElementById('view-title').innerText = title;
+
+        // GRIDS - Insertando HTML dinámico
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
+            createCard("Atendidas (Cerradas)", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+
+        document.getElementById('grid-estatus').innerHTML = 
+            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
+            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") +
+            createCard("Inspección", s["INSPECCIONADO"], "fa- binoculars", "#06b6d4") +
+            createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#10b981") +
+            createCard("Por Fiscalizar", s["POR FISCALIZAR"], "fa-clipboard-list", "#f59e0b") +
+            createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
+            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+
+        document.getElementById('grid-fiscales').innerHTML = 
+            createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") +
+            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
+            createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+
+        // Cálculo de Eficiencia
+        const total = s["REGISTROS RECIBIDOS"];
+        const pAte = total > 0 ? (s["ATENDIDAS"] / total) * 100 : 0;
+        const pPen = total > 0 ? (s["POR ATENDER"] / total) * 100 : 0;
+
+        document.getElementById('grid-metricas').innerHTML = 
+            createCard("Índice de Atención", pAte, "fa-chart-line", "var(--success)", true) +
+            createCard("Índice de Pendientes", pPen, "fa-chart-pie", "var(--danger)", true);
+    }
+
+    function resetFilter(el) {
+        updateDashboard(rawData);
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        if(window.innerWidth <= 768) toggleMenu();
+    }
+
+    init();
+</script>
 </body>
 </html>
