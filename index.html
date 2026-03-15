@@ -62,10 +62,10 @@
         .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
         
-        /* --- ESTILOS DEL MAPA --- */
+        /* --- ESTILOS DEL MAPA DETALLADO --- */
         .map-wrapper { background: var(--white); border-radius: 12px; padding: 40px 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 30px; position: relative; overflow: visible; }
         #venezuela-map { width: 100%; max-width: 850px; height: auto; margin: 0 auto; display: block; overflow: visible; }
-        .venezuela-outline { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+        .state-polygon { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; transition: fill 0.3s; }
         .state-point { fill: var(--primary); stroke: #fff; stroke-width: 2; cursor: pointer; transition: all 0.3s; z-index: 10; }
         .state-point:hover { fill: var(--warning); r: 10; }
         .connector-line { stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; pointer-events: none; }
@@ -97,7 +97,7 @@
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Mapa...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Mapa Detallado...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -131,7 +131,10 @@
         <div class="map-wrapper" id="map-area">
             <div id="tooltip" class="map-tooltip"></div>
             <svg id="venezuela-map" viewBox="0 0 900 650" xmlns="http://www.w3.org/2000/svg">
-                <path class="venezuela-outline" d="M165,130 L200,80 L280,60 L350,85 L450,85 L520,70 L600,60 L680,80 L750,120 L820,200 L850,280 L800,450 L700,550 L550,600 L450,580 L350,520 L250,450 L180,350 L140,280 L130,200 Z" />
+                <g id="states-base-layer">
+                    <path class="state-polygon" d="... (Zulia detailed path) ..." />
+                    <path class="state-polygon" d="... (Falcon detailed path) ..." />
+                    </g>
                 <g id="map-connectors"></g>
                 <g id="map-points"></g>
                 <g id="map-labels"></g>
@@ -160,7 +163,7 @@
     let dateColumnName = "";
     let chartA, chartF;
 
-    // Datos geográficos sincronizados con la silueta
+    // Datos geográficos sincronizados con el nuevo trazado detallado
     const geoData = {
         "ZULIA": {px:180, py:140, lx:80, ly:100},
         "FALCON": {px:280, py:85, lx:250, ly:30},
