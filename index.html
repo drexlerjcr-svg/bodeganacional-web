@@ -139,10 +139,20 @@
 </div>
 
 <script>
-    // URL encriptada en Base64 para ocultarla del código fuente simple
+    // URL encriptada - Hemos añadido .trim() para evitar errores por espacios invisibles
     const _0x4d2a = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZLUT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
-    const url = atob(_0x4d2a);
+    
+    // Función segura para decodificar
+    function getSafeUrl(base64) {
+        try {
+            return atob(base64.trim());
+        } catch (e) {
+            console.error("Error decodificando la URL. Verifica que la cadena Base64 sea correcta.");
+            return "";
+        }
+    }
 
+    const url = getSafeUrl(_0x4d2a);
     let rawData = [];
     let dateColumnName = "";
     let chartA, chartF;
@@ -175,6 +185,7 @@
     }
 
     async function init() {
+        if (!url) return;
         try {
             const res = await fetch(url);
             const text = await res.text();
@@ -194,7 +205,10 @@
             renderSidebar();
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e);
+            document.getElementById('loader').innerHTML = "<p style='color:red'>Error al conectar con los datos</p>";
+        }
     }
 
     function renderSidebar() {
