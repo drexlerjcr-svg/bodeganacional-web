@@ -139,7 +139,10 @@
 </div>
 
 <script>
-    const url = "https://docs.google.com/spreadsheets/d/19TiaUO98LcDaVshi2Tb9CJdrmvt08w2nXHrYkrJVLkQ/gviz/tq?tqx=out:json&sheet=Hoja%201";
+    // URL encriptada en Base64 para ocultarla del código fuente simple
+    const _0x4d2a = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZLUT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    const url = atob(_0x4d2a);
+
     let rawData = [];
     let dateColumnName = "";
     let chartA, chartF;
