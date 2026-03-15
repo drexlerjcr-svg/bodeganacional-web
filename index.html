@@ -15,7 +15,6 @@
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        /* --- PANEL DE CONTRASEÑA --- */
         #auth-overlay {
             position: fixed; inset: 0; background: var(--primary);
             display: flex; justify-content: center; align-items: center;
@@ -43,7 +42,6 @@
         .btn-auth:hover { background: #152a66; }
         .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none; }
 
-        /* --- ESTILOS ORIGINALES MANTENIDOS --- */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
         .app-container { display: flex; height: 100vh; position: relative; opacity: 0; transition: opacity 0.5s; }
         .sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001; }
@@ -78,7 +76,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <i class="fas fa-user-shield fa-4x"></i>
-        <h2>SALA DE MANDO</h2>
+        <h2>Programación y Monitoreo</h2>
         <p>Ingrese el código de seguridad para acceder</p>
         <input type="password" id="pin-input" class="pin-input" placeholder="****" maxlength="4">
         <button class="btn-auth" onclick="checkAuth()">ENTRAR</button>
@@ -88,7 +86,7 @@
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos con URL Corregida...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -100,7 +98,7 @@
             <i class="fas fa-shield-alt"></i> UBICACIONES
         </div>
         <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL</div>
         </div>
         <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
             SISTEMA DE MANDO v2.6
@@ -132,8 +130,7 @@
 </div>
 
 <script>
-    // Configuración de Seguridad Encriptada
-    const _0x_h = "MTc5Mw=="; // Hash Base64 de la clave
+    const _0x_h = "MTc5Mw=="; 
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
@@ -143,10 +140,8 @@
 
     Chart.register(ChartDataLabels);
 
-    // FUNCIÓN DE AUTENTICACIÓN MEJORADA
     function checkAuth() {
         const input = document.getElementById('pin-input').value;
-        // Validación contra el hash
         if (btoa(input) === _0x_h) {
             document.getElementById('auth-overlay').style.opacity = '0';
             setTimeout(() => {
