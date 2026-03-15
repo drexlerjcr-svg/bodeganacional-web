@@ -108,11 +108,11 @@
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
             <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
-                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="view-mode">Histórico Nacional</span>
+                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | Sala de Programación y Monitoreo
             </div>
         </div>
 
-        <div class="section-title">Indicadores Críticos</div>
+        <div class="section-title">Indicadores Críticos (Generales)</div>
         <div class="grid" id="grid-criticos"></div>
 
         <div class="section-title">Estatus del Flujo de Denuncia</div>
@@ -149,18 +149,16 @@
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
-                    let val = (cell && cell.v !== null) ? cell.v : 0;
+                    let val = cell ? cell.v : 0;
                     if(cols[i]) obj[cols[i]] = val;
                 });
                 return obj;
             }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
             renderSidebar();
-            updateDashboard(rawData, "VENEZUELA", false);
+            updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
-        } catch (e) { 
-            console.error("Error cargando datos:", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     function renderSidebar() {
@@ -171,11 +169,11 @@
             div.className = 'state-item';
             div.innerText = s;
             div.onclick = () => {
-                // FILTRADO DE ÚLTIMAS 24 FILAS PARA EL ESTADO SELECCIONADO
-                const stateFiltered = rawData.filter(d => d['ESTADO'] === s);
-                const last24 = stateFiltered.slice(-24); 
+                // CAMBIO AQUÍ: Filtramos por estado y tomamos SOLO la última fila registrada
+                const stateData = rawData.filter(d => d['ESTADO'] === s);
+                const lastRow = stateData.slice(-1); 
                 
-                updateDashboard(last24, s, true);
+                updateDashboard(lastRow, s);
                 
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
@@ -201,7 +199,7 @@
             </div>`;
     }
 
-    function updateDashboard(data, title, isRecentView) {
+    function updateDashboard(data, title = "VENEZUELA") {
         let s = {};
         const columnsToSum = [
             "REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", 
@@ -215,11 +213,10 @@
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('view-mode').innerText = isRecentView ? "Análisis de últimas 24 filas" : "Histórico Nacional";
 
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
-            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Atendidas (Cerradas)", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
             createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
 
         document.getElementById('grid-estatus').innerHTML = 
@@ -239,13 +236,16 @@
             createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
 
         const total = s["REGISTROS RECIBIDOS"];
+        const pAte = total > 0 ? (s["ATENDIDAS"] / total) * 100 : 0;
+        const pPen = total > 0 ? (s["POR ATENDER"] / total) * 100 : 0;
+
         document.getElementById('grid-metricas').innerHTML = 
-            createCard("Eficiencia", total > 0 ? (s["ATENDIDAS"] / total) * 100 : 0, "fa-chart-line", "var(--success)", true) +
-            createCard("Mora Operativa", total > 0 ? (s["POR ATENDER"] / total) * 100 : 0, "fa-chart-pie", "var(--danger)", true);
+            createCard("Índice de Atención", pAte, "fa-chart-line", "var(--success)", true) +
+            createCard("Índice de Pendientes", pPen, "fa-chart-pie", "var(--danger)", true);
     }
 
     function resetFilter(el) {
-        updateDashboard(rawData, "VENEZUELA", false);
+        updateDashboard(rawData);
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         if(window.innerWidth <= 768) toggleMenu();
