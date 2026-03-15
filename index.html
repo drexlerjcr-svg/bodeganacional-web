@@ -47,7 +47,7 @@
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Sincronizando con Sala de Mando...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos con URL Corregida...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -55,41 +55,71 @@
 
 <div class="app-container">
     <aside class="sidebar" id="sidebar">
-        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;"><i class="fas fa-shield-alt"></i> UBICACIONES</div>
-        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;"><div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div></div>
-        <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">SISTEMA DE MANDO v2.5</div>
+        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
+            <i class="fas fa-shield-alt"></i> UBICACIONES
+        </div>
+        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
+        </div>
+        <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
+            SISTEMA DE MANDO v2.6
+        </div>
     </aside>
+
     <main class="main-view" id="main-scroll-container">
-        <div class="banner"><h1 id="view-title">VENEZUELA</h1><div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;"><i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="date-info">Consolidado Histórico</span></div></div>
-        <div class="section-title">Indicadores Críticos</div><div id="grid-criticos" class="grid"></div>
-        <div class="section-title">Estatus del Flujo de Denuncia</div><div id="grid-estatus" class="grid"></div>
-        <div class="section-title">Asignación de Fiscales y Dependencias</div><div id="grid-fiscales" class="grid"></div>
+        <div class="banner">
+            <h1 id="view-title">VENEZUELA</h1>
+            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
+                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="date-info">Consolidado Histórico</span>
+            </div>
+        </div>
+
+        <div class="section-title">Indicadores Críticos</div>
+        <div class="grid" id="grid-criticos"></div>
+
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div class="grid" id="grid-estatus"></div>
+
+        <div class="section-title">Asignación de Fiscales y Dependencias</div>
+        <div class="grid" id="grid-fiscales"></div>
+
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
-            <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
-            <div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
+            <div class="chart-container">
+                <h3>Atención vs Pendientes</h3>
+                <canvas id="chartAtencion"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Asignación de Fiscales</h3>
+                <canvas id="chartFiscales"></canvas>
+            </div>
         </div>
         <div style="height: 60px;"></div>
     </main>
 </div>
 
 <script>
-    // Técnica de fragmentación: Oculta la URL sin usar Base64 para evitar errores de red
-    const _p1 = "https://docs.google.com/";
-    const _p2 = "spreadsheets/d/19TiaUO98LcdAVshi2Tb9CJdrmvt08w2nXHrYkrJVlKQ/";
-    const _p3 = "gviz/tq?tqx=out:json&sheet=Hoja%201";
-    const _finalUrl = _p1 + _p2 + _p3;
+    // URL Corregida (Q mayúscula al final) y ofuscada para mayor protección
+    const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+    const url = atob(_0x_u);
 
     let rawData = [];
     let dateColumnName = "";
     let chartA, chartF;
 
     Chart.register(ChartDataLabels);
+
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
-    function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
-    
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function scrollToTop() {
+        document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function toRealDate(val) {
         if (!val) return new Date(0);
         if (typeof val === 'string' && val.includes('Date')) {
@@ -106,8 +136,8 @@
 
     async function init() {
         try {
-            const response = await fetch(_finalUrl);
-            const text = await response.text();
+            const res = await fetch(url);
+            const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             dateColumnName = cols[1];
@@ -125,8 +155,8 @@
             updateDashboard(rawData);
             document.getElementById('loader').style.display = 'none';
         } catch (e) {
-            console.error("Fallo crítico:", e);
-            document.getElementById('loader').innerHTML = `<div style="text-align:center; padding: 20px;"><i class="fas fa-wifi-slash fa-3x" style="color:var(--danger)"></i><h2 style="margin-top:20px">Error de Enlace</h2><p>Verifique los permisos de la hoja o su conexión.</p><button onclick="location.reload()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer">Reintentar</button></div>`;
+            console.error(e);
+            document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión: Verifica que el documento sea público.</p>";
         }
     }
 
@@ -160,14 +190,24 @@
     function createCard(label, value, icon, color, isPercent = false) {
         const numericValue = Number(value) || 0;
         const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
-        return `<div class="card"><div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div><div class="card-val" style="color:${color}">${valStr}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div></div>`;
+        return `<div class="card">
+                <div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div>
+                <div class="card-val" style="color:${color}">${valStr}</div>
+                <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div>
+            </div>`;
     }
 
     function initCharts(atendidas, porAtender, porAsignar, conFiscal) {
         const config = (labels, data, colors) => ({
             type: 'doughnut',
             data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, formatter: (value) => value > 0 ? value.toLocaleString('es-ES') : '' } } }
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } },
+                    datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, formatter: (v) => v > 0 ? v.toLocaleString('es-ES') : '' }
+                }
+            }
         });
         if (chartA) chartA.destroy();
         if (chartF) chartF.destroy();
@@ -177,18 +217,42 @@
 
     function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
-        cols.forEach(c => s[c] = 0);
-        data.forEach(d => cols.forEach(c => s[c] += Number(d[c]) || 0));
+        const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+        columnsToSum.forEach(c => s[c] = 0);
+        data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
+
         document.getElementById('view-title').innerText = title;
         document.getElementById('date-info').innerText = dateLabel ? `Reporte del: ${dateLabel}` : "Consolidado Histórico";
+
         initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
+            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+
+        document.getElementById('grid-estatus').innerHTML = 
+            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
+            createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") +
+            createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
+            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+
+        document.getElementById('grid-fiscales').innerHTML = 
+            createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") +
+            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+            createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
+            createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
     }
 
-    function resetFilter(el) { updateDashboard(rawData); document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); if(window.innerWidth <= 768) toggleMenu(); scrollToTop(); }
+    function resetFilter(el) {
+        updateDashboard(rawData);
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        if(window.innerWidth <= 768) toggleMenu();
+        scrollToTop();
+    }
+
     init();
 </script>
 </body>
