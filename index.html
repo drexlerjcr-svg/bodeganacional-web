@@ -1,331 +1,302 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Monitoreo en Tiempo Real</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <style>
-        :root {
-            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
-            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
-            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala de Mando Operativa - Monitoreo en Tiempo Real</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<style>
+:root {
+--primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
+--danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
+--bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
+--shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
 
-        /* --- PANEL DE CONTRASEÑA --- */
-        #auth-overlay {
-            position: fixed; inset: 0; background: var(--primary);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 5000; transition: opacity 0.5s ease;
-        }
-        .auth-card {
-            background: white; padding: 40px; border-radius: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
-            text-align: center; width: 90%; max-width: 400px;
-        }
-        .auth-card i { color: var(--primary); margin-bottom: 20px; }
-        .auth-card h2 { margin: 0 0 10px; color: var(--text); font-weight: 900; text-transform: uppercase; }
-        .auth-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
-        .pin-input {
-            width: 100%; padding: 15px; font-size: 1.5rem; text-align: center;
-            letter-spacing: 10px; border: 2px solid #e2e8f0; border-radius: 10px;
-            margin-bottom: 20px; outline: none; transition: border-color 0.3s;
-        }
-        .pin-input:focus { border-color: var(--accent); }
-        .btn-auth {
-            width: 100%; padding: 15px; background: var(--primary);
-            color: white; border: none; border-radius: 10px;
-            font-weight: bold; cursor: pointer; font-size: 1rem;
-        }
-        .btn-auth:hover { background: #152a66; }
-        .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none; }
+#auth-overlay {
+position: fixed; inset: 0; background: var(--primary);
+display: flex; justify-content: center; align-items: center;
+z-index: 5000; transition: opacity 0.5s ease;
+}
+.auth-card {
+background: white; padding: 40px; border-radius: 20px;
+box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+text-align: center; width: 90%; max-width: 400px;
+}
+.auth-card i { color: var(--primary); margin-bottom: 20px; }
+.auth-card h2 { margin: 0 0 10px; color: var(--text); font-weight: 900; text-transform: uppercase; }
+.auth-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+.pin-input {
+width: 100%; padding: 15px; font-size: 1.5rem; text-align: center;
+letter-spacing: 10px; border: 2px solid #e2e8f0; border-radius: 10px;
+margin-bottom: 20px; outline: none; transition: border-color 0.3s;
+}
+.pin-input:focus { border-color: var(--accent); }
+.btn-auth {
+width: 100%; padding: 15px; background: var(--primary);
+color: white; border: none; border-radius: 10px;
+font-weight: bold; cursor: pointer; font-size: 1rem;
+}
+.btn-auth:hover { background: #152a66; }
+.error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none; }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        .app-container { display: flex; height: 100vh; position: relative; opacity: 0; transition: opacity 0.5s; }
-        .sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001; }
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-        .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow); }
-        .banner h1 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
-        .menu-btn { display: none; position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2000; cursor: pointer; font-size: 1.5rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .chart-container { background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); height: 260px; display: flex; flex-direction: column; align-items: center; }
-        .chart-container h3 { font-size: 0.65rem; margin: 0 0 10px 0; color: var(--muted); text-transform: uppercase; }
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .card { background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
-        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-        .card-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
-        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 1s ease-in-out; }
-        .section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
-        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
-        
-        /* --- ESTILOS DEL MAPA DETALLADO --- */
-        .map-wrapper { background: var(--white); border-radius: 12px; padding: 40px 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 30px; position: relative; overflow: visible; }
-        #venezuela-map { width: 100%; max-width: 850px; height: auto; margin: 0 auto; display: block; overflow: visible; }
-        .state-polygon { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; transition: fill 0.3s; }
-        .state-point { fill: var(--primary); stroke: #fff; stroke-width: 2; cursor: pointer; transition: all 0.3s; z-index: 10; }
-        .state-point:hover { fill: var(--warning); r: 10; }
-        .connector-line { stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; pointer-events: none; }
-        .state-label-text { font-size: 10px; font-weight: 800; fill: var(--muted); cursor: pointer; transition: fill 0.3s; text-transform: uppercase; }
-        .state-label-text:hover { fill: var(--accent); }
-        .map-tooltip { position: absolute; background: rgba(30, 58, 138, 0.95); color: white; padding: 10px 15px; border-radius: 8px; font-size: 13px; pointer-events: none; display: none; z-index: 2000; box-shadow: 0 8px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); text-align: center; }
-
-        @media (max-width: 768px) { .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; } .sidebar.open { transform: translateX(0); } .menu-btn { display: block; } .grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .map-wrapper { padding: 10px; } }
-        .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
-        .state-item:hover { background: #f8fafc; color: var(--primary); }
-        .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .overlay.active { display: block; }
-    </style>
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
+.app-container { display: flex; height: 100vh; position: relative; opacity: 0; transition: opacity 0.5s; }
+.sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001; }
+.main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+.banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow); }
+.banner h1 { margin: 0; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+.menu-btn { display: none; position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2000; cursor: pointer; font-size: 1.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+.chart-container { background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); height: 260px; display: flex; flex-direction: column; align-items: center; }
+.chart-container h3 { font-size: 0.65rem; margin: 0 0 10px 0; color: var(--muted); text-transform: uppercase; }
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+canvas { max-width: 100% !important; max-height: 100% !important; }
+.card { background: var(--white); padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+.card-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; transition: width 1s ease-in-out; }
+.section-title { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+.section-title::before { content: ''; width: 4px; height: 16px; background: var(--warning); border-radius: 2px; }
+@media (max-width: 768px) { .sidebar { position: absolute; left: 0; transform: translateX(-100%); height: 100%; } .sidebar.open { transform: translateX(0); } .menu-btn { display: block; } .grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .chart-container { height: 240px; } }
+.state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+.state-item:hover { background: #f8fafc; color: var(--primary); }
+.state-item.active { background: var(--primary); color: white; }
+#loader { position: fixed; inset: 0; background: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+.overlay.active { display: block; }
+</style>
 </head>
 <body>
 
 <div id="auth-overlay">
-    <div class="auth-card">
-        <i class="fas fa-user-shield fa-4x"></i>
+<div class="auth-card">
+<i class="fas fa-user-shield fa-4x"></i>
         <h2>SALA DE MANDO</h2>
-        <p>Ingrese el código de seguridad para acceder</p>
-        <input type="password" id="pin-input" class="pin-input" placeholder="****" maxlength="4">
-        <button class="btn-auth" onclick="checkAuth()">ENTRAR</button>
-        <div id="error-msg" class="error-msg">Código incorrecto. Intente de nuevo.</div>
-    </div>
+        <h2>Programación y Monitoreo</h2>
+<p>Ingrese el código de seguridad para acceder</p>
+<input type="password" id="pin-input" class="pin-input" placeholder="****" maxlength="4">
+<button class="btn-auth" onclick="checkAuth()">ENTRAR</button>
+<div id="error-msg" class="error-msg">Código incorrecto. Intente de nuevo.</div>
+</div>
 </div>
 
 <div id="loader">
-    <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Mapa Detallado...</p>
+<i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos...</p>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--muted)">Cargando Datos...</p>
 </div>
 
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="app-container" id="app">
-    <aside class="sidebar" id="sidebar">
-        <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
-            <i class="fas fa-shield-alt"></i> UBICACIONES
-        </div>
-        <div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
-            <div class="state-item active" onclick="resetFilter(this)">NACIONAL (TOTAL)</div>
-        </div>
-        <div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
-            SISTEMA DE MANDO v2.6
-        </div>
-    </aside>
+<aside class="sidebar" id="sidebar">
+<div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
+<i class="fas fa-shield-alt"></i> UBICACIONES
+</div>
+<div id="sidebar-list" style="overflow-y: auto; flex-grow: 1; padding-top: 10px;">
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL</div>
+            <div class="state-item active" onclick="resetFilter(this)">NACIONAL</div>
+</div>
+<div style="padding: 15px; font-size: 10px; color: var(--muted); border-top: 1px solid #eee; text-align: center;">
+SISTEMA DE MANDO v2.6
+</div>
+</aside>
 
-    <main class="main-view" id="main-scroll-container">
-        <div class="banner">
-            <h1 id="view-title">VENEZUELA</h1>
-            <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
-                <i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="date-info">Consolidado Histórico</span>
-            </div>
-        </div>
+<main class="main-view" id="main-scroll-container">
+<div class="banner">
+<h1 id="view-title">VENEZUELA</h1>
+<div style="font-size: 0.8rem; opacity: 0.9; margin-top: 4px; font-weight: 500;">
+<i class="far fa-calendar-alt"></i> <span id="current-date"></span> | <span id="date-info">Consolidado Histórico</span>
+</div>
+</div>
 
-        <div class="section-title">Indicadores Críticos</div>
-        <div class="grid" id="grid-criticos"></div>
+<div class="section-title">Indicadores Críticos</div>
+<div class="grid" id="grid-criticos"></div>
+<div class="section-title">Estatus del Flujo de Denuncia</div>
+<div class="grid" id="grid-estatus"></div>
+<div class="section-title">Asignación de Fiscales y Dependencias</div>
+<div class="grid" id="grid-fiscales"></div>
 
-        <div class="section-title">Distribución Geográfica (% Atención)</div>
-        <div class="map-wrapper" id="map-area">
-            <div id="tooltip" class="map-tooltip"></div>
-            <svg id="venezuela-map" viewBox="0 0 900 650" xmlns="http://www.w3.org/2000/svg">
-                <g id="states-base-layer">
-                    <path class="state-polygon" d="... (Zulia detailed path) ..." />
-                    <path class="state-polygon" d="... (Falcon detailed path) ..." />
-                    </g>
-                <g id="map-connectors"></g>
-                <g id="map-points"></g>
-                <g id="map-labels"></g>
-            </svg>
-        </div>
-
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div class="grid" id="grid-estatus"></div>
-        <div class="section-title">Asignación de Fiscales y Dependencias</div>
-        <div class="grid" id="grid-fiscales"></div>
-
-        <div class="charts-row">
-            <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
-            <div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
-        </div>
-        <div style="height: 60px;"></div>
-    </main>
+<div class="section-title">Análisis Visual de Gestión</div>
+<div class="charts-row">
+<div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
+<div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
+</div>
+<div style="height: 60px;"></div>
+</main>
 </div>
 
 <script>
+    const _0x_h = "MTc5Mw==";
     const _0x_h = "MTc5Mw=="; 
-    const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
-    const url = atob(_0x_u);
+const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
+const url = atob(_0x_u);
 
-    let rawData = [];
-    let dateColumnName = "";
-    let chartA, chartF;
+let rawData = [];
+let dateColumnName = "";
+let chartA, chartF;
 
-    // Datos geográficos sincronizados con el nuevo trazado detallado
-    const geoData = {
-        "ZULIA": {px:180, py:140, lx:80, ly:100},
-        "FALCON": {px:280, py:85, lx:250, ly:30},
-        "LARA": {px:310, py:150, lx:240, ly:180},
-        "YARACUY": {px:370, py:120, lx:380, ly:50},
-        "CARABOBO": {px:400, py:135, lx:410, ly:185},
-        "ARAGUA": {px:430, py:135, lx:460, ly:50},
-        "DISTRITO CAPITAL": {px:455, py:110, lx:480, ly:80},
-        "MIRANDA": {px:480, py:130, lx:550, ly:70},
-        "LA GUAIRA": {px:460, py:95, lx:500, ly:30},
-        "ANZOATEGUI": {px:570, py:200, lx:680, ly:140},
-        "SUCRE": {px:640, py:100, lx:750, ly:50},
-        "MONAGAS": {px:660, py:190, lx:780, ly:200},
-        "DELTA AMACURO": {px:740, py:230, lx:840, ly:270},
-        "BOLIVAR": {px:610, py:370, lx:780, ly:470},
-        "AMAZONAS": {px:470, py:500, lx:350, ly:600},
-        "APURE": {px:370, py:350, lx:280, ly:420},
-        "TACHIRA": {px:170, py:300, lx:80, ly:340},
-        "MERIDA": {px:210, py:250, lx:120, ly:220},
-        "TRUJILLO": {px:250, py:200, lx:180, ly:240},
-        "BARINAS": {px:290, py:260, lx:200, ly:300},
-        "PORTUGUESA": {px:330, py:210, lx:300, ly:170},
-        "COJEDES": {px:390, py:210, lx:430, ly:260},
-        "GUARICO": {px:450, py:250, lx:550, ly:320},
-        "NUEVA ESPARTA": {px:620, py:60, lx:750, ly:100}
-    };
+Chart.register(ChartDataLabels);
 
-    Chart.register(ChartDataLabels);
+function checkAuth() {
+const input = document.getElementById('pin-input').value;
+if (btoa(input) === _0x_h) {
+document.getElementById('auth-overlay').style.opacity = '0';
+setTimeout(() => {
+document.getElementById('auth-overlay').style.display = 'none';
+document.getElementById('app').style.opacity = '1';
+document.getElementById('loader').style.display = 'flex';
+init(); 
+}, 500);
+} else {
+document.getElementById('error-msg').style.display = 'block';
+document.getElementById('pin-input').value = '';
+}
+}
 
-    function checkAuth() {
-        const input = document.getElementById('pin-input').value;
-        if (btoa(input) === _0x_h) {
-            document.getElementById('auth-overlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('app').style.opacity = '1';
-                document.getElementById('loader').style.display = 'flex';
-                init(); 
-            }, 500);
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('pin-input').value = '';
-        }
-    }
+document.getElementById('pin-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAuth(); });
+document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    async function init() {
-        try {
-            const res = await fetch(url);
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
-            dateColumnName = cols[1];
+function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
+function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
 
-            rawData = json.table.rows.map(r => {
-                let obj = {};
-                r.c.forEach((cell, i) => {
-                    let val = cell ? (cell.f ? cell.f : cell.v) : 0;
-                    if(cols[i]) obj[cols[i]] = val;
-                });
-                return obj;
-            }).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
+function toRealDate(val) {
+if (!val) return new Date(0);
+if (typeof val === 'string' && val.includes('Date')) {
+const p = val.match(/\d+/g);
+return new Date(p[0], p[1], p[2]);
+}
+if (typeof val === 'string' && val.includes('/')) {
+const parts = val.split('/');
+return new Date(parts[2], parts[1] - 1, parts[0]);
+}
+const d = new Date(val);
+return isNaN(d.getTime()) ? new Date(0) : d;
+}
 
-            renderSidebar();
-            renderMap();
-            updateDashboard(rawData);
-            document.getElementById('loader').style.display = 'none';
-        } catch (e) { document.getElementById('loader').innerHTML = "<p style='color:red'>Error de carga.</p>"; }
-    }
+async function init() {
+try {
+const res = await fetch(url);
+const text = await res.text();
+const json = JSON.parse(text.substring(47).slice(0, -2));
+const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+dateColumnName = cols[1];
 
-    function renderMap() {
-        const pointsLayer = document.getElementById('map-points');
-        const linesLayer = document.getElementById('map-connectors');
-        const labelsLayer = document.getElementById('map-labels');
-        const tooltip = document.getElementById('tooltip');
-        
-        Object.keys(geoData).forEach(state => {
-            const d = geoData[state];
-            
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", d.px); line.setAttribute("y1", d.py);
-            line.setAttribute("x2", d.lx); line.setAttribute("y2", d.ly);
-            line.setAttribute("class", "connector-line");
-            linesLayer.appendChild(line);
+rawData = json.table.rows.map(r => {
+let obj = {};
+r.c.forEach((cell, i) => {
+let val = cell ? (cell.f ? cell.f : cell.v) : 0;
+if(cols[i]) obj[cols[i]] = val;
+});
+return obj;
+}).filter(d => d['ESTADO'] && d['ESTADO'] !== 'TOTALES');
 
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", d.px); circle.setAttribute("cy", d.py); circle.setAttribute("r", "7");
-            circle.setAttribute("class", "state-point");
-            
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", d.lx); text.setAttribute("y", d.ly);
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("class", "state-label-text");
-            text.textContent = state;
+renderSidebar();
+updateDashboard(rawData);
+document.getElementById('loader').style.display = 'none';
+} catch (e) {
+document.getElementById('loader').innerHTML = "<p style='color:red'>Error de conexión: Documento no accesible.</p>";
+}
+}
 
-            const showInfo = (e) => {
-                const stateRows = rawData.filter(row => row['ESTADO'] === (state === "DISTRITO CAPITAL" ? "CARACAS" : (state === "LA GUAIRA" ? "VARGAS" : state)));
-                let rec = 0, ate = 0;
-                stateRows.forEach(r => { rec += Number(r["REGISTROS RECIBIDOS"]) || 0; ate += Number(r["ATENDIDAS"]) || 0; });
-                const porc = rec > 0 ? ((ate / rec) * 100).toFixed(1) : "0.0";
-                
-                tooltip.style.display = "block";
-                tooltip.style.left = (e.pageX - document.getElementById('map-area').offsetLeft + 15) + "px";
-                tooltip.style.top = (e.pageY - document.getElementById('map-area').offsetTop - 40) + "px";
-                tooltip.innerHTML = `<strong>${state}</strong><br><span style="color:var(--success)">${porc}% Atención</span>`;
-                circle.style.fill = "var(--warning)";
-            };
+function renderSidebar() {
+const list = document.getElementById('sidebar-list');
+const states = [...new Set(rawData.map(d => d['ESTADO']))].filter(Boolean).sort();
+states.forEach(s => {
+const div = document.createElement('div');
+div.className = 'state-item';
+div.innerText = s;
+div.onclick = () => {
+const stateRows = rawData.filter(d => d['ESTADO'] === s);
+if (stateRows.length > 0) {
+let maxTime = 0, newestDateLabel = "";
+stateRows.forEach(row => {
+const d = toRealDate(row[dateColumnName]);
+if (d.getTime() > maxTime) { maxTime = d.getTime(); newestDateLabel = row[dateColumnName]; }
+});
+const lastDayData = stateRows.filter(row => toRealDate(row[dateColumnName]).getTime() === maxTime);
+updateDashboard(lastDayData, s, newestDateLabel);
+}
+document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+div.classList.add('active');
+if(window.innerWidth <= 768) toggleMenu();
+scrollToTop();
+};
+list.appendChild(div);
+});
+}
 
-            const hideInfo = () => { tooltip.style.display = "none"; circle.style.fill = "var(--primary)"; };
+function createCard(label, value, icon, color, isPercent = false) {
+const numericValue = Number(value) || 0;
+const valStr = isPercent ? numericValue.toFixed(1) + '%' : Math.floor(numericValue).toLocaleString('es-ES');
+return `<div class="card">
+               <div class="card-head"><span class="card-label">${label}</span><i class="fas ${icon}" style="color:${color}"></i></div>
+               <div class="card-val" style="color:${color}">${valStr}</div>
+               <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(isPercent ? numericValue : 100, 100)}%; background:${color}"></div></div>
+           </div>`;
+}
 
-            [circle, text].forEach(el => {
-                el.onmousemove = showInfo;
-                el.onmouseleave = hideInfo;
-                el.onclick = () => {
-                    const searchName = state === "DISTRITO CAPITAL" ? "CARACAS" : (state === "LA GUAIRA" ? "VARGAS" : state);
-                    const sideEl = Array.from(document.querySelectorAll('.state-item')).find(i => i.innerText === searchName);
-                    if(sideEl) sideEl.click();
-                };
-            });
+function initCharts(atendidas, porAtender, porAsignar, conFiscal) {
+const config = (labels, data, colors) => ({
+type: 'doughnut',
+data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
+options: {
+responsive: true, maintainAspectRatio: false, cutout: '65%',
+plugins: {
+legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 10 } },
+datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, formatter: (v) => v > 0 ? v.toLocaleString('es-ES') : '' }
+}
+}
+});
+if (chartA) chartA.destroy();
+if (chartF) chartF.destroy();
+chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Por Atender'], [atendidas, porAtender], ['#22c55e', '#ef4444']));
+chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal', 'Con Fiscal Asignado'], [porAsignar, conFiscal], ['#f97316', '#059669']));
+}
 
-            pointsLayer.appendChild(circle);
-            labelsLayer.appendChild(text);
-        });
-    }
+function updateDashboard(data, title = "VENEZUELA", dateLabel = null) {
+let s = {};
+const columnsToSum = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "NUEVO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "POR FISCALIZAR", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+columnsToSum.forEach(c => s[c] = 0);
+data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
-    function updateDashboard(data, title = "VENEZUELA") {
-        let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "DIRECTOR DE FISCALIZACIÓN"];
-        cols.forEach(c => s[c] = 0);
-        data.forEach(d => cols.forEach(c => s[c] += Number(d[c]) || 0));
-        
-        document.getElementById('view-title').innerText = title;
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+document.getElementById('view-title').innerText = title;
+document.getElementById('date-info').innerText = dateLabel ? `Reporte del: ${dateLabel}` : "Consolidado Histórico";
 
-        initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-    }
+initCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
 
-    function createCard(l, v, i, c) { return `<div class="card"><div class="card-label">${l}</div><div class="card-val" style="color:${c}">${v.toLocaleString('es-ES')}</div><div class="progress-bar"><div class="progress-fill" style="width:70%; background:${c}"></div></div></div>`; }
+document.getElementById('grid-criticos').innerHTML = 
+createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
+createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
 
-    function initCharts(ate, pat, pas, con) {
-        const conf = (l, d, c) => ({ type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } } });
-        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), conf(['A', 'P'], [ate, pat], ['#22c55e', '#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), conf(['As', 'An'], [pas, con], ['#f97316', '#059669']));
-    }
+document.getElementById('grid-estatus').innerHTML = 
+createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") +
+createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") +
+createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") +
+createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") +
+createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
 
-    function renderSidebar() {
-        const list = document.getElementById('sidebar-list');
-        const states = [...new Set(rawData.map(d => d['ESTADO']))].sort();
-        states.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'state-item'; div.innerText = s;
-            div.onclick = () => { updateDashboard(rawData.filter(d => d['ESTADO'] === s), s); document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active')); div.classList.add('active'); };
-            list.appendChild(div);
-        });
-    }
+document.getElementById('grid-fiscales').innerHTML = 
+createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") +
+createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") +
+createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") +
+createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d");
+}
 
-    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); }
-    function scrollToTop() { document.getElementById('main-scroll-container').scrollTo({ top: 0, behavior: 'smooth' }); }
-    function resetFilter(el) { updateDashboard(rawData); document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+function resetFilter(el) {
+updateDashboard(rawData);
+document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+el.classList.add('active');
+if(window.innerWidth <= 768) toggleMenu();
+scrollToTop();
+}
 </script>
 </body>
 </html>
