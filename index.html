@@ -14,8 +14,38 @@
             --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
+
+        /* --- ESTILOS DEL PANEL DE CONTRASEÑA --- */
+        #auth-overlay {
+            position: fixed; inset: 0; background: var(--primary);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 5000; transition: opacity 0.5s ease;
+        }
+        .auth-card {
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            text-align: center; width: 90%; max-width: 400px;
+        }
+        .auth-card i { color: var(--primary); margin-bottom: 20px; }
+        .auth-card h2 { margin: 0 0 10px; color: var(--text); font-weight: 900; text-transform: uppercase; }
+        .auth-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+        .pin-input {
+            width: 100%; padding: 15px; font-size: 1.5rem; text-align: center;
+            letter-spacing: 10px; border: 2px solid #e2e8f0; border-radius: 10px;
+            margin-bottom: 20px; outline: none; transition: border-color 0.3s;
+        }
+        .pin-input:focus { border-color: var(--accent); }
+        .btn-auth {
+            width: 100%; padding: 15px; background: var(--primary);
+            color: white; border: none; border-radius: 10px;
+            font-weight: bold; cursor: pointer; font-size: 1rem;
+        }
+        .btn-auth:hover { background: #152a66; }
+        .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none; }
+
+        /* --- ESTILOS ORIGINALES MANTENIDOS --- */
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow: hidden; }
-        .app-container { display: flex; height: 100vh; position: relative; }
+        .app-container { display: flex; height: 100vh; position: relative; opacity: 0; transition: opacity 0.5s; }
         .sidebar { width: 260px; min-width: 260px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 1001; }
         .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; scroll-behavior: smooth; }
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow); }
@@ -38,12 +68,23 @@
         .state-item { padding: 12px 15px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
         .state-item:hover { background: #f8fafc; color: var(--primary); }
         .state-item.active { background: var(--primary); color: white; }
-        #loader { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
+        #loader { position: fixed; inset: 0; background: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .overlay.active { display: block; }
     </style>
 </head>
 <body>
+
+<div id="auth-overlay">
+    <div class="auth-card">
+        <i class="fas fa-user-shield fa-4x"></i>
+        <h2>SALA DE MANDO</h2>
+        <p>Ingrese el código de seguridad para acceder</p>
+        <input type="password" id="pin-input" class="pin-input" placeholder="****" maxlength="4">
+        <button class="btn-auth" onclick="checkAuth()">ENTRAR</button>
+        <div id="error-msg" class="error-msg">Código incorrecto. Intente de nuevo.</div>
+    </div>
+</div>
 
 <div id="loader">
     <i class="fas fa-circle-notch fa-spin fa-3x" style="color: var(--primary)"></i>
@@ -53,7 +94,7 @@
 <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<div class="app-container">
+<div class="app-container" id="app">
     <aside class="sidebar" id="sidebar">
         <div style="padding: 25px 20px; font-weight: 900; color: var(--primary); border-bottom: 1px solid #eee;">
             <i class="fas fa-shield-alt"></i> UBICACIONES
@@ -99,7 +140,7 @@
 </div>
 
 <script>
-    // URL Corregida (Q mayúscula al final) y ofuscada para mayor protección
+    const PIN_CORRECTO = "1793";
     const _0x_u = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=";
     const url = atob(_0x_u);
 
@@ -108,6 +149,26 @@
     let chartA, chartF;
 
     Chart.register(ChartDataLabels);
+
+    // FUNCIÓN DE AUTENTICACIÓN
+    function checkAuth() {
+        const input = document.getElementById('pin-input').value;
+        if (input === PIN_CORRECTO) {
+            document.getElementById('auth-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app').style.opacity = '1';
+                document.getElementById('loader').style.display = 'flex';
+                init(); // Llama a la carga original de datos
+            }, 500);
+        } else {
+            document.getElementById('error-msg').style.display = 'block';
+            document.getElementById('pin-input').value = '';
+        }
+    }
+
+    // Enter para entrar
+    document.getElementById('pin-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAuth(); });
 
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -252,8 +313,6 @@
         if(window.innerWidth <= 768) toggleMenu();
         scrollToTop();
     }
-
-    init();
 </script>
 </body>
 </html>
