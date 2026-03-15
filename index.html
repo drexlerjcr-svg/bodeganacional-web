@@ -32,7 +32,6 @@
         .sidebar-header i { cursor: pointer; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
 
-        /* ESTILOS SUBMENÚ */
         .state-group { border-bottom: 1px solid #f1f5f9; }
         .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
         .state-item:hover { background: #f1f5f9; }
@@ -87,7 +86,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">PREPARANDO MENÚS...</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">SINCRONIZANDO DATOS...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -212,7 +211,13 @@
 
         const createCard = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div><div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString('es-ES')}</div></div>`;
 
-        document.getElementById('grid-criticos').innerHTML = createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-hourglass-half", "var(--danger)");
+        // UNIFICACIÓN DE TARJETAS SOLICITADA
+        const diferenciaAtencion = s["ATENDIDAS"] - s["POR ATENDER"];
+
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + 
+            createCard("Atendidas / Por Atender", diferenciaAtencion, "fa-balance-scale", diferenciaAtencion >= 0 ? "var(--success)" : "var(--danger)");
+
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("No Admitidas", s["DENUNCIAS NO ADMITIDAS"], "fa-ban", "#94a3b8") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Centralizada", s["CENTRALIZADA"], "fa-network-wired", "#6366f1") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899") + createCard("Desestimada", s["DESESTIMADA"], "fa-thumbs-down", "#64748b");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca") + createCard("Dir. Fiscalización", s["DIRECTOR DE FISCALIZACIÓN"], "fa-user-shield", "#be185d") + createCard("Otras Depend.", s["OTRA DEPENDENCI"], "fa-share-alt", "#94a3b8");
