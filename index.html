@@ -140,6 +140,17 @@
         document.getElementById('overlay').classList.toggle('active');
     }
 
+    // Función auxiliar para parsear fechas de Google Sheets (Date(2025,0,29) o strings)
+    function parseDate(dateVal) {
+        if (!dateVal) return new Date(0);
+        if (typeof dateVal === 'string' && dateVal.includes('Date')) {
+            const parts = dateVal.match(/\d+/g);
+            return new Date(parts[0], parts[1], parts[2]);
+        }
+        const d = new Date(dateVal);
+        return isNaN(d) ? new Date(0) : d;
+    }
+
     async function init() {
         try {
             const res = await fetch(url);
@@ -147,13 +158,12 @@
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
             
-            // Identificamos el nombre de la columna 2 (índice 1) para filtrar por fecha
             dateColumnName = cols[1];
 
             rawData = json.table.rows.map(r => {
                 let obj = {};
                 r.c.forEach((cell, i) => {
-                    let val = cell ? cell.v : 0;
+                    let val = cell ? (cell.f ? cell.f : cell.v) : 0; // Usamos .f si existe para obtener el texto formateado de la fecha
                     if(cols[i]) obj[cols[i]] = val;
                 });
                 return obj;
@@ -175,12 +185,16 @@
             div.onclick = () => {
                 const stateRows = rawData.filter(d => d['ESTADO'] === s);
                 
-                // LÓGICA DE FECHA: Buscamos la fecha más reciente en la columna 2 para ese estado
                 if (stateRows.length > 0) {
-                    const lastDate = stateRows[stateRows.length - 1][dateColumnName];
-                    const lastDayData = stateRows.filter(d => d[dateColumnName] === lastDate);
+                    // Buscamos la fecha máxima real convirtiendo los valores
+                    const sortedByDate = [...stateRows].sort((a, b) => {
+                        return parseDate(b[dateColumnName]) - parseDate(a[dateColumnName]);
+                    });
+
+                    const mostRecentDate = sortedByDate[0][dateColumnName];
+                    const lastDayData = stateRows.filter(d => d[dateColumnName] === mostRecentDate);
                     
-                    updateDashboard(lastDayData, s, lastDate);
+                    updateDashboard(lastDayData, s, mostRecentDate);
                 }
                 
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
@@ -221,7 +235,7 @@
         data.forEach(d => columnsToSum.forEach(c => s[c] += Number(d[c]) || 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = dateLabel ? `Corte del día: ${dateLabel}` : "Consolidado Histórico";
+        document.getElementById('date-info').innerText = dateLabel ? `Última Actualización: ${dateLabel}` : "Consolidado Histórico";
 
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Registros Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
