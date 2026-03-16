@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Privada</title>
+    <title>Estadisticas - Programación y Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -77,7 +77,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <i class="fas fa-shield-alt fa-4x" style="color: var(--primary); margin-bottom: 20px;"></i>
-        <h2>SALA DE MANDO</h2>
+        <h2 id="auth-status">SALA DE MANDO</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="PIN" maxlength="4">
         <button onclick="checkAuth()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">ACCEDER</button>
     </div>
@@ -133,8 +133,8 @@
 </div>
 
 <script>
-    // URL DE TU APPS SCRIPT ACTUALIZADA
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbz9E3TbiHb8ac-Fr1al-HJH8pnbvXHAR_GJRUgALFDAXzfqsNzeL1OAWihgOtzvM3-M/exec"; 
+    // PEGA AQUÍ TU NUEVA URL DE IMPLEMENTACIÓN
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbypsSbSP194UABFRsVsrF0XN8OaeZK7WUj-3triDEUem6gOO2QTqVl8r4-OFGv0bNHm/exec"; 
     
     let allFetched = []; 
     let chartA, chartF;
@@ -145,11 +145,22 @@
         document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
     }
 
-    function checkAuth() {
-        if (document.getElementById('pin-input').value === "1793") {
+    // NUEVA FUNCIÓN DE AUTENTICACIÓN SEGURA
+    async function checkAuth() {
+        const pin = document.getElementById('pin-input').value;
+        const statusText = document.getElementById('auth-status');
+        
+        statusText.innerText = "VERIFICANDO...";
+        
+        const success = await init(pin);
+        
+        if (success) {
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app').style.opacity = '1';
-            init();
+        } else {
+            statusText.innerText = "PIN INCORRECTO";
+            document.getElementById('pin-input').value = "";
+            setTimeout(() => { statusText.innerText = "SALA DE MANDO"; }, 2000);
         }
     }
 
@@ -165,25 +176,28 @@
         return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(0);
     }
 
-    async function init() {
+    // MODIFICADO: Ahora recibe el PIN y lo envía al Script
+    async function init(pin) {
         try {
-            const res = await fetch(webAppUrl);
+            const res = await fetch(`${webAppUrl}?pass=${pin}`);
             const data = await res.json();
             
-            // Los datos de Apps Script vienen como objetos limpios
+            if (data.error) return false; // El script devolvió error de PIN
+
             allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
             renderSidebar();
             resetFilter(document.getElementById('btn-nacional'));
+            return true;
         } catch (e) { 
             console.error("Error cargando datos:", e); 
-            document.getElementById('date-info').innerText = "ERROR AL CONECTAR CON EL SERVIDOR";
+            return false;
         }
     }
 
     function updateDashboard(data, title, isNational = false) {
         const main = document.getElementById('main-scroll');
-        main.scrollTop = 0; // Subida automática al filtrar
+        main.scrollTop = 0;
 
         const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
         const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
@@ -200,7 +214,6 @@
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderTipologia(s);
         
-        // Mostrar ranking solo si es vista Nacional
         const rankSec = document.getElementById('ranking-section');
         if(isNational) {
             rankSec.style.display = "block";
@@ -218,14 +231,12 @@
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
 
-        // "Indicadores a destacar"
         document.getElementById('grid-criticos').innerHTML = 
             createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + 
             createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") +
             createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
             createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
         
-        // Estatus (Sin admitidas como pediste)
         document.getElementById('grid-estatus').innerHTML = 
             createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + 
             createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + 
@@ -274,7 +285,7 @@
         const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
             let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
-            if(p > 0 && p < 1) p *= 100; // Por si viene en decimal (0.85)
+            if(p > 0 && p < 1) p *= 100;
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
 
@@ -289,6 +300,7 @@
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
+        list.innerHTML = `<div class="state-item active" id="btn-nacional" onclick="resetFilter(this)"><span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span></div>`;
         [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
             const btn = document.createElement('div');
             btn.className = 'state-item';
