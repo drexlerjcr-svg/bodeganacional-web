@@ -136,6 +136,9 @@
             <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
         </div>
 
+        <div class="section-title">Tipología</div>
+        <div id="tipologia-container" class="ranking-card"></div>
+
         <div id="ranking-section">
             <div class="section-title">Eficiencia por Estados (Top 10)</div>
             <div id="ranking-container" class="ranking-card"></div>
@@ -201,7 +204,7 @@
 
     function updateDashboard(data, title, isNational = false) {
         const main = document.getElementById('main-scroll');
-        main.scrollTop = 0; // Subir al inicio
+        main.scrollTop = 0; 
 
         const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
         const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
@@ -209,7 +212,7 @@
         const filteredData = data.filter(d => d['FECHA'] === ultimaFecha);
 
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
         
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
@@ -217,8 +220,8 @@
         document.getElementById('date-info').innerText = "ÚLTIMA ACTUALIZACIÓN: " + ultimaFecha;
         
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        renderTipologia(s);
         
-        // Mostrar ranking solo en nacional
         const rankSec = document.getElementById('ranking-section');
         if(isNational) {
             rankSec.style.display = "block";
@@ -242,7 +245,6 @@
             createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
             createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
         
-        // Sección Estatus (sin Admitidas)
         document.getElementById('grid-estatus').innerHTML = 
             createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + 
             createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + 
@@ -250,6 +252,24 @@
 
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
+    }
+
+    function renderTipologia(stats) {
+        const container = document.getElementById('tipologia-container');
+        container.innerHTML = "";
+        const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
+        
+        const totalTipologia = rubros.reduce((acc, r) => acc + stats[r], 0);
+
+        rubros.forEach(r => {
+            const valor = stats[r];
+            const porcentaje = totalTipologia > 0 ? (valor / totalTipologia * 100) : 0;
+            container.innerHTML += `
+                <div class="ranking-item">
+                    <div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div>
+                    <div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div>
+                </div>`;
+        });
     }
 
     function renderCharts(ate, pen, pas, cas) {
@@ -280,11 +300,10 @@
         const states = [...new Set(dataReciente.map(d => d['ESTADO']))];
         const ranking = states.map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
-            // Uso directo de la columna "ATENCIÓN %" del excel
             let p = 0;
             if(row && row['ATENCIÓN %']) {
                 p = cleanNum(row['ATENCIÓN %']);
-                if(p > 0 && p < 1) p = p * 100; // Por si viene en formato decimal 0.85
+                if(p > 0 && p < 1) p = p * 100;
             }
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
