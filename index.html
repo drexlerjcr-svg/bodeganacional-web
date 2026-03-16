@@ -18,7 +18,6 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
         
-        /* Sidebar: Abierto por defecto en PC */
         .sidebar { 
             width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
@@ -40,18 +39,12 @@
             .sidebar.collapsed { margin-left: -100%; }
         }
 
-        .state-group { border-bottom: 1px solid #f1f5f9; }
         .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
         .state-item:hover { background: #f1f5f9; }
         .state-item.active { background: var(--primary); color: white; }
         
-        .submenu { display: none; background: #f8fafc; margin: 0 12px 8px 12px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; }
-        .submenu-item { padding: 10px 15px 10px 35px; font-size: 0.75rem; color: var(--muted); cursor: pointer; font-weight: 500; transition: 0.2s; border-radius: 4px; }
-        .submenu-item:hover { color: var(--primary); background: #f1f5f9; }
-
         .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
         
-        /* Botón hamburguesa flotante (Solo cuando el sidebar está oculto) */
         .floating-toggle { 
             position: fixed; top: 18px; left: 20px; z-index: 999; 
             background: var(--primary); color: white; border: none; 
@@ -64,7 +57,7 @@
         
         @media (max-width: 768px) { 
             .banner { padding-top: 60px; text-align: center; } 
-            .floating-toggle { display: flex; } /* Siempre visible en móvil si el sidebar está cerrado */
+            .floating-toggle { display: flex; }
         }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
@@ -158,12 +151,9 @@
         const sb = document.getElementById('sidebar');
         const btn = document.getElementById('menu-btn');
         sb.classList.toggle('collapsed');
-        
-        // El botón flotante solo aparece si el sidebar está colapsado
         if (sb.classList.contains('collapsed')) {
             btn.style.display = 'flex';
         } else {
-            // En PC, si se abre, ocultamos el flotante porque ya está el icono dentro del sidebar
             if (window.innerWidth > 768) btn.style.display = 'none';
         }
     }
@@ -201,17 +191,22 @@
         } catch (e) { console.error(e); }
     }
 
-    function updateDashboard(data, title, subtitle = "REPORTE HISTÓRICO") {
+    function updateDashboard(data, title) {
+        // Lógica de última fecha:
+        const fechas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
+        const ultimaFecha = fechas.length > 0 ? fechas.sort().reverse()[0] : "SIN FECHA";
+        const filteredData = data.filter(d => d['FECHA'] === ultimaFecha);
+
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
         
-        cols.forEach(c => s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
+        cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = subtitle;
+        document.getElementById('date-info').innerText = "ÚLTIMA ACTUALIZACIÓN: " + ultimaFecha;
         
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderRanking(data);
+        renderRanking(data); // Ranking usa toda la data para consistencia
 
         const createCard = (l, v, i, c, ex = "") => `
             <div class="card">
@@ -224,7 +219,7 @@
             </div>`;
 
         const dif = Math.abs(s["POR ATENDER"] - s["ATENDIDAS"]);
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", "Dif: P - A");
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", "Diferencia Actual");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
@@ -266,30 +261,22 @@
         const list = document.getElementById('sidebar-list');
         const states = [...new Set(allFetched.map(d => d['ESTADO']))].sort();
         states.forEach(s => {
-            const group = document.createElement('div');
-            group.className = 'state-group';
             const btn = document.createElement('div');
             btn.className = 'state-item';
-            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span> <i class="fas fa-chevron-down" style="font-size:0.7rem"></i>`;
-            const sub = document.createElement('div');
-            sub.className = 'submenu';
-            sub.innerHTML = `<div class="submenu-item" onclick="filterState('${s}', 'global', this)">Histórico</div><div class="submenu-item" onclick="filterState('${s}', 'latest', this)">Actual</div>`;
+            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
             btn.onclick = () => {
-                const isVisible = sub.style.display === 'block';
-                document.querySelectorAll('.submenu').forEach(m => m.style.display = 'none');
-                sub.style.display = isVisible ? 'none' : 'block';
+                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+                btn.classList.add('active');
+                updateDashboard(allFetched.filter(r => r['ESTADO'] === s), s);
+                if(window.innerWidth <= 768) toggleSidebar();
             };
-            group.appendChild(btn); group.appendChild(sub); list.appendChild(group);
+            list.appendChild(btn);
         });
     }
 
-    function filterState(st, type, el) {
-        const data = allFetched.filter(r => r['ESTADO'] === st);
-        updateDashboard(data, st, type === 'global' ? "HISTÓRICO" : "ACTUAL");
-        if(window.innerWidth <= 768) toggleSidebar();
-    }
-
     function resetFilter(el) {
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
         updateDashboard(allFetched, "VENEZUELA");
         if(window.innerWidth <= 768) {
             const sb = document.getElementById('sidebar');
