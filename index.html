@@ -173,6 +173,14 @@
         return isNaN(n) ? 0 : n;
     }
 
+    // Nueva función para parsear fechas DD/MM/YYYY correctamente
+    function parseDate(str) {
+        if (!str) return new Date(0);
+        const parts = str.split('/');
+        if (parts.length !== 3) return new Date(0);
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
     async function init() {
         try {
             const res = await fetch(url);
@@ -192,9 +200,10 @@
     }
 
     function updateDashboard(data, title) {
-        // Lógica de última fecha:
-        const fechas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
-        const ultimaFecha = fechas.length > 0 ? fechas.sort().reverse()[0] : "SIN FECHA";
+        // CORRECCIÓN: Ordenar por fecha real para obtener la más reciente
+        const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
+        const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
+        
         const filteredData = data.filter(d => d['FECHA'] === ultimaFecha);
 
         let s = {};
@@ -206,7 +215,7 @@
         document.getElementById('date-info').innerText = "ÚLTIMA ACTUALIZACIÓN: " + ultimaFecha;
         
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderRanking(data); // Ranking usa toda la data para consistencia
+        renderRanking(data);
 
         const createCard = (l, v, i, c, ex = "") => `
             <div class="card">
