@@ -23,20 +23,14 @@
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        /* Ajuste responsivo sidebar */
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; }
-            .sidebar.collapsed { margin-left: -100%; }
-        }
         .sidebar.collapsed { margin-left: -280px; }
         
         .sidebar-header { 
             padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; 
             display: flex; align-items: center; gap: 15px;
         }
-        /* Icono hamburguesa visible */
-        .sidebar-header i { cursor: pointer; color: #ffffff !important; } 
+        /* Hamburguesa corregida: Blanco sólido y con prioridad visual */
+        .sidebar-header i { cursor: pointer; color: #ffffff !important; font-size: 1.5rem; min-width: 25px; text-align: center; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
 
         .state-group { border-bottom: 1px solid #f1f5f9; }
@@ -62,12 +56,26 @@
         .card-val { font-size: 1.8rem; font-weight: 800; }
         .card-example { font-size: 0.6rem; color: var(--muted); font-style: italic; margin-top: -5px; }
 
-        /* Gráficos Responsivos */
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
-        @media (max-width: 992px) { .charts-row { grid-template-columns: 1fr; } }
-
-        .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); height: 350px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; }
+        
+        /* Contenedor de gráficos corregido: Altura automática con min/max para evitar desbordamiento */
+        .chart-container { 
+            background: var(--white); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: var(--shadow); 
+            min-height: 350px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-container h3 { font-size: 0.75rem; margin-bottom: 20px; color: var(--muted); text-transform: uppercase; text-align: center; width: 100%; }
+        
+        /* Forzar al canvas a quedarse dentro de la caja de su padre */
+        .chart-wrapper { position: relative; width: 100%; height: 250px; display: flex; justify-content: center; }
         canvas { max-width: 100% !important; max-height: 100% !important; }
 
         .ranking-card { background: var(--white); padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 35px; }
@@ -98,7 +106,7 @@
 
 <div id="loader">
     <i class="fas fa-sync fa-spin fa-3x" style="color: var(--primary)"></i>
-    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">CARGANDO INDICADORES...</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--muted);">SINCRONIZANDO DATOS...</p>
 </div>
 
 <div class="app-container" id="app">
@@ -133,8 +141,14 @@
 
         <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
-            <div class="chart-container"><h3>Atención vs Pendientes</h3><canvas id="chartAtencion"></canvas></div>
-            <div class="chart-container"><h3>Asignación de Fiscales</h3><canvas id="chartFiscales"></canvas></div>
+            <div class="chart-container">
+                <h3>Atención vs Pendientes</h3>
+                <div class="chart-wrapper"><canvas id="chartAtencion"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Asignación de Fiscales</h3>
+                <div class="chart-wrapper"><canvas id="chartFiscales"></canvas></div>
+            </div>
         </div>
 
         <div class="section-title">Eficiencia por Estados (Top 10)</div>
@@ -253,13 +267,14 @@
     function initCharts(ate, pen, pas, cas) {
         const cfg = (lb, da, co) => ({
             type: 'doughnut',
-            data: { labels: lb, datasets: [{ data: da, backgroundColor: co, borderWidth: 2 }] },
+            data: { labels: lb, datasets: [{ data: da, backgroundColor: co, borderWidth: 2, hoverOffset: 4 }] },
             options: { 
                 responsive: true, 
-                maintainAspectRatio: false, 
-                cutout: '75%', 
+                maintainAspectRatio: true, // Forzar proporción
+                aspectRatio: 1.5, // Mantenerlo horizontalmente contenido
+                layout: { padding: 10 },
                 plugins: { 
-                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: 'bold' } } }, 
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11, weight: 'bold' } } }, 
                     datalabels: { display: false } 
                 } 
             }
@@ -301,8 +316,8 @@
             sub.className = 'submenu';
             sub.id = `sub-${s.replace(/\s+/g, '')}`;
             sub.innerHTML = `
-                <div class="submenu-item" onclick="handleStateSelection('${s}', 'global', this)"> <i class="fas fa-history"></i> Global del Estado</div>
-                <div class="submenu-item" onclick="handleStateSelection('${s}', 'latest', this)"> <i class="fas fa-clock"></i> Último Reporte</div>
+                <div class="submenu-item" onclick="filterState('${s}', 'global', this)"> <i class="fas fa-history"></i> Global del Estado</div>
+                <div class="submenu-item" onclick="filterState('${s}', 'latest', this)"> <i class="fas fa-clock"></i> Último Reporte</div>
             `;
 
             btn.onclick = () => {
@@ -317,14 +332,6 @@
             group.appendChild(sub);
             list.appendChild(group);
         });
-    }
-
-    // Nueva función para manejar selección y ocultar sidebar en móviles
-    function handleStateSelection(stateName, type, element) {
-        filterState(stateName, type, element);
-        if (window.innerWidth <= 768) {
-            toggleSidebar();
-        }
     }
 
     function filterState(stateName, type, element) {
@@ -346,7 +353,6 @@
         updateDashboard(allFetched, "VENEZUELA", "REPORTE HISTÓRICO CONSOLIDADO");
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        if (window.innerWidth <= 768) toggleSidebar();
     }
 </script>
 </body>
