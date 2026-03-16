@@ -64,7 +64,7 @@
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.8rem; font-weight: 800; }
-        .card-example { font-size: 0.6rem; color: var(--muted); font-style: italic; margin-top: -5px; }
+        .card-example { font-size: 0.65rem; color: var(--muted); font-style: normal; margin-top: 2px; line-height: 1.2; }
 
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
         @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
@@ -173,7 +173,6 @@
         return isNaN(n) ? 0 : n;
     }
 
-    // Nueva función para parsear fechas DD/MM/YYYY correctamente
     function parseDate(str) {
         if (!str) return new Date(0);
         const parts = str.split('/');
@@ -200,7 +199,6 @@
     }
 
     function updateDashboard(data, title) {
-        // CORRECCIÓN: Ordenar por fecha real para obtener la más reciente
         const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
         const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
         
@@ -228,7 +226,18 @@
             </div>`;
 
         const dif = Math.abs(s["POR ATENDER"] - s["ATENDIDAS"]);
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", "Diferencia Actual");
+        
+        // Formateo del detalle para "Pendientes Netos"
+        const detallePendientes = `
+            Se han admitido: ${Math.floor(s["DENUNCIAS ADMITIDAS"]).toLocaleString()}<br>
+            Se han atendido: ${Math.floor(s["ATENDIDAS"]).toLocaleString()}<br>
+            Quedan por atender: ${Math.floor(s["POR ATENDER"]).toLocaleString()}
+        `;
+
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + 
+            createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", detallePendientes);
+        
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
