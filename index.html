@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Monitoreo Total</title>
+    <title>Sala de Mando Operativa - Monitoreo total</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
             --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
@@ -22,16 +21,11 @@
             width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: 0;
         }
 
         .sidebar.collapsed { margin-left: -280px; }
-        
-        .sidebar-header { 
-            padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; 
-            display: flex; align-items: center; gap: 15px;
-        }
-        .sidebar-header i { cursor: pointer; color: #ffffff !important; font-size: 1.3rem; }
+        .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 15px; }
+        .sidebar-header i { cursor: pointer; color: white; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
 
         @media (max-width: 768px) {
@@ -45,20 +39,12 @@
         
         .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
         
-        .floating-toggle { 
-            position: fixed; top: 18px; left: 20px; z-index: 999; 
-            background: var(--primary); color: white; border: none; 
-            width: 42px; height: 42px; border-radius: 8px; cursor: pointer; 
-            display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); 
-        }
+        .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: var(--primary); color: white; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
 
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); }
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
         
-        @media (max-width: 768px) { 
-            .banner { padding-top: 60px; text-align: center; } 
-            .floating-toggle { display: flex; }
-        }
+        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
@@ -69,7 +55,7 @@
         @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
         
         .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; }
-        .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; text-align: center; }
+        .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; }
         .chart-box { position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; }
 
         .ranking-card { background: var(--white); padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 35px; }
@@ -99,10 +85,7 @@
 
 <div class="app-container" id="app">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-bars" onclick="toggleSidebar()"></i> 
-            <span>ESTADOS</span>
-        </div>
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i> <span>ESTADOS</span></div>
         <div class="sidebar-content" id="sidebar-list">
             <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
                 <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
@@ -147,19 +130,16 @@
 </div>
 
 <script>
-    const url = atob("aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=");
+    // REEMPLAZAR ESTA URL POR LA TUYA DE APPS SCRIPT
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyuEX9gE71KfwIq8ChYzCP4wpLUq8uQfeszy3tBxvxfz5QzJuUsLGCx3927YkSkCH9Z/exec"; 
+    
     let allFetched = []; 
     let chartA, chartF;
 
     function toggleSidebar() { 
         const sb = document.getElementById('sidebar');
-        const btn = document.getElementById('menu-btn');
         sb.classList.toggle('collapsed');
-        if (sb.classList.contains('collapsed')) {
-            btn.style.display = 'flex';
-        } else {
-            if (window.innerWidth > 768) btn.style.display = 'none';
-        }
+        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
     }
 
     function checkAuth() {
@@ -172,7 +152,6 @@
 
     function cleanNum(val) {
         if (!val) return 0;
-        if (typeof val === 'number') return val;
         let n = parseFloat(String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
         return isNaN(n) ? 0 : n;
     }
@@ -180,26 +159,20 @@
     function parseDate(str) {
         if (!str) return new Date(0);
         const parts = str.split('/');
-        if (parts.length !== 3) return new Date(0);
-        return new Date(parts[2], parts[1] - 1, parts[0]);
+        return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(0);
     }
 
     async function init() {
         try {
-            const res = await fetch(url);
-            const text = await res.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            const res = await fetch(webAppUrl);
+            const data = await res.json();
             
-            allFetched = json.table.rows.map(r => {
-                let obj = {};
-                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
-                return obj;
-            }).filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase()));
+            // Procesamiento de datos limpio desde Apps Script
+            allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase()));
 
             renderSidebar();
             resetFilter(document.getElementById('btn-nacional'));
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error de conexión:", e); }
     }
 
     function updateDashboard(data, title, isNational = false) {
@@ -208,7 +181,6 @@
 
         const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
         const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
-        
         const filteredData = data.filter(d => d['FECHA'] === ultimaFecha);
 
         let s = {};
@@ -239,17 +211,8 @@
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
 
-        document.getElementById('grid-criticos').innerHTML = 
-            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + 
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") +
-            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
-        
-        document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + 
-            createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + 
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
     }
@@ -258,17 +221,11 @@
         const container = document.getElementById('tipologia-container');
         container.innerHTML = "";
         const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        
-        const totalTipologia = rubros.reduce((acc, r) => acc + stats[r], 0);
-
+        const totalTipologia = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
         rubros.forEach(r => {
-            const valor = stats[r];
+            const valor = stats[r] || 0;
             const porcentaje = totalTipologia > 0 ? (valor / totalTipologia * 100) : 0;
-            container.innerHTML += `
-                <div class="ranking-item">
-                    <div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div>
-                    <div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div>
-                </div>`;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div></div>`;
         });
     }
 
@@ -277,12 +234,7 @@
         const config = (labels, data, colors) => ({
             type: 'doughnut',
             data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: true, 
-                cutout: '70%',
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: isMobile ? 12 : 11 } } } }
-            }
+            options: { responsive: true, maintainAspectRatio: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: isMobile ? 12 : 11 } } } } }
         });
         if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
@@ -292,35 +244,23 @@
     function renderRanking(data) {
         const container = document.getElementById('ranking-container');
         container.innerHTML = "";
-        
         const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
         const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0];
         const dataReciente = data.filter(d => d['FECHA'] === ultimaFecha);
-
-        const states = [...new Set(dataReciente.map(d => d['ESTADO']))];
-        const ranking = states.map(s => {
+        const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
-            let p = 0;
-            if(row && row['ATENCIÓN %']) {
-                p = cleanNum(row['ATENCIÓN %']);
-                if(p > 0 && p < 1) p = p * 100;
-            }
+            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
+            if(p > 0 && p < 1) p *= 100;
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
-
         ranking.forEach(item => {
-            container.innerHTML += `
-                <div class="ranking-item">
-                    <div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div>
-                    <div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div>
-                </div>`;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
         });
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        const states = [...new Set(allFetched.map(d => d['ESTADO']))].sort();
-        states.forEach(s => {
+        [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
             const btn = document.createElement('div');
             btn.className = 'state-item';
             btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
