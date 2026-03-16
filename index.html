@@ -3,92 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa</title>
+    <title>Sala de Mando Operativa - Monitoreo Total</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
-            --primary: #1e3a8a; --accent: #3b82f6; --bg: #f1f5f9; --white: #ffffff;
-            --text: #1e293b; --muted: #64748b; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
+            --danger: #ef4444; --warning: #f59e0b; --purple: #8b5cf6;
+            --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
-        .app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
         
-        /* Sidebar y Menú */
+        /* Sidebar corregido */
         .sidebar { 
-            width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
-            display: flex; flex-direction: column; z-index: 1001; transition: 0.3s;
+            width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
+            display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; }
+            .sidebar.collapsed { margin-left: -100%; }
         }
         .sidebar.collapsed { margin-left: -280px; }
-
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; height: 100%; width: 80%; }
-            .sidebar.collapsed { margin-left: -100%; }
-            .charts-row { grid-template-columns: 1fr !important; gap: 15px !important; }
-        }
-
-        .sidebar-header { padding: 20px; background: var(--primary); color: white; display: flex; align-items: center; gap: 15px; }
-        .sidebar-content { overflow-y: auto; flex-grow: 1; }
-        .state-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: var(--muted); }
-        .state-item.active { background: var(--primary); color: white; }
-
-        /* Contenido Principal */
-        .main-view { flex-grow: 1; padding: 20px; overflow-y: auto; position: relative; }
-        .floating-toggle { 
-            position: fixed; top: 15px; left: 15px; z-index: 1000; 
-            background: var(--primary); color: white; border: none; 
-            width: 40px; height: 40px; border-radius: 8px; display: none;
-        }
-        @media (max-width: 768px) { .floating-toggle { display: block; } }
-
-        .banner { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; }
-        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } }
-
-        /* Grid de Tarjetas */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
-        .card-label { font-size: 0.7rem; font-weight: 800; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .card-val { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
-
-        /* GRÁFICOS CORREGIDOS */
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .chart-container { 
-            background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; 
-            box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center;
-        }
-        .chart-container h3 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; }
         
-        /* Contenedor dinámico del canvas */
-        .chart-box { 
-            position: relative; 
-            width: 100%; 
-            max-width: 250px; /* Limita el tamaño en desktop */
-            aspect-ratio: 1 / 1; /* Mantiene el círculo perfecto */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .sidebar-header { 
+            padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; 
+            display: flex; align-items: center; gap: 15px;
         }
+        /* Hamburguesa blanca siempre visible */
+        .sidebar-header i { cursor: pointer; color: #ffffff !important; font-size: 1.3rem; }
+        .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
+
+        .state-group { border-bottom: 1px solid #f1f5f9; }
+        .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .state-item:hover { background: #f1f5f9; }
+        .state-item.active { background: var(--primary); color: white; }
+        
+        .submenu { display: none; background: #f8fafc; margin: 0 12px 8px 12px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; }
+        .submenu-item { padding: 10px 15px 10px 35px; font-size: 0.75rem; color: var(--muted); cursor: pointer; font-weight: 500; transition: 0.2s; border-radius: 4px; }
+        .submenu-item:hover { color: var(--primary); background: #f1f5f9; }
+        .submenu-item.active-sub { color: var(--primary); font-weight: 800; background: #e0e7ff; }
+
+        .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+        .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+        @media (max-width: 768px) { .floating-toggle { display: flex; } }
+
+        .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); }
+        .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
+        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
+        .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
+        .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .card-val { font-size: 1.8rem; font-weight: 800; }
+        .card-example { font-size: 0.6rem; color: var(--muted); font-style: italic; margin-top: -5px; }
+
+        /* Gráficos Responsivos Corregidos */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
+        @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
+        .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; }
+        .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; text-align: center; }
+        .chart-box { position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; }
+
+        .ranking-card { background: var(--white); padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 35px; }
+        .ranking-item { margin-bottom: 15px; }
+        .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; }
+        .bar-container { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; }
+
+        .section-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 12px; }
+        .section-title::before { content: ''; width: 5px; height: 18px; background: var(--warning); border-radius: 3px; }
 
         #auth-overlay { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 5000; }
-        .auth-card { background: white; padding: 30px; border-radius: 20px; text-align: center; }
-        .pin-input { width: 100%; padding: 12px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; }
+        .auth-card { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; }
+        .pin-input { width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 20px; outline: none; }
     </style>
 </head>
 <body>
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h2>PIN DE ACCESO</h2>
-        <input type="password" id="pin-input" class="pin-input" maxlength="4">
-        <button onclick="checkAuth()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">ENTRAR</button>
+        <i class="fas fa-shield-alt fa-4x" style="color: var(--primary); margin-bottom: 20px;"></i>
+        <h2>SALA DE MANDO</h2>
+        <input type="password" id="pin-input" class="pin-input" placeholder="PIN" maxlength="4">
+        <button onclick="checkAuth()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">ACCEDER</button>
     </div>
 </div>
 
-<div class="app-container" id="app" style="opacity:0">
+<div class="app-container" id="app">
     <aside class="sidebar collapsed" id="sidebar">
-        <div class="sidebar-header"><i class="fas fa-times" onclick="toggleSidebar()"></i> <span>ESTADOS</span></div>
-        <div class="sidebar-content" id="sidebar-list"></div>
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i> <span>ESTADOS</span></div>
+        <div class="sidebar-content" id="sidebar-list">
+            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
+                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
+            </div>
+        </div>
     </aside>
 
     <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -96,33 +109,40 @@
     <main class="main-view">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <small id="date-info">Sincronizando...</small>
+            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CARGANDO...</div>
         </div>
 
-        <div class="grid" id="grid-stats"></div>
+        <div class="section-title">Indicadores Críticos</div>
+        <div id="grid-criticos" class="grid"></div>
 
+        <div class="section-title">Estatus del Flujo de Denuncia</div>
+        <div id="grid-estatus" class="grid"></div>
+
+        <div class="section-title">Procesos de Campo e Inspección</div>
+        <div id="grid-procesos" class="grid"></div>
+
+        <div class="section-title">Asignación de Fiscales y Dependencias</div>
+        <div id="grid-fiscales" class="grid"></div>
+
+        <div class="section-title">Análisis Visual de Gestión</div>
         <div class="charts-row">
-            <div class="chart-container">
-                <h3>Atención vs Pendientes</h3>
-                <div class="chart-box"><canvas id="chartAtencion"></canvas></div>
-            </div>
-            <div class="chart-container">
-                <h3>Asignación de Fiscales</h3>
-                <div class="chart-box"><canvas id="chartFiscales"></canvas></div>
-            </div>
+            <div class="chart-container"><h3>Atención vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
+            <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
         </div>
+
+        <div class="section-title">Eficiencia por Estados (Top 10)</div>
+        <div id="ranking-container" class="ranking-card"></div>
     </main>
 </div>
 
 <script>
     const url = atob("aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMTlUaWFVTzk4TGNEYVZzaGkyVGI5Q0pkcm12dDA4dzJuWEhyWWtySlZMa1EvZ3Zpei90cT90cXg9b3V0Ompzb24mc2hlZXQ9SG9qYSUyMDE=");
-    let allData = [];
+    let allFetched = []; 
     let chartA, chartF;
 
     function toggleSidebar() { 
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'block' : 'none';
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('menu-btn').style.display = document.getElementById('sidebar').classList.contains('collapsed') ? 'flex' : 'none';
     }
 
     function checkAuth() {
@@ -133,87 +153,127 @@
         }
     }
 
+    function cleanNum(val) {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        let n = parseFloat(String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
+        return isNaN(n) ? 0 : n;
+    }
+
     async function init() {
-        const res = await fetch(url);
-        const text = await res.text();
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        const cols = json.table.cols.map(c => c.label.toUpperCase());
-        allData = json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
-            return obj;
-        }).filter(d => d.ESTADO && !['TOTAL', 'TOTALES'].includes(String(d.ESTADO).toUpperCase()));
+        try {
+            const res = await fetch(url);
+            const text = await res.text();
+            const json = JSON.parse(text.substring(47).slice(0, -2));
+            const cols = json.table.cols.map(c => c.label ? c.label.toUpperCase().trim() : "");
+            
+            allFetched = json.table.rows.map(r => {
+                let obj = {};
+                r.c.forEach((cell, i) => { if(cols[i]) obj[cols[i]] = cell ? (cell.f || cell.v) : 0; });
+                return obj;
+            }).filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase()));
 
-        renderSidebar();
-        updateDashboard(allData, "VENEZUELA");
+            renderSidebar();
+            resetFilter(document.getElementById('btn-nacional'));
+        } catch (e) { console.error(e); }
     }
 
-    function renderSidebar() {
-        const list = document.getElementById('sidebar-list');
-        const states = [...new Set(allData.map(d => d.ESTADO))].sort();
-        states.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'state-item';
-            div.innerHTML = s;
-            div.onclick = () => {
-                updateDashboard(allData.filter(d => d.ESTADO === s), s);
-                if(window.innerWidth <= 768) toggleSidebar();
-            };
-            list.appendChild(div);
-        });
-    }
-
-    function updateDashboard(data, title) {
-        const sum = (col) => data.reduce((acc, curr) => acc + parseFloat(String(curr[col]).replace(/\./g,'').replace(',','.') || 0), 0);
+    function updateDashboard(data, title, subtitle = "REPORTE HISTÓRICO") {
+        let s = {};
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
         
-        const rec = sum("REGISTROS RECIBIDOS");
-        const ate = sum("ATENDIDAS");
-        const pen = sum("POR ATENDER");
-        const pas = sum("POR ASIGNAR FISCAL");
-        const cas = sum("CON FISCAL ASIGNADO");
+        cols.forEach(c => s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('grid-stats').innerHTML = `
-            <div class="card"><span class="card-label">Recibidos</span><div class="card-val">${Math.floor(rec).toLocaleString()}</div></div>
-            <div class="card"><span class="card-label">Atendidas</span><div class="card-val" style="color:#22c55e">${Math.floor(ate).toLocaleString()}</div></div>
-            <div class="card"><span class="card-label">Pendientes</span><div class="card-val" style="color:#ef4444">${Math.floor(pen).toLocaleString()}</div></div>
-        `;
+        document.getElementById('date-info').innerText = subtitle;
+        
+        renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        renderRanking(data);
 
-        renderCharts(ate, pen, pas, cas);
+        const createCard = (l, v, i, c, ex = "") => {
+            return `<div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="card-label">${l}</span>
+                    <i class="fas ${i}" style="color:${c}"></i>
+                </div>
+                <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
+                ${ex ? `<div class="card-example">${ex}</div>` : ''}
+            </div>`;
+        };
+
+        const dif = Math.abs(s["POR ATENDER"] - s["ATENDIDAS"]);
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", `Diferencia: P - A`);
+        
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        
+        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
+        
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
     }
 
     function renderCharts(ate, pen, pas, cas) {
         const isMobile = window.innerWidth <= 768;
-        
         const config = (labels, data, colors) => ({
             type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors,
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true, // Crucial para mantener el círculo
-                cutout: isMobile ? '65%' : '70%', // Más grueso en móvil para que se vea mejor
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: isMobile ? 12 : 11, weight: '600' } }
-                    }
-                }
+            data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: true, 
+                cutout: '70%',
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: isMobile ? 12 : 11 } } } }
             }
         });
 
-        if(chartA) chartA.destroy();
-        if(chartF) chartF.destroy();
-
+        if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
         chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Asignado'], [pas, cas], ['#f97316', '#059669']));
+    }
+
+    function renderRanking(data) {
+        const container = document.getElementById('ranking-container');
+        container.innerHTML = "";
+        const states = [...new Set(data.map(d => d['ESTADO']))];
+        const ranking = states.map(s => {
+            const rows = data.filter(r => r['ESTADO'] === s);
+            const rec = rows.reduce((acc, curr) => acc + cleanNum(curr['REGISTROS RECIBIDOS']), 0);
+            const ate = rows.reduce((acc, curr) => acc + cleanNum(curr['ATENDIDAS']), 0);
+            return { s, p: rec > 0 ? (ate/rec*100) : 0 };
+        }).sort((a,b) => b.p - a.p).slice(0, 10);
+        ranking.forEach(item => {
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
+        });
+    }
+
+    function renderSidebar() {
+        const list = document.getElementById('sidebar-list');
+        const states = [...new Set(allFetched.map(d => d['ESTADO']))].sort();
+        states.forEach(s => {
+            const group = document.createElement('div');
+            group.className = 'state-group';
+            const btn = document.createElement('div');
+            btn.className = 'state-item';
+            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span> <i class="fas fa-chevron-down" style="font-size:0.7rem"></i>`;
+            const sub = document.createElement('div');
+            sub.className = 'submenu';
+            sub.innerHTML = `<div class="submenu-item" onclick="filterState('${s}', 'global', this)">Histórico</div><div class="submenu-item" onclick="filterState('${s}', 'latest', this)">Actual</div>`;
+            btn.onclick = () => {
+                const isVisible = sub.style.display === 'block';
+                document.querySelectorAll('.submenu').forEach(m => m.style.display = 'none');
+                sub.style.display = isVisible ? 'none' : 'block';
+            };
+            group.appendChild(btn); group.appendChild(sub); list.appendChild(group);
+        });
+    }
+
+    function filterState(st, type, el) {
+        const data = allFetched.filter(r => r['ESTADO'] === st);
+        updateDashboard(data, st, type === 'global' ? "HISTÓRICO" : "ACTUAL");
+        if(window.innerWidth <= 768) toggleSidebar();
+    }
+
+    function resetFilter(el) {
+        updateDashboard(allFetched, "VENEZUELA");
+        if(window.innerWidth <= 768 && !document.getElementById('sidebar').classList.contains('collapsed')) toggleSidebar();
     }
 </script>
 </body>
