@@ -18,25 +18,27 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
         
-        /* Sidebar corregido */
+        /* Sidebar: Abierto por defecto en PC */
         .sidebar { 
             width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
             display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 0;
         }
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; }
-            .sidebar.collapsed { margin-left: -100%; }
-        }
+
         .sidebar.collapsed { margin-left: -280px; }
         
         .sidebar-header { 
             padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; 
             display: flex; align-items: center; gap: 15px;
         }
-        /* Hamburguesa blanca siempre visible */
         .sidebar-header i { cursor: pointer; color: #ffffff !important; font-size: 1.3rem; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; margin-left: 0; }
+            .sidebar.collapsed { margin-left: -100%; }
+        }
 
         .state-group { border-bottom: 1px solid #f1f5f9; }
         .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
@@ -46,25 +48,34 @@
         .submenu { display: none; background: #f8fafc; margin: 0 12px 8px 12px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; }
         .submenu-item { padding: 10px 15px 10px 35px; font-size: 0.75rem; color: var(--muted); cursor: pointer; font-weight: 500; transition: 0.2s; border-radius: 4px; }
         .submenu-item:hover { color: var(--primary); background: #f1f5f9; }
-        .submenu-item.active-sub { color: var(--primary); font-weight: 800; background: #e0e7ff; }
 
         .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
-        .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
-        @media (max-width: 768px) { .floating-toggle { display: flex; } }
+        
+        /* Botón hamburguesa flotante (Solo cuando el sidebar está oculto) */
+        .floating-toggle { 
+            position: fixed; top: 18px; left: 20px; z-index: 999; 
+            background: var(--primary); color: white; border: none; 
+            width: 42px; height: 42px; border-radius: 8px; cursor: pointer; 
+            display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); 
+        }
 
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); }
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
-        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } }
         
+        @media (max-width: 768px) { 
+            .banner { padding-top: 60px; text-align: center; } 
+            .floating-toggle { display: flex; } /* Siempre visible en móvil si el sidebar está cerrado */
+        }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.8rem; font-weight: 800; }
         .card-example { font-size: 0.6rem; color: var(--muted); font-style: italic; margin-top: -5px; }
 
-        /* Gráficos Responsivos Corregidos */
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
         @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
+        
         .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; }
         .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; text-align: center; }
         .chart-box { position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; }
@@ -95,8 +106,11 @@
 </div>
 
 <div class="app-container" id="app">
-    <aside class="sidebar collapsed" id="sidebar">
-        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i> <span>ESTADOS</span></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-bars" onclick="toggleSidebar()"></i> 
+            <span>ESTADOS</span>
+        </div>
         <div class="sidebar-content" id="sidebar-list">
             <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
                 <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
@@ -141,8 +155,17 @@
     let chartA, chartF;
 
     function toggleSidebar() { 
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display = document.getElementById('sidebar').classList.contains('collapsed') ? 'flex' : 'none';
+        const sb = document.getElementById('sidebar');
+        const btn = document.getElementById('menu-btn');
+        sb.classList.toggle('collapsed');
+        
+        // El botón flotante solo aparece si el sidebar está colapsado
+        if (sb.classList.contains('collapsed')) {
+            btn.style.display = 'flex';
+        } else {
+            // En PC, si se abre, ocultamos el flotante porque ya está el icono dentro del sidebar
+            if (window.innerWidth > 768) btn.style.display = 'none';
+        }
     }
 
     function checkAuth() {
@@ -180,7 +203,7 @@
 
     function updateDashboard(data, title, subtitle = "REPORTE HISTÓRICO") {
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "DENUNCIAS NO ADMITIDAS", "INSPECCIONADO", "PROCESO CONCILIATORIO", "CENTRALIZADA", "POR APROBAR FISCALIZACIÓN", "DESESTIMADA", "PROCESO CULMINADO", "CERRADO", "POR ASIGNAR FISCAL", "DIRECTOR DE FISCALIZACIÓN", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "OTRA DEPENDENCI"];
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL"];
         
         cols.forEach(c => s[c] = data.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
@@ -190,8 +213,8 @@
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderRanking(data);
 
-        const createCard = (l, v, i, c, ex = "") => {
-            return `<div class="card">
+        const createCard = (l, v, i, c, ex = "") => `
+            <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                     <span class="card-label">${l}</span>
                     <i class="fas ${i}" style="color:${c}"></i>
@@ -199,15 +222,11 @@
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
                 ${ex ? `<div class="card-example">${ex}</div>` : ''}
             </div>`;
-        };
 
         const dif = Math.abs(s["POR ATENDER"] - s["ATENDIDAS"]);
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", `Diferencia: P - A`);
-        
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Pendientes Netos", dif, "fa-balance-scale", "var(--warning)", "Dif: P - A");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-alt", "#8b5cf6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
-        
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
     }
 
@@ -223,7 +242,6 @@
                 plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: isMobile ? 12 : 11 } } } }
             }
         });
-
         if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
         chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Asignado'], [pas, cas], ['#f97316', '#059669']));
@@ -273,7 +291,10 @@
 
     function resetFilter(el) {
         updateDashboard(allFetched, "VENEZUELA");
-        if(window.innerWidth <= 768 && !document.getElementById('sidebar').classList.contains('collapsed')) toggleSidebar();
+        if(window.innerWidth <= 768) {
+            const sb = document.getElementById('sidebar');
+            if(!sb.classList.contains('collapsed')) toggleSidebar();
+        }
     }
 </script>
 </body>
