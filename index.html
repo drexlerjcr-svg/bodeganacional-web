@@ -151,7 +151,7 @@
     
     let allFetched = []; 
     let chartA, chartF;
-    let selectedDateGlobal = ""; // Para mantener la fecha elegida al cambiar de estado
+    let selectedDateGlobal = ""; 
 
     function toggleSidebar() { 
         const sb = document.getElementById('sidebar');
@@ -193,13 +193,33 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // Establecer fecha por defecto (la más reciente)
+        // --- LÓGICA DE BLOQUEO DE FECHA (MÁXIMO AYER) ---
+        const hoy = new Date();
+        const ayer = new Date(hoy);
+        ayer.setDate(hoy.getDate() - 1); 
+
+        const yyyy = ayer.getFullYear();
+        const mm = String(ayer.getMonth() + 1).padStart(2, '0');
+        const dd = String(ayer.getDate()).padStart(2, '0');
+        const fechaMax = `${yyyy}-${mm}-${dd}`;
+
+        const dateInput = document.getElementById('global-date-filter');
+        dateInput.max = fechaMax; // Bloquea hoy y futuro en el calendario
+        // -----------------------------------------------
+
+        // Establecer fecha por defecto (la más reciente que no sea hoy)
         const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
-        const ultima = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0];
+        const ultima = fechasUnicas
+            .filter(f => parseDate(f) <= ayer)
+            .sort((a, b) => parseDate(b) - parseDate(a))[0];
+
         if(ultima) {
-            const [d, m, y] = ultima.split('/');
+            const [dU, mU, yU] = ultima.split('/');
             selectedDateGlobal = ultima;
-            document.getElementById('global-date-filter').value = `${y}-${m}-${d}`;
+            dateInput.value = `${yU}-${mU}-${dU}`;
+        } else {
+            selectedDateGlobal = `${dd}/${mm}/${yyyy}`;
+            dateInput.value = fechaMax;
         }
 
         renderSidebar();
@@ -212,7 +232,6 @@
         const [y, m, d] = rawDate.split('-');
         selectedDateGlobal = `${d}/${m}/${y}`;
         
-        // Refrescar vista actual con la nueva fecha
         const activeItem = document.querySelector('.state-item.active');
         if(activeItem.id === 'btn-nacional') {
             updateDashboard(allFetched, "VENEZUELA", true);
@@ -226,7 +245,6 @@
         const main = document.getElementById('main-scroll');
         main.scrollTop = 0;
 
-        // Filtrar datos por la fecha seleccionada en el calendario
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
 
         if(filteredData.length === 0) {
