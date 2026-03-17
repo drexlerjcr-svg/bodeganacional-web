@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Mando Operativa - Privada</title>
+    <title>Sala de Mando Operativa - Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -132,7 +132,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <i class="fas fa-shield-alt"></i>
-        <h2>SALA DE MANDO</h2>
+        <h2>PROGRAMACIÓN Y MONITOREO</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="PIN MASTER" maxlength="4">
         <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
     </div>
@@ -219,7 +219,7 @@
             cargandoLabel.innerText = "ERROR DE ACCESO";
             document.getElementById('pin-input').value = "";
             alert("PIN incorrecto o error de conexión.");
-            setTimeout(() => { cargandoLabel.innerText = "SALA DE MANDO"; }, 2000);
+            setTimeout(() => { cargandoLabel.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
         }
     }
 
