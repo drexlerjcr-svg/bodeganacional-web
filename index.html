@@ -41,10 +41,15 @@
         
         .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: var(--primary); color: white; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
 
-        .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); }
+        .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); position: relative;}
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
         
-        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } }
+        /* Estilos del Calendario */
+        .calendar-box { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255,255,255,0.2); }
+        .calendar-box span { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; }
+
+        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } .calendar-box { margin: 15px auto 0 auto; } }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
@@ -67,64 +72,13 @@
         .section-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 12px; }
         .section-title::before { content: ''; width: 5px; height: 18px; background: var(--warning); border-radius: 3px; }
 
-        #auth-overlay { 
-            position: fixed; inset: 0; 
-            background: var(--bg);
-            display: flex; justify-content: center; align-items: center; 
-            z-index: 5000; 
-        }
-        .auth-card { 
-            background: white; 
-            padding: 50px 40px;
-            border-radius: 20px; 
-            text-align: center; 
-            width: 90%; max-width: 380px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            border: 1px solid #e2e8f0;
-        }
-        .auth-card i { 
-            color: var(--primary); 
-            margin-bottom: 30px; 
-            font-size: 4.5rem; 
-        }
-        .auth-card h2 {
-            font-size: 1.4rem;
-            color: var(--text);
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-        .pin-input { 
-            width: 100%; 
-            padding: 18px;
-            font-size: 1.4rem; 
-            text-align: center; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            outline: none; 
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-        }
-        .pin-input:focus {
-            border-color: var(--accent);
-        }
-        .auth-btn {
-            width: 100%; 
-            padding: 16px; 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: 700; 
-            font-size: 1rem;
-            cursor: pointer; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: background 0.2s;
-        }
-        .auth-btn:hover {
-            background: #1a3375;
-        }
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
+        .auth-card { background: white; padding: 50px 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .auth-card i { color: var(--primary); margin-bottom: 30px; font-size: 4.5rem; }
+        .auth-card h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 25px; font-weight: 700; }
+        .pin-input { width: 100%; padding: 18px; font-size: 1.4rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 25px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+        .pin-input:focus { border-color: var(--accent); }
+        .auth-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
     </style>
 </head>
 <body>
@@ -156,7 +110,12 @@
     <main class="main-view" id="main-scroll">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CARGANDO...</div>
+            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CONECTANDO...</div>
+            
+            <div class="calendar-box">
+                <span><i class="fas fa-calendar-day"></i> Fecha:</span>
+                <input type="date" id="global-date-filter" onchange="handleDateChange()">
+            </div>
         </div>
 
         <div class="section-title">Indicadores a destacar</div>
@@ -192,6 +151,7 @@
     
     let allFetched = []; 
     let chartA, chartF;
+    let selectedDateGlobal = ""; // Para mantener la fecha elegida al cambiar de estado
 
     function toggleSidebar() { 
         const sb = document.getElementById('sidebar');
@@ -202,23 +162,14 @@
     async function checkAuth() {
         const pinInput = document.getElementById('pin-input').value;
         const cargandoLabel = document.querySelector('.auth-card h2');
-        
-        if(!pinInput) {
-            alert("Por favor ingrese el PIN");
-            return;
-        }
-
+        if(!pinInput) { alert("PIN Requerido"); return; }
         cargandoLabel.innerText = "VERIFICANDO...";
-
         try {
             await init(pinInput);
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app').style.opacity = '1';
         } catch (error) {
-            console.error("Error:", error);
-            cargandoLabel.innerText = "ERROR DE ACCESO";
-            document.getElementById('pin-input').value = "";
-            alert("PIN incorrecto o error de conexión.");
+            cargandoLabel.innerText = "ACCESO DENEGADO";
             setTimeout(() => { cargandoLabel.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
         }
     }
@@ -238,27 +189,50 @@
     async function init(pin) {
         const res = await fetch(`${webAppUrl}?pass=${pin}`);
         const data = await res.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
 
-        allFetched = data.filter(d => 
-            d['ESTADO'] && 
-            !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim())
-        );
+        allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
+
+        // Establecer fecha por defecto (la más reciente)
+        const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
+        const ultima = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0];
+        if(ultima) {
+            const [d, m, y] = ultima.split('/');
+            selectedDateGlobal = ultima;
+            document.getElementById('global-date-filter').value = `${y}-${m}-${d}`;
+        }
 
         renderSidebar();
         resetFilter(document.getElementById('btn-nacional'));
+    }
+
+    function handleDateChange() {
+        const rawDate = document.getElementById('global-date-filter').value;
+        if(!rawDate) return;
+        const [y, m, d] = rawDate.split('-');
+        selectedDateGlobal = `${d}/${m}/${y}`;
+        
+        // Refrescar vista actual con la nueva fecha
+        const activeItem = document.querySelector('.state-item.active');
+        if(activeItem.id === 'btn-nacional') {
+            updateDashboard(allFetched, "VENEZUELA", true);
+        } else {
+            const estado = activeItem.innerText.trim();
+            updateDashboard(allFetched.filter(r => r['ESTADO'] === estado), estado, false);
+        }
     }
 
     function updateDashboard(data, title, isNational = false) {
         const main = document.getElementById('main-scroll');
         main.scrollTop = 0;
 
-        const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
-        const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0] || "SIN FECHA";
-        const filteredData = data.filter(d => d['FECHA'] === ultimaFecha);
+        // Filtrar datos por la fecha seleccionada en el calendario
+        const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
+
+        if(filteredData.length === 0) {
+            alert("No hay registros para la fecha " + selectedDateGlobal);
+            return;
+        }
 
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
@@ -266,7 +240,7 @@
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = "ÚLTIMA ACTUALIZACIÓN: " + ultimaFecha;
+        document.getElementById('date-info').innerText = "VISTA: " + selectedDateGlobal;
         
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderTipologia(s);
@@ -288,17 +262,8 @@
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
 
-        document.getElementById('grid-criticos').innerHTML = 
-            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + 
-            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") +
-            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
-            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
-        
-        document.getElementById('grid-estatus').innerHTML = 
-            createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + 
-            createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + 
-            createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
     }
@@ -308,15 +273,10 @@
         container.innerHTML = "";
         const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
         const totalTipologia = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
-        
         rubros.forEach(r => {
             const valor = stats[r] || 0;
             const porcentaje = totalTipologia > 0 ? (valor / totalTipologia * 100) : 0;
-            container.innerHTML += `
-                <div class="ranking-item">
-                    <div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div>
-                    <div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div>
-                </div>`;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div></div>`;
         });
     }
 
@@ -335,9 +295,7 @@
     function renderRanking(data) {
         const container = document.getElementById('ranking-container');
         container.innerHTML = "";
-        const fechasUnicas = [...new Set(data.map(d => d['FECHA']))].filter(f => f);
-        const ultimaFecha = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0];
-        const dataReciente = data.filter(d => d['FECHA'] === ultimaFecha);
+        const dataReciente = data.filter(d => d['FECHA'] === selectedDateGlobal);
 
         const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
@@ -347,20 +305,13 @@
         }).sort((a,b) => b.p - a.p).slice(0, 10);
 
         ranking.forEach(item => {
-            container.innerHTML += `
-                <div class="ranking-item">
-                    <div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div>
-                    <div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div>
-                </div>`;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
         });
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        list.innerHTML = `<div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
-            </div>`;
-        
+        list.innerHTML = `<div class="state-item active" id="btn-nacional" onclick="resetFilter(this)"><span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span></div>`;
         [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
             const btn = document.createElement('div');
             btn.className = 'state-item';
