@@ -74,7 +74,10 @@
 
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
         .auth-card { background: white; padding: 50px 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .auth-card i { color: var(--primary); margin-bottom: 30px; font-size: 4.5rem; }
+        
+        /* Ajuste para el nuevo logo Sundde */
+        .auth-logo { width: 140px; margin-bottom: 25px; }
+        
         .auth-card h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 25px; font-weight: 700; }
         .pin-input { width: 100%; padding: 18px; font-size: 1.4rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 25px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
         .pin-input:focus { border-color: var(--accent); }
@@ -85,7 +88,7 @@
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <i class="fas fa-shield-alt"></i>
+        <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
         <h2>PROGRAMACIÓN Y MONITOREO</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6">
         <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
@@ -193,7 +196,6 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // --- LÓGICA DE BLOQUEO DE FECHA (MÁXIMO AYER) ---
         const hoy = new Date();
         const ayer = new Date(hoy);
         ayer.setDate(hoy.getDate() - 1); 
@@ -204,10 +206,8 @@
         const fechaMax = `${yyyy}-${mm}-${dd}`;
 
         const dateInput = document.getElementById('global-date-filter');
-        dateInput.max = fechaMax; // Bloquea hoy y futuro en el calendario
-        // -----------------------------------------------
+        dateInput.max = fechaMax; 
 
-        // Establecer fecha por defecto (la más reciente que no sea hoy)
         const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
         const ultima = fechasUnicas
             .filter(f => parseDate(f) <= ayer)
