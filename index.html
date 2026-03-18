@@ -193,28 +193,13 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // --- BLOQUEO DE FECHA (MÁXIMO AYER) ---
-        const hoy = new Date();
-        const ayer = new Date(hoy);
-        ayer.setDate(hoy.getDate() - 1);
-        const fechaMax = ayer.toISOString().split('T')[0];
-        const dateInput = document.getElementById('global-date-filter');
-        dateInput.max = fechaMax;
-
+        // Fecha por defecto
         const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
-        
-        // Buscar última fecha que no sea hoy, ni viernes (5), ni sábado (6)
-        const ultima = fechasUnicas
-            .filter(f => {
-                const d = parseDate(f);
-                return d <= ayer && d.getDay() !== 5 && d.getDay() !== 6;
-            })
-            .sort((a, b) => parseDate(b) - parseDate(a))[0];
-
+        const ultima = fechasUnicas.sort((a, b) => parseDate(b) - parseDate(a))[0];
         if(ultima) {
-            const [dU, mU, yU] = ultima.split('/');
+            const [d, m, y] = ultima.split('/');
             selectedDateGlobal = ultima;
-            dateInput.value = `${yU}-${mU}-${dU}`;
+            document.getElementById('global-date-filter').value = `${y}-${m}-${d}`;
         }
 
         renderSidebar();
@@ -223,21 +208,24 @@
 
     function handleDateChange() {
         const input = document.getElementById('global-date-filter');
-        if(!input.value) return;
+        const rawDate = input.value;
+        if(!rawDate) return;
 
-        // Validar si es Viernes (5) o Sábado (6)
-        const dateObj = new Date(input.value + "T00:00:00");
+        // --- VALIDACIÓN DE VIERNES (5) Y SÁBADO (6) ---
+        const dateParts = rawDate.split('-');
+        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
         const day = dateObj.getDay();
 
-        if(day === 5 || day === 6) {
-            alert("Viernes y Sábados no están disponibles.");
-            // Restaurar a la fecha anterior válida
-            const [d, m, y] = selectedDateGlobal.split('/');
-            input.value = `${y}-${m}-${d}`;
+        if (day === 5 || day === 6) {
+            alert("No se permite seleccionar Viernes ni Sábados.");
+            // Revertir a la fecha anterior guardada
+            const [prevD, prevM, prevY] = selectedDateGlobal.split('/');
+            input.value = `${prevY}-${prevM}-${prevD}`;
             return;
         }
+        // ----------------------------------------------
 
-        const [y, m, d] = input.value.split('-');
+        const [y, m, d] = rawDate.split('-');
         selectedDateGlobal = `${d}/${m}/${y}`;
         
         const activeItem = document.querySelector('.state-item.active');
@@ -255,7 +243,7 @@
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
 
         if(filteredData.length === 0) {
-            alert("No hay registros para " + selectedDateGlobal);
+            alert("No hay registros para la fecha " + selectedDateGlobal);
             return;
         }
 
