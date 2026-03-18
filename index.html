@@ -193,22 +193,21 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // --- BLOQUEO MÁXIMO AYER ---
+        // --- BLOQUEO DE FECHA (MÁXIMO AYER) ---
         const hoy = new Date();
         const ayer = new Date(hoy);
-        ayer.setDate(hoy.getDate() - 1); 
-        const yyyy = ayer.getFullYear();
-        const mm = String(ayer.getMonth() + 1).padStart(2, '0');
-        const dd = String(ayer.getDate()).padStart(2, '0');
-        const fechaMax = `${yyyy}-${mm}-${dd}`;
+        ayer.setDate(hoy.getDate() - 1);
+        const fechaMax = ayer.toISOString().split('T')[0];
         const dateInput = document.getElementById('global-date-filter');
         dateInput.max = fechaMax;
 
         const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
+        
+        // Buscar última fecha que no sea hoy, ni viernes (5), ni sábado (6)
         const ultima = fechasUnicas
             .filter(f => {
                 const d = parseDate(f);
-                return d <= ayer && d.getDay() !== 5 && d.getDay() !== 6; // Ignora hoy, Viernes(5) y Sabados(6)
+                return d <= ayer && d.getDay() !== 5 && d.getDay() !== 6;
             })
             .sort((a, b) => parseDate(b) - parseDate(a))[0];
 
@@ -216,9 +215,6 @@
             const [dU, mU, yU] = ultima.split('/');
             selectedDateGlobal = ultima;
             dateInput.value = `${yU}-${mU}-${dU}`;
-        } else {
-            selectedDateGlobal = `${dd}/${mm}/${yyyy}`;
-            dateInput.value = fechaMax;
         }
 
         renderSidebar();
@@ -226,23 +222,22 @@
     }
 
     function handleDateChange() {
-        const dateInput = document.getElementById('global-date-filter');
-        const rawDate = dateInput.value;
-        if(!rawDate) return;
+        const input = document.getElementById('global-date-filter');
+        if(!input.value) return;
 
-        const dateObj = new Date(rawDate + "T00:00:00");
-        const day = dateObj.getDay(); // 5 = Viernes, 6 = Sábado
+        // Validar si es Viernes (5) o Sábado (6)
+        const dateObj = new Date(input.value + "T00:00:00");
+        const day = dateObj.getDay();
 
-        // --- BLOQUEO DE VIERNES Y SABADOS ---
         if(day === 5 || day === 6) {
-            alert("Los días Viernes y Sábados no están disponibles para monitoreo.");
-            // Resetear al valor anterior
+            alert("Viernes y Sábados no están disponibles.");
+            // Restaurar a la fecha anterior válida
             const [d, m, y] = selectedDateGlobal.split('/');
-            dateInput.value = `${y}-${m}-${d}`;
+            input.value = `${y}-${m}-${d}`;
             return;
         }
 
-        const [y, m, d] = rawDate.split('-');
+        const [y, m, d] = input.value.split('-');
         selectedDateGlobal = `${d}/${m}/${y}`;
         
         const activeItem = document.querySelector('.state-item.active');
@@ -260,7 +255,7 @@
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
 
         if(filteredData.length === 0) {
-            alert("No hay registros para la fecha " + selectedDateGlobal);
+            alert("No hay registros para " + selectedDateGlobal);
             return;
         }
 
