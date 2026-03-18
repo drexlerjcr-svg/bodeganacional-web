@@ -193,24 +193,23 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // --- LÓGICA DE BLOQUEO DE FECHA (MÁXIMO AYER) ---
+        // --- BLOQUEO MÁXIMO AYER ---
         const hoy = new Date();
         const ayer = new Date(hoy);
         ayer.setDate(hoy.getDate() - 1); 
-
         const yyyy = ayer.getFullYear();
         const mm = String(ayer.getMonth() + 1).padStart(2, '0');
         const dd = String(ayer.getDate()).padStart(2, '0');
         const fechaMax = `${yyyy}-${mm}-${dd}`;
-
         const dateInput = document.getElementById('global-date-filter');
-        dateInput.max = fechaMax; // Bloquea hoy y futuro en el calendario
-        // -----------------------------------------------
+        dateInput.max = fechaMax;
 
-        // Establecer fecha por defecto (la más reciente que no sea hoy)
         const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
         const ultima = fechasUnicas
-            .filter(f => parseDate(f) <= ayer)
+            .filter(f => {
+                const d = parseDate(f);
+                return d <= ayer && d.getDay() !== 5 && d.getDay() !== 6; // Ignora hoy, Viernes(5) y Sabados(6)
+            })
             .sort((a, b) => parseDate(b) - parseDate(a))[0];
 
         if(ultima) {
@@ -227,8 +226,22 @@
     }
 
     function handleDateChange() {
-        const rawDate = document.getElementById('global-date-filter').value;
+        const dateInput = document.getElementById('global-date-filter');
+        const rawDate = dateInput.value;
         if(!rawDate) return;
+
+        const dateObj = new Date(rawDate + "T00:00:00");
+        const day = dateObj.getDay(); // 5 = Viernes, 6 = Sábado
+
+        // --- BLOQUEO DE VIERNES Y SABADOS ---
+        if(day === 5 || day === 6) {
+            alert("Los días Viernes y Sábados no están disponibles para monitoreo.");
+            // Resetear al valor anterior
+            const [d, m, y] = selectedDateGlobal.split('/');
+            dateInput.value = `${y}-${m}-${d}`;
+            return;
+        }
+
         const [y, m, d] = rawDate.split('-');
         selectedDateGlobal = `${d}/${m}/${y}`;
         
@@ -244,7 +257,6 @@
     function updateDashboard(data, title, isNational = false) {
         const main = document.getElementById('main-scroll');
         main.scrollTop = 0;
-
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
 
         if(filteredData.length === 0) {
@@ -254,7 +266,6 @@
 
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
@@ -314,14 +325,12 @@
         const container = document.getElementById('ranking-container');
         container.innerHTML = "";
         const dataReciente = data.filter(d => d['FECHA'] === selectedDateGlobal);
-
         const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
             let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
             if(p > 0 && p < 1) p *= 100;
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
-
         ranking.forEach(item => {
             container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
         });
