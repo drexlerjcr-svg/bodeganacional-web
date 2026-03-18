@@ -44,7 +44,6 @@
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); position: relative;}
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
         
-        /* Estilos del Calendario */
         .calendar-box { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255,255,255,0.2); }
         .calendar-box span { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; }
@@ -74,10 +73,7 @@
 
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
         .auth-card { background: white; padding: 50px 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        
-        /* Ajuste para el nuevo logo Sundde */
         .auth-logo { width: 140px; margin-bottom: 25px; }
-        
         .auth-card h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 25px; font-weight: 700; }
         .pin-input { width: 100%; padding: 18px; font-size: 1.4rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 25px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
         .pin-input:focus { border-color: var(--accent); }
@@ -226,12 +222,28 @@
         resetFilter(document.getElementById('btn-nacional'));
     }
 
+    // --- FUNCIÓN MODIFICADA PARA REVERTIR FECHA SI NO HAY DATOS ---
     function handleDateChange() {
-        const rawDate = document.getElementById('global-date-filter').value;
+        const dateInput = document.getElementById('global-date-filter');
+        const rawDate = dateInput.value;
         if(!rawDate) return;
-        const [y, m, d] = rawDate.split('-');
-        selectedDateGlobal = `${d}/${m}/${y}`;
         
+        const [y, m, d] = rawDate.split('-');
+        const nuevaFechaFormateada = `${d}/${m}/${y}`;
+        
+        // Verificamos si hay registros para esta nueva fecha
+        const hayRegistros = allFetched.some(registro => registro['FECHA'] === nuevaFechaFormateada);
+
+        if(!hayRegistros) {
+            alert("No hay registros para la fecha " + nuevaFechaFormateada);
+            // Revertimos el input a la fecha que ya teníamos guardada
+            const [dR, mR, yR] = selectedDateGlobal.split('/');
+            dateInput.value = `${yR}-${mR}-${dR}`;
+            return;
+        }
+
+        // Si hay registros, actualizamos la global y el dashboard
+        selectedDateGlobal = nuevaFechaFormateada;
         const activeItem = document.querySelector('.state-item.active');
         if(activeItem.id === 'btn-nacional') {
             updateDashboard(allFetched, "VENEZUELA", true);
@@ -246,11 +258,6 @@
         main.scrollTop = 0;
 
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
-
-        if(filteredData.length === 0) {
-            alert("No hay registros para la fecha " + selectedDateGlobal);
-            return;
-        }
 
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
