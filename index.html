@@ -85,7 +85,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
-        <h2>PROGRAMACIÓN Y MONITOREO</h2>
+        <h2>Programación y Monitoreo</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6">
         <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
     </div>
@@ -151,6 +151,12 @@
     let allFetched = []; 
     let chartA, chartF;
     let selectedDateGlobal = ""; 
+
+    document.getElementById('pin-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            checkAuth();
+        }
+    });
 
     function toggleSidebar() { 
         const sb = document.getElementById('sidebar');
@@ -222,7 +228,6 @@
         resetFilter(document.getElementById('btn-nacional'));
     }
 
-    // --- FUNCIÓN MODIFICADA PARA REVERTIR FECHA SI NO HAY DATOS ---
     function handleDateChange() {
         const dateInput = document.getElementById('global-date-filter');
         const rawDate = dateInput.value;
@@ -230,19 +235,15 @@
         
         const [y, m, d] = rawDate.split('-');
         const nuevaFechaFormateada = `${d}/${m}/${y}`;
-        
-        // Verificamos si hay registros para esta nueva fecha
         const hayRegistros = allFetched.some(registro => registro['FECHA'] === nuevaFechaFormateada);
 
         if(!hayRegistros) {
             alert("No hay registros para la fecha " + nuevaFechaFormateada);
-            // Revertimos el input a la fecha que ya teníamos guardada
             const [dR, mR, yR] = selectedDateGlobal.split('/');
             dateInput.value = `${yR}-${mR}-${dR}`;
             return;
         }
 
-        // Si hay registros, actualizamos la global y el dashboard
         selectedDateGlobal = nuevaFechaFormateada;
         const activeItem = document.querySelector('.state-item.active');
         if(activeItem.id === 'btn-nacional') {
@@ -256,20 +257,14 @@
     function updateDashboard(data, title, isNational = false) {
         const main = document.getElementById('main-scroll');
         main.scrollTop = 0;
-
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
-
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
-
         document.getElementById('view-title').innerText = title;
         document.getElementById('date-info').innerText = "VISTA: " + selectedDateGlobal;
-        
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderTipologia(s);
-        
         const rankSec = document.getElementById('ranking-section');
         if(isNational) {
             rankSec.style.display = "block";
@@ -277,7 +272,6 @@
         } else {
             rankSec.style.display = "none";
         }
-
         const createCard = (l, v, i, c) => `
             <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center">
@@ -286,7 +280,6 @@
                 </div>
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
-
         document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
@@ -321,14 +314,12 @@
         const container = document.getElementById('ranking-container');
         container.innerHTML = "";
         const dataReciente = data.filter(d => d['FECHA'] === selectedDateGlobal);
-
         const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
             const row = dataReciente.find(r => r['ESTADO'] === s);
             let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
             if(p > 0 && p < 1) p *= 100;
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
-
         ranking.forEach(item => {
             container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
         });
