@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sala de Mando Operativa - Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
     <style>
         :root {
             --primary: #1e3a8a; --accent: #3b82f6; --success: #22c55e; 
@@ -46,7 +53,7 @@
         
         .calendar-box { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255,255,255,0.2); }
         .calendar-box span { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-        .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; }
+        .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; width: 100px; }
 
         @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } .calendar-box { margin: 15px auto 0 auto; } }
 
@@ -85,7 +92,7 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
-        <h2>Programación y Monitoreo</h2>
+        <h2>PROGRAMACIÓN Y MONITOREO</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6">
         <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
     </div>
@@ -113,7 +120,7 @@
             
             <div class="calendar-box">
                 <span><i class="fas fa-calendar-day"></i> Fecha:</span>
-                <input type="date" id="global-date-filter" onchange="handleDateChange()">
+                <input type="text" id="global-date-filter" placeholder="Seleccione...">
             </div>
         </div>
 
@@ -151,11 +158,10 @@
     let allFetched = []; 
     let chartA, chartF;
     let selectedDateGlobal = ""; 
+    let fp; // Instancia de Flatpickr
 
     document.getElementById('pin-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            checkAuth();
-        }
+        if (e.key === 'Enter') checkAuth();
     });
 
     function toggleSidebar() { 
@@ -198,53 +204,57 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
+        // Obtener todas las fechas únicas de la base de datos
+        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
+            .filter(f => f)
+            .map(f => {
+                const [d, m, y] = f.split('/');
+                return new Date(y, m - 1, d);
+            });
+
         const hoy = new Date();
         const ayer = new Date(hoy);
-        ayer.setDate(hoy.getDate() - 1); 
+        ayer.setDate(hoy.getDate() - 1);
 
-        const yyyy = ayer.getFullYear();
-        const mm = String(ayer.getMonth() + 1).padStart(2, '0');
-        const dd = String(ayer.getDate()).padStart(2, '0');
-        const fechaMax = `${yyyy}-${mm}-${dd}`;
+        // Inicializar Flatpickr
+        fp = flatpickr("#global-date-filter", {
+            locale: "es",
+            dateFormat: "d/m/Y",
+            maxDate: ayer,
+            // Habilitar solo las fechas que existen en los datos
+            enable: fechasDisponibles,
+            onChange: function(selectedDates, dateStr) {
+                if (dateStr) handleDateChange(dateStr);
+            }
+        });
 
-        const dateInput = document.getElementById('global-date-filter');
-        dateInput.max = fechaMax; 
-
-        const fechasUnicas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
-        const ultima = fechasUnicas
+        const fechasTexto = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
+        const ultima = fechasTexto
             .filter(f => parseDate(f) <= ayer)
             .sort((a, b) => parseDate(b) - parseDate(a))[0];
 
         if(ultima) {
-            const [dU, mU, yU] = ultima.split('/');
             selectedDateGlobal = ultima;
-            dateInput.value = `${yU}-${mU}-${dU}`;
-        } else {
-            selectedDateGlobal = `${dd}/${mm}/${yyyy}`;
-            dateInput.value = fechaMax;
+            fp.setDate(ultima);
+        } else if (fechasTexto.length > 0) {
+            selectedDateGlobal = fechasTexto[0];
+            fp.setDate(fechasTexto[0]);
         }
 
         renderSidebar();
         resetFilter(document.getElementById('btn-nacional'));
     }
 
-    function handleDateChange() {
-        const dateInput = document.getElementById('global-date-filter');
-        const rawDate = dateInput.value;
-        if(!rawDate) return;
-        
-        const [y, m, d] = rawDate.split('-');
-        const nuevaFechaFormateada = `${d}/${m}/${y}`;
-        const hayRegistros = allFetched.some(registro => registro['FECHA'] === nuevaFechaFormateada);
+    function handleDateChange(nuevaFecha) {
+        const hayRegistros = allFetched.some(r => r['FECHA'] === nuevaFecha);
 
         if(!hayRegistros) {
-            alert("No hay registros para la fecha " + nuevaFechaFormateada);
-            const [dR, mR, yR] = selectedDateGlobal.split('/');
-            dateInput.value = `${yR}-${mR}-${dR}`;
+            alert("No hay registros para la fecha " + nuevaFecha);
+            fp.setDate(selectedDateGlobal);
             return;
         }
 
-        selectedDateGlobal = nuevaFechaFormateada;
+        selectedDateGlobal = nuevaFecha;
         const activeItem = document.querySelector('.state-item.active');
         if(activeItem.id === 'btn-nacional') {
             updateDashboard(allFetched, "VENEZUELA", true);
