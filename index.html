@@ -158,7 +158,7 @@
     let allFetched = []; 
     let chartA, chartF;
     let selectedDateGlobal = ""; 
-    let fp; // Instancia de Flatpickr
+    let fp;
 
     document.getElementById('pin-input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') checkAuth();
@@ -204,7 +204,6 @@
 
         allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
 
-        // Obtener todas las fechas únicas de la base de datos
         const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
             .filter(f => f)
             .map(f => {
@@ -216,12 +215,10 @@
         const ayer = new Date(hoy);
         ayer.setDate(hoy.getDate() - 1);
 
-        // Inicializar Flatpickr
         fp = flatpickr("#global-date-filter", {
             locale: "es",
             dateFormat: "d/m/Y",
             maxDate: ayer,
-            // Habilitar solo las fechas que existen en los datos
             enable: fechasDisponibles,
             onChange: function(selectedDates, dateStr) {
                 if (dateStr) handleDateChange(dateStr);
@@ -272,7 +269,7 @@
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
         document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = "VISTA: " + selectedDateGlobal;
+        document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderTipologia(s);
         const rankSec = document.getElementById('ranking-section');
