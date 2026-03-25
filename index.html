@@ -18,64 +18,41 @@
             --bg: #f1f5f9; --white: #ffffff; --text: #1e293b; --muted: #64748b;
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
-
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.5s; position: relative; }
-        
-        .sidebar { 
-            width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; 
-            display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
+        .sidebar { width: 280px; min-width: 280px; background: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 1001; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar.collapsed { margin-left: -280px; }
         .sidebar-header { padding: 20px; background: var(--primary); color: white; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 15px; }
         .sidebar-header i { cursor: pointer; color: white !important; }
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0; }
-
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; margin-left: 0; }
-            .sidebar.collapsed { margin-left: -100%; }
-        }
-
+        @media (max-width: 768px) { .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; margin-left: 0; } .sidebar.collapsed { margin-left: -100%; } }
         .state-item { padding: 12px 20px; margin: 2px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
         .state-item:hover { background: #f1f5f9; }
         .state-item.active { background: var(--primary); color: white; }
-        
         .main-view { flex-grow: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
-        
         .floating-toggle { position: fixed; top: 18px; left: 20px; z-index: 999; background: var(--primary); color: white; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: var(--shadow); }
-
         .banner { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: var(--shadow); position: relative;}
         .banner h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; font-weight: 900; }
-        
         .calendar-box { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 8px; width: fit-content; border: 1px solid rgba(255,255,255,0.2); }
         .calendar-box span { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; width: 100px; }
-
         @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } .calendar-box { margin: 15px auto 0 auto; } }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.8rem; font-weight: 800; }
-
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
         @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
-        
         .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; }
         .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; }
         .chart-box { position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; }
-
         .ranking-card { background: var(--white); padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 35px; }
         .ranking-item { margin-bottom: 15px; }
         .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; }
         .bar-container { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
         .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; }
-
         .section-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 12px; }
         .section-title::before { content: ''; width: 5px; height: 18px; background: var(--warning); border-radius: 3px; }
-
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
         .auth-card { background: white; padding: 50px 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         .auth-logo { width: 140px; margin-bottom: 25px; }
@@ -91,19 +68,15 @@
     <div class="auth-card">
         <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
         <h2>PROGRAMACIÓN Y MONITOREO</h2>
-        <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6">
+        <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6" onkeydown="if(event.key==='Enter') checkAuth()">
         <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
     </div>
 </div>
 
 <div class="app-container" id="app">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-bars" onclick="toggleSidebar()"></i> 
-            <span>ESTADOS</span>
-        </div>
-        <div class="sidebar-content" id="sidebar-list">
-            </div>
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i><span>ESTADOS</span></div>
+        <div class="sidebar-content" id="sidebar-list"></div>
     </aside>
 
     <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -112,7 +85,6 @@
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
             <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CONECTANDO...</div>
-            
             <div class="calendar-box">
                 <span><i class="fas fa-calendar-day"></i> Fecha:</span>
                 <input type="text" id="global-date-filter" placeholder="Seleccione...">
@@ -126,22 +98,17 @@
             <div id="full-nacional-content">
                 <div class="section-title">Estatus del Flujo de Denuncia</div>
                 <div id="grid-estatus" class="grid"></div>
-
                 <div class="section-title">Procesos de Campo e Inspección</div>
                 <div id="grid-procesos" class="grid"></div>
-
                 <div class="section-title">Asignación de Fiscales y Dependencias</div>
                 <div id="grid-fiscales" class="grid"></div>
-
                 <div class="section-title">Análisis Visual de Gestión</div>
                 <div class="charts-row">
                     <div class="chart-container"><h3>Atención vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
                     <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
                 </div>
-
                 <div class="section-title">Tipología</div>
                 <div id="tipologia-container" class="ranking-card"></div>
-
                 <div id="ranking-section">
                     <div class="section-title">Eficiencia por Estados (Top 10)</div>
                     <div id="ranking-container" class="ranking-card"></div>
@@ -162,16 +129,16 @@
 
     async function checkAuth() {
         const pinInput = document.getElementById('pin-input').value;
-        const cargandoLabel = document.querySelector('.auth-card h2');
+        const label = document.querySelector('.auth-card h2');
         if(!pinInput) { alert("PIN Requerido"); return; }
-        cargandoLabel.innerText = "VERIFICANDO...";
+        label.innerText = "VERIFICANDO...";
         try {
             await init(pinInput);
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app').style.opacity = '1';
         } catch (error) {
-            cargandoLabel.innerText = "ACCESO DENEGADO";
-            setTimeout(() => { cargandoLabel.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
+            label.innerText = "ACCESO DENEGADO";
+            setTimeout(() => { label.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
         }
     }
 
@@ -179,6 +146,14 @@
         if (!val) return 0;
         let n = parseFloat(String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
         return isNaN(n) ? 0 : n;
+    }
+
+    function getUltimaFecha(dataArr, campoFecha) {
+        const fechas = [...new Set(dataArr.map(d => d[campoFecha]))].filter(f => f);
+        return fechas.sort((a, b) => {
+            const da = a.split('/'); const db = b.split('/');
+            return new Date(db[2], db[1]-1, db[0]) - new Date(da[2], da[1]-1, da[0]);
+        })[0] || "";
     }
 
     async function init(pin) {
@@ -189,30 +164,17 @@
         allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
         sedeData = data.sede;
 
-        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
-            .filter(f => f)
-            .map(f => {
-                const [d, m, y] = f.split('/');
-                return new Date(y, m - 1, d);
-            });
-
-        const hoy = new Date();
-        const ayer = new Date(hoy);
-        ayer.setDate(hoy.getDate() - 1);
+        const fechasH1 = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f).map(f => {
+            const [d, m, y] = f.split('/'); return new Date(y, m - 1, d);
+        });
 
         fp = flatpickr("#global-date-filter", {
-            locale: "es", dateFormat: "d/m/Y", maxDate: ayer, enable: fechasDisponibles,
+            locale: "es", dateFormat: "d/m/Y", maxDate: new Date(), enable: fechasH1,
             onChange: (selectedDates, dateStr) => { if (dateStr) handleDateChange(dateStr); }
         });
 
-        const fechasTexto = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
-        const ultima = fechasTexto.sort((a, b) => {
-            const da = a.split('/'); const db = b.split('/');
-            return new Date(db[2], db[1]-1, db[0]) - new Date(da[2], da[1]-1, da[0]);
-        })[0];
-
-        selectedDateGlobal = ultima || "";
-        if(ultima) fp.setDate(ultima);
+        selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
+        if(selectedDateGlobal) fp.setDate(selectedDateGlobal);
 
         renderSidebar();
         resetFilter(document.getElementById('btn-nacional'));
@@ -249,7 +211,16 @@
         document.getElementById('full-nacional-content').style.display = "none";
         document.getElementById('sec-indicadores').innerText = "Resumen de Gestión Sede";
 
-        const count = (estatus) => sedeData.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus).length;
+        // Cambiar fecha a la última de Sede Central (Hoja 2)
+        const ultimaSede = getUltimaFecha(sedeData, 'FECHA');
+        if(ultimaSede) {
+            selectedDateGlobal = ultimaSede;
+            document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
+            // No actualizamos el flatpickr porque las fechas de Hoja 2 pueden ser distintas a las de Hoja 1
+        }
+
+        const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
+        const count = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
         
         const createCard = (l, v, i, c) => `
             <div class="card">
@@ -272,6 +243,13 @@
     function updateDashboard(data, title, isNational = false) {
         document.getElementById('full-nacional-content').style.display = "block";
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
+        
+        // Si venimos de Sede Central, restauramos la fecha a la última de Hoja 1
+        if (title === "VENEZUELA" && isNational) {
+            selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
+            fp.setDate(selectedDateGlobal);
+        }
+
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
@@ -285,10 +263,7 @@
         
         const createCard = (l, v, i, c) => `
             <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}"></i>
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div>
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
         
@@ -319,10 +294,10 @@
 
     function handleDateChange(nuevaFecha) {
         selectedDateGlobal = nuevaFecha;
-        const activeItem = document.querySelector('.state-item.active');
-        if(activeItem.id === 'btn-nacional') resetFilter(activeItem);
-        else if(activeItem.id === 'btn-sede') renderSedeCentral(activeItem);
-        else activeItem.click();
+        const active = document.querySelector('.state-item.active');
+        if(active.id === 'btn-nacional') updateDashboard(allFetched, "VENEZUELA", true);
+        else if(active.id === 'btn-sede') renderSedeCentral(active);
+        else active.click();
     }
 
     function renderCharts(ate, pen, pas, cas) {
