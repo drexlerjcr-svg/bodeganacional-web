@@ -55,57 +55,41 @@
         .calendar-box span { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .calendar-box input { background: white; border: none; border-radius: 4px; padding: 4px 8px; font-family: inherit; font-weight: 600; color: var(--primary); outline: none; cursor: pointer; width: 100px; }
 
-        @media (max-width: 768px) { .banner { padding-top: 60px; text-align: center; } .floating-toggle { display: flex; } .calendar-box { margin: 15px auto 0 auto; } }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-bottom: 35px; }
         .card { background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
         .card-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .card-val { font-size: 1.8rem; font-weight: 800; }
 
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 35px; }
-        @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
-        
         .chart-container { background: var(--white); padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; }
         .chart-container h3 { font-size: 0.75rem; margin-bottom: 15px; color: var(--muted); text-transform: uppercase; }
         .chart-box { position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; }
 
         .ranking-card { background: var(--white); padding: 25px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); margin-bottom: 35px; }
-        .ranking-item { margin-bottom: 15px; }
-        .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; }
-        .bar-container { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; }
-
-        .section-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 12px; }
-        .section-title::before { content: ''; width: 5px; height: 18px; background: var(--warning); border-radius: 3px; }
-
+        
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 5000; }
         .auth-card { background: white; padding: 50px 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         .auth-logo { width: 140px; margin-bottom: 25px; }
         .auth-card h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 25px; font-weight: 700; }
         .pin-input { width: 100%; padding: 18px; font-size: 1.4rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 25px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
-        .pin-input:focus { border-color: var(--accent); }
         .auth-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
 
-        /* MODAL Y BARRA DE BUSQUEDA SEGUN IMAGEN */
+        /* MODAL Y CHECKLIST */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; backdrop-filter: blur(4px); }
-        .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; display: flex; flex-direction: column; }
-        @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-card { background: white; width: 100%; max-width: 550px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: 90vh; }
         .modal-header { padding: 20px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h3 { margin: 0; font-size: 1rem; text-transform: uppercase; }
         
-        /* Contenedor de búsqueda refinado */
-        .modal-search-container { padding: 15px 20px; background: #fff; border-bottom: 1px solid #f1f5f9; }
-        .search-wrapper { position: relative; width: 100%; }
-        .modal-search-input { width: 100%; padding: 12px 45px 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 0.9rem; outline: none; box-sizing: border-box; transition: all 0.2s; }
-        .modal-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+        .checklist-container { padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; max-height: 200px; overflow-y: auto; }
+        .check-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; font-weight: 600; }
+        .check-item:hover { background: #edf2f7; }
+        .check-item input { width: 18px; height: 18px; cursor: pointer; }
 
-        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+        .modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
         .detail-row { padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px; }
-        .detail-row:last-child { border: none; }
         .detail-label { font-size: 0.7rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
         .detail-val { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-        .close-modal { cursor: pointer; font-size: 1.2rem; }
+        .section-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 12px; }
+        .section-title::before { content: ''; width: 5px; height: 18px; background: var(--warning); border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -122,25 +106,19 @@
 <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3 id="modal-title">Detalle de Registro</h3>
-            <i class="fas fa-times close-modal" onclick="closeModal()"></i>
+            <h3 id="modal-title">Seleccione Registro</h3>
+            <i class="fas fa-times" style="cursor:pointer" onclick="closeModal()"></i>
         </div>
-        <div class="modal-search-container">
-            <div class="search-wrapper">
-                <input type="text" id="modal-search" class="modal-search-input" placeholder="Buscar..." onkeyup="filterModalResults()">
-                <i class="fas fa-search search-icon"></i>
-            </div>
+        <div id="modal-checklist" class="checklist-container"></div>
+        <div id="modal-body" class="modal-body">
+            <p style="text-align:center; color:var(--muted); margin-top:20px;">Seleccione un código arriba para ver detalles</p>
         </div>
-        <div id="modal-body" class="modal-body"></div>
     </div>
 </div>
 
 <div class="app-container" id="app">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-bars" onclick="toggleSidebar()"></i> 
-            <span>ESTADOS</span>
-        </div>
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i> <span>ESTADOS</span></div>
         <div class="sidebar-content" id="sidebar-list"></div>
     </aside>
 
@@ -149,10 +127,10 @@
     <main class="main-view" id="main-scroll">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CONECTANDO...</div>
+            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CARGANDO...</div>
             <div class="calendar-box">
                 <span><i class="fas fa-calendar-day"></i> Fecha:</span>
-                <input type="text" id="global-date-filter" placeholder="Seleccione...">
+                <input type="text" id="global-date-filter">
             </div>
         </div>
 
@@ -163,25 +141,12 @@
             <div id="full-nacional-content">
                 <div class="section-title">Estatus del Flujo de Denuncia</div>
                 <div id="grid-estatus" class="grid"></div>
-
                 <div class="section-title">Procesos de Campo e Inspección</div>
                 <div id="grid-procesos" class="grid"></div>
-
-                <div class="section-title">Asignación de Fiscales y Dependencias</div>
-                <div id="grid-fiscales" class="grid"></div>
-
-                <div class="section-title">Análisis Visual de Gestión</div>
+                <div class="section-title">Análisis Visual</div>
                 <div class="charts-row">
-                    <div class="chart-container"><h3>Atención vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
-                    <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
-                </div>
-
-                <div class="section-title">Tipología</div>
-                <div id="tipology-container" class="ranking-card"></div>
-
-                <div id="ranking-section">
-                    <div class="section-title">Eficiencia por Estados (Top 10)</div>
-                    <div id="ranking-container" class="ranking-card"></div>
+                    <div class="chart-container"><h3>Atención</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
+                    <div class="chart-container"><h3>Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
                 </div>
             </div>
         </div>
@@ -190,293 +155,155 @@
 
 <script>
     const webAppUrl = "https://script.google.com/macros/s/AKfycbypsSbSP194UABFRsVsrF0XN8OaeZK7WUj-3triDEUem6gOO2QTqVl8r4-OFGv0bNHm/exec"; 
-    
-    let allFetched = []; 
-    let sedeData = []; 
-    let currentModalData = [];
+    let allFetched = [], sedeData = [], selectedDateGlobal = "", fp;
     let chartA, chartF;
-    let selectedDateGlobal = ""; 
-    let fp;
-
-    document.getElementById('pin-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') checkAuth();
-    });
-
-    function toggleSidebar() { 
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
-    }
 
     async function checkAuth() {
-        const pinInput = document.getElementById('pin-input').value;
-        const cargandoLabel = document.querySelector('.auth-card h2');
-        if(!pinInput) { alert("PIN Requerido"); return; }
-        cargandoLabel.innerText = "VERIFICANDO...";
+        const pin = document.getElementById('pin-input').value;
+        if(!pin) return;
         try {
-            await init(pinInput);
+            const res = await fetch(`${webAppUrl}?pass=${pin}`);
+            const data = await res.json();
+            if(data.error) throw new Error();
+            allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL','TOTALES'].includes(d['ESTADO'].toUpperCase()));
+            sedeData = data.sede;
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app').style.opacity = '1';
-        } catch (error) {
-            cargandoLabel.innerText = "ACCESO DENEGADO";
-            setTimeout(() => { cargandoLabel.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
-        }
+            initApp();
+        } catch(e) { alert("PIN Incorrecto"); }
     }
 
-    function cleanNum(val) {
-        if (!val) return 0;
-        let n = parseFloat(String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
-        return isNaN(n) ? 0 : n;
-    }
-
-    function getUltimaFecha(dataArr, campoFecha) {
-        const fechas = [...new Set(dataArr.map(d => d[campoFecha]))].filter(f => f);
-        return fechas.sort((a, b) => {
-            const da = a.split('/'); const db = b.split('/');
-            return new Date(db[2], db[1]-1, db[0]) - new Date(da[2], da[1]-1, da[0]);
-        })[0] || "";
-    }
-
-    async function init(pin) {
-        const res = await fetch(`${webAppUrl}?pass=${pin}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
-        sedeData = data.sede;
-
-        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
-            .filter(f => f)
-            .map(f => {
-                const [d, m, y] = f.split('/');
-                return new Date(y, m - 1, d);
-            });
-
+    function initApp() {
+        const fechas = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
         fp = flatpickr("#global-date-filter", {
-            locale: "es",
-            dateFormat: "d/m/Y",
-            maxDate: new Date(),
-            enable: fechasDisponibles,
-            onChange: function(selectedDates, dateStr) {
-                if (dateStr) handleDateChange(dateStr);
-            }
+            locale: "es", dateFormat: "d/m/Y",
+            defaultDate: fechas[fechas.length-1],
+            enable: fechas.map(f => { const [d,m,y] = f.split('/'); return new Date(y,m-1,d); }),
+            onChange: (d, str) => { selectedDateGlobal = str; refreshUI(); }
         });
-
-        selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
-        if(selectedDateGlobal) fp.setDate(selectedDateGlobal);
-
+        selectedDateGlobal = fp.input.value;
         renderSidebar();
-        resetFilter(document.getElementById('btn-nacional'));
+        refreshUI();
     }
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        list.innerHTML = `
-            <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)">
-                <span><i class="fas fa-building"></i> SEDE CENTRAL</span>
-            </div>
-            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
-            </div>`;
-        
+        list.innerHTML = `<div class="state-item active" onclick="setViewState('VENEZUELA', true, this)"><span><i class="fas fa-globe-americas"></i> NACIONAL</span></div>`;
+        list.innerHTML += `<div class="state-item" onclick="renderSedeCentral(this)"><span><i class="fas fa-building"></i> SEDE CENTRAL</span></div>`;
         [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
-            const btn = document.createElement('div');
-            btn.className = 'state-item';
-            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
-            btn.onclick = () => {
-                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                btn.classList.add('active');
-                updateDashboard(allFetched.filter(r => r['ESTADO'] === s), s, false);
-                if(window.innerWidth <= 768) toggleSidebar();
-            };
-            list.appendChild(btn);
+            list.innerHTML += `<div class="state-item" onclick="setViewState('${s}', false, this)"><span><i class="fas fa-map-marker-alt"></i> ${s}</span></div>`;
         });
     }
 
-    function showSedeDetail(estatus) {
-        currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
-        document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
-        document.getElementById('modal-search').value = "";
-        renderModalResults(currentModalData);
-        document.getElementById('modal-overlay').style.display = 'flex';
+    function setViewState(title, isNacional, el) {
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('view-title').innerText = title;
+        document.getElementById('full-nacional-content').style.display = "block";
+        const data = isNacional ? allFetched : allFetched.filter(d => d['ESTADO'] === title);
+        updateDashboard(data);
     }
-
-    function filterModalResults() {
-        const query = document.getElementById('modal-search').value.toLowerCase().trim();
-        const filtered = currentModalData.filter(item => {
-            const sujeto = String(item['SUJETO DE APLICACIÓN'] || "").toLowerCase();
-            const codigo = String(item['CÓDIGO DE DENUNCIA'] || "").toLowerCase();
-            return sujeto.includes(query) || codigo.includes(query);
-        });
-        renderModalResults(filtered);
-    }
-
-    function renderModalResults(data) {
-        const body = document.getElementById('modal-body');
-        body.innerHTML = "";
-        if (data.length === 0) {
-            body.innerHTML = "<p style='text-align:center; padding:20px; color:var(--muted);'>No se encontraron registros.</p>";
-            return;
-        }
-        data.forEach(item => {
-            let html = '<div class="ranking-card" style="margin-bottom:15px; padding:10px;">';
-            for (let key in item) {
-                const uKey = key.toUpperCase().trim();
-                if(item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
-                    html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-val">${item[key]}</span></div>`;
-                }
-            }
-            html += '</div>';
-            body.innerHTML += html;
-        });
-    }
-
-    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
     function renderSedeCentral(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
-        document.getElementById('sec-indicadores').innerText = "Resumen de Gestión Sede";
-        document.querySelector('.calendar-box').style.display = 'none';
-
-        const ultimaSede = getUltimaFecha(sedeData, 'FECHA');
-        if(ultimaSede) {
-            selectedDateGlobal = ultimaSede;
-            document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
-        }
-
+        
         const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
         
-        const conteoSujetos = {};
+        // Lógica Incidencia Columna F (Sujeto de Aplicación)
+        const counts = {};
         filteredSede.forEach(r => {
             const s = r['SUJETO DE APLICACIÓN'];
-            if(s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
+            if(s) counts[s] = (counts[s] || 0) + 1;
         });
+        let topSujeto = "N/A", max = 0;
+        for(let s in counts) if(counts[s] > max) { max = counts[s]; topSujeto = s; }
 
-        let topSujeto = "N/A", maxD = 0;
-        for(let s in conteoSujetos) if(conteoSujetos[s] > maxD) { maxD = conteoSujetos[s]; topSujeto = s; }
-        
-        const topData = filteredSede.filter(r => r['SUJETO DE APLICACIÓN'] === topSujeto);
-        const topSinAtender = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "SIN ATENDER").length;
-        const topEnProceso = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "EN PROCESO").length;
+        const topRows = filteredSede.filter(r => r['SUJETO DE APLICACIÓN'] === topSujeto);
+        const sinAtender = topRows.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "SIN ATENDER").length;
 
-        const count = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
-        
-        const createCard = (l, v, i, c, status) => `
-            <div class="card" onclick="showSedeDetail('${status}')" style="cursor:pointer">
-                <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div>
-                <div class="card-val" style="color:${c}">${v.toLocaleString()}</div>
-                <div style="font-size:0.6rem; color:var(--muted); text-align:right;">Ver detalles <i class="fas fa-chevron-right"></i></div>
-            </div>`;
+        const count = (est) => filteredSede.filter(r => String(r['ESTATUS']).toUpperCase().trim() === est.toUpperCase()).length;
 
-        let gridHtml = 
-            createCard("Cerrada", count("CERRADA"), "fa-folder-check", "var(--success)", "CERRADA") +
-            createCard("En Proceso", count("EN PROCESO"), "fa-spinner", "var(--accent)", "EN PROCESO") +
-            createCard("Sin Atender", count("SIN ATENDER"), "fa-clock", "var(--danger)", "SIN ATENDER") +
-            createCard("Desestimada", count("DESESTIMADA"), "fa-ban", "var(--muted)", "DESESTIMADA");
-        
-        gridHtml += `
-            <div class="card" style="grid-column: 1 / -1; border-left: 5px solid var(--purple);">
-                <span class="card-label">Sujeto con mayor incidencia</span>
-                <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary); margin: 5px 0;">${topSujeto}</div>
-                <div style="display:flex; gap:20px; margin-top:5px;">
-                    <div><span class="card-label">Sin Atender</span><div style="font-size:1.2rem; font-weight:800; color:var(--danger)">${topSinAtender}</div></div>
-                    <div><span class="card-label">En Proceso</span><div style="font-size:1.2rem; font-weight:800; color:var(--accent)">${topEnProceso}</div></div>
-                    <div style="margin-left:auto; text-align:right;"><span class="card-label">Total</span><div style="font-size:1.2rem; font-weight:800;">${maxD}</div></div>
+        document.getElementById('grid-criticos').innerHTML = `
+            <div class="card" onclick="openChecklist('CERRADA')" style="cursor:pointer"><span class="card-label">Cerrada</span><div class="card-val" style="color:var(--success)">${count('CERRADA')}</div></div>
+            <div class="card" onclick="openChecklist('EN PROCESO')" style="cursor:pointer"><span class="card-label">En Proceso</span><div class="card-val" style="color:var(--accent)">${count('EN PROCESO')}</div></div>
+            <div class="card" onclick="openChecklist('SIN ATENDER')" style="cursor:pointer"><span class="card-label">Sin Atender</span><div class="card-val" style="color:var(--danger)">${count('SIN ATENDER')}</div></div>
+            <div class="card" style="grid-column: 1/-1; border-left: 5px solid var(--purple);">
+                <span class="card-label">Sujeto con mayor incidencia (Columna F)</span>
+                <div style="font-size:1.1rem; font-weight:800; color:var(--primary); margin:5px 0;">${topSujeto}</div>
+                <div style="display:flex; gap:20px;">
+                    <div><span class="card-label">Sin Atender</span><div style="font-size:1.2rem; font-weight:800; color:var(--danger)">${sinAtender}</div></div>
+                    <div><span class="card-label">Total</span><div style="font-size:1.2rem; font-weight:800;">${max}</div></div>
                 </div>
             </div>`;
-
-        document.getElementById('grid-criticos').innerHTML = gridHtml;
-        if(window.innerWidth <= 768) toggleSidebar();
     }
 
-    function updateDashboard(data, title, isNational = false) {
-        document.getElementById('full-nacional-content').style.display = "block";
-        document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
-        document.querySelector('.calendar-box').style.display = 'flex';
-
-        if (title === "VENEZUELA" && isNational) {
-            selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
-            fp.setDate(selectedDateGlobal);
-        }
-
-        const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
-        let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
+    function openChecklist(estatus) {
+        const filtered = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && String(r['ESTATUS']).toUpperCase().trim() === estatus.toUpperCase());
+        const checklist = document.getElementById('modal-checklist');
+        const body = document.getElementById('modal-body');
         
-        document.getElementById('view-title').innerText = title;
+        checklist.innerHTML = "";
+        body.innerHTML = `<p style="text-align:center; color:var(--muted); margin-top:20px;">Seleccione un código de la lista</p>`;
+        
+        filtered.forEach((r, index) => {
+            const codigo = r['CÓDIGO DE DENUNCIA'] || `Fila ${index + 1}`;
+            checklist.innerHTML += `
+                <label class="check-item">
+                    <input type="radio" name="reg-check" onchange="showDetail('${estatus}', ${index})">
+                    <span>${codigo}</span>
+                </label>`;
+        });
+        
+        document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function showDetail(estatus, index) {
+        const filtered = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && String(r['ESTATUS']).toUpperCase().trim() === estatus.toUpperCase());
+        const item = filtered[index];
+        const body = document.getElementById('modal-body');
+        
+        let html = "";
+        for(let key in item) {
+            if(key.toUpperCase() !== 'ITEM' && item[key]) {
+                html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-val">${item[key]}</span></div>`;
+            }
+        }
+        body.innerHTML = html;
+    }
+
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+    function updateDashboard(data) {
+        const current = data.filter(d => d['FECHA'] === selectedDateGlobal);
+        const sum = (col) => current.reduce((acc, curr) => acc + parseFloat(String(curr[col] || 0).replace(',','.')), 0);
+        
         document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
         
-        renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderTipologia(s);
-        
-        const createCard = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div><div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div></div>`;
-        
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
-
-        document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
-        if(isNational) renderRanking(allFetched);
+        document.getElementById('grid-criticos').innerHTML = `
+            <div class="card"><span class="card-label">Recibidos</span><div class="card-val">${sum('REGISTROS RECIBIDOS')}</div></div>
+            <div class="card"><span class="card-label">Atendidas</span><div class="card-val" style="color:var(--success)">${sum('ATENDIDAS')}</div></div>
+            <div class="card"><span class="card-label">Por Atender</span><div class="card-val" style="color:var(--warning)">${sum('POR ATENDER')}</div></div>`;
+            
+        renderCharts(sum('ATENDIDAS'), sum('POR ATENDER'));
     }
 
-    function resetFilter(el) {
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        updateDashboard(allFetched, "VENEZUELA", true);
-        if(window.innerWidth <= 768) {
-            const sb = document.getElementById('sidebar');
-            if(!sb.classList.contains('collapsed')) toggleSidebar();
-        }
+    function renderCharts(a, p) {
+        if(chartA) chartA.destroy();
+        chartA = new Chart(document.getElementById('chartAtencion'), {
+            type: 'doughnut',
+            data: { labels: ['Atendidas','Pendientes'], datasets: [{ data: [a, p], backgroundColor: ['#22c55e', '#ef4444'] }] },
+            options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+        });
     }
 
-    function handleDateChange(nuevaFecha) {
-        selectedDateGlobal = nuevaFecha;
+    function refreshUI() {
         const active = document.querySelector('.state-item.active');
-        if(active.id === 'btn-nacional') updateDashboard(allFetched, "VENEZUELA", true);
-        else if(active.id === 'btn-sede') renderSedeCentral(active);
-        else active.click();
-    }
-
-    function renderCharts(ate, pen, pas, cas) {
-        const config = (labels, data, colors) => ({
-            type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
-        });
-        if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Asignado'], [pas, cas], ['#f97316', '#059669']));
-    }
-
-    function renderTipologia(stats) {
-        const container = document.getElementById('tipology-container');
-        container.innerHTML = "";
-        const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        const total = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
-        rubros.forEach(r => {
-            const v = stats[r] || 0;
-            const p = total > 0 ? (v / total * 100) : 0;
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${v.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
-        });
-    }
-
-    function renderRanking(data) {
-        const container = document.getElementById('ranking-container');
-        container.innerHTML = "";
-        const rec = data.filter(d => d['FECHA'] === selectedDateGlobal);
-        const rank = [...new Set(rec.map(d => d['ESTADO']))].map(s => {
-            const row = rec.find(r => r['ESTADO'] === s);
-            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
-            if(p > 0 && p < 1) p *= 100;
-            return { s, p };
-        }).sort((a,b) => b.p - a.p).slice(0, 10);
-        rank.forEach(i => {
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${i.s}</span><span>${i.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${i.p}%"></div></div></div>`;
-        });
+        if(active) active.click();
     }
 </script>
 </body>
