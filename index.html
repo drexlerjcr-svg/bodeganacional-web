@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sala de Mando Operativa - Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
@@ -105,10 +103,7 @@
             <span>ESTADOS</span>
         </div>
         <div class="sidebar-content" id="sidebar-list">
-            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
             </div>
-        </div>
     </aside>
 
     <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -124,30 +119,34 @@
             </div>
         </div>
 
-        <div class="section-title">Indicadores a destacar</div>
-        <div id="grid-criticos" class="grid"></div>
+        <div id="dynamic-content">
+            <div class="section-title" id="sec-indicadores">Indicadores a destacar</div>
+            <div id="grid-criticos" class="grid"></div>
 
-        <div class="section-title">Estatus del Flujo de Denuncia</div>
-        <div id="grid-estatus" class="grid"></div>
+            <div id="full-nacional-content">
+                <div class="section-title">Estatus del Flujo de Denuncia</div>
+                <div id="grid-estatus" class="grid"></div>
 
-        <div class="section-title">Procesos de Campo e Inspección</div>
-        <div id="grid-procesos" class="grid"></div>
+                <div class="section-title">Procesos de Campo e Inspección</div>
+                <div id="grid-procesos" class="grid"></div>
 
-        <div class="section-title">Asignación de Fiscales y Dependencias</div>
-        <div id="grid-fiscales" class="grid"></div>
+                <div class="section-title">Asignación de Fiscales y Dependencias</div>
+                <div id="grid-fiscales" class="grid"></div>
 
-        <div class="section-title">Análisis Visual de Gestión</div>
-        <div class="charts-row">
-            <div class="chart-container"><h3>Atención vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
-            <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
-        </div>
+                <div class="section-title">Análisis Visual de Gestión</div>
+                <div class="charts-row">
+                    <div class="chart-container"><h3>Atención vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
+                    <div class="chart-container"><h3>Asignación de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
+                </div>
 
-        <div class="section-title">Tipología</div>
-        <div id="tipologia-container" class="ranking-card"></div>
+                <div class="section-title">Tipología</div>
+                <div id="tipologia-container" class="ranking-card"></div>
 
-        <div id="ranking-section">
-            <div class="section-title">Eficiencia por Estados (Top 10)</div>
-            <div id="ranking-container" class="ranking-card"></div>
+                <div id="ranking-section">
+                    <div class="section-title">Eficiencia por Estados (Top 10)</div>
+                    <div id="ranking-container" class="ranking-card"></div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -156,19 +155,10 @@
     const webAppUrl = "https://script.google.com/macros/s/AKfycbypsSbSP194UABFRsVsrF0XN8OaeZK7WUj-3triDEUem6gOO2QTqVl8r4-OFGv0bNHm/exec"; 
     
     let allFetched = []; 
+    let sedeData = []; 
     let chartA, chartF;
     let selectedDateGlobal = ""; 
     let fp;
-
-    document.getElementById('pin-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') checkAuth();
-    });
-
-    function toggleSidebar() { 
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
-    }
 
     async function checkAuth() {
         const pinInput = document.getElementById('pin-input').value;
@@ -191,18 +181,13 @@
         return isNaN(n) ? 0 : n;
     }
 
-    function parseDate(str) {
-        if (!str) return new Date(0);
-        const parts = str.split('/');
-        return parts.length === 3 ? new Date(parts[2], parts[1] - 1, parts[0]) : new Date(0);
-    }
-
     async function init(pin) {
         const res = await fetch(`${webAppUrl}?pass=${pin}`);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        allFetched = data.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
+        allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
+        sedeData = data.sede;
 
         const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
             .filter(f => f)
@@ -216,125 +201,33 @@
         ayer.setDate(hoy.getDate() - 1);
 
         fp = flatpickr("#global-date-filter", {
-            locale: "es",
-            dateFormat: "d/m/Y",
-            maxDate: ayer,
-            enable: fechasDisponibles,
-            onChange: function(selectedDates, dateStr) {
-                if (dateStr) handleDateChange(dateStr);
-            }
+            locale: "es", dateFormat: "d/m/Y", maxDate: ayer, enable: fechasDisponibles,
+            onChange: (selectedDates, dateStr) => { if (dateStr) handleDateChange(dateStr); }
         });
 
         const fechasTexto = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f);
-        const ultima = fechasTexto
-            .filter(f => parseDate(f) <= ayer)
-            .sort((a, b) => parseDate(b) - parseDate(a))[0];
+        const ultima = fechasTexto.sort((a, b) => {
+            const da = a.split('/'); const db = b.split('/');
+            return new Date(db[2], db[1]-1, db[0]) - new Date(da[2], da[1]-1, da[0]);
+        })[0];
 
-        if(ultima) {
-            selectedDateGlobal = ultima;
-            fp.setDate(ultima);
-        } else if (fechasTexto.length > 0) {
-            selectedDateGlobal = fechasTexto[0];
-            fp.setDate(fechasTexto[0]);
-        }
+        selectedDateGlobal = ultima || "";
+        if(ultima) fp.setDate(ultima);
 
         renderSidebar();
         resetFilter(document.getElementById('btn-nacional'));
     }
 
-    function handleDateChange(nuevaFecha) {
-        const hayRegistros = allFetched.some(r => r['FECHA'] === nuevaFecha);
-
-        if(!hayRegistros) {
-            alert("No hay registros para la fecha " + nuevaFecha);
-            fp.setDate(selectedDateGlobal);
-            return;
-        }
-
-        selectedDateGlobal = nuevaFecha;
-        const activeItem = document.querySelector('.state-item.active');
-        if(activeItem.id === 'btn-nacional') {
-            updateDashboard(allFetched, "VENEZUELA", true);
-        } else {
-            const estado = activeItem.innerText.trim();
-            updateDashboard(allFetched.filter(r => r['ESTADO'] === estado), estado, false);
-        }
-    }
-
-    function updateDashboard(data, title, isNational = false) {
-        const main = document.getElementById('main-scroll');
-        main.scrollTop = 0;
-        const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
-        let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
-        document.getElementById('view-title').innerText = title;
-        document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
-        renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderTipologia(s);
-        const rankSec = document.getElementById('ranking-section');
-        if(isNational) {
-            rankSec.style.display = "block";
-            renderRanking(allFetched);
-        } else {
-            rankSec.style.display = "none";
-        }
-        const createCard = (l, v, i, c) => `
-            <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}"></i>
-                </div>
-                <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
-            </div>`;
-        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
-        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
-        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
-    }
-
-    function renderTipologia(stats) {
-        const container = document.getElementById('tipologia-container');
-        container.innerHTML = "";
-        const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
-        const totalTipologia = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
-        rubros.forEach(r => {
-            const valor = stats[r] || 0;
-            const porcentaje = totalTipologia > 0 ? (valor / totalTipologia * 100) : 0;
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${valor.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${porcentaje}%"></div></div></div>`;
-        });
-    }
-
-    function renderCharts(ate, pen, pas, cas) {
-        const isMobile = window.innerWidth <= 768;
-        const config = (labels, data, colors) => ({
-            type: 'doughnut',
-            data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: isMobile ? 12 : 11 } } } } }
-        });
-        if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Asignado'], [pas, cas], ['#f97316', '#059669']));
-    }
-
-    function renderRanking(data) {
-        const container = document.getElementById('ranking-container');
-        container.innerHTML = "";
-        const dataReciente = data.filter(d => d['FECHA'] === selectedDateGlobal);
-        const ranking = [...new Set(dataReciente.map(d => d['ESTADO']))].map(s => {
-            const row = dataReciente.find(r => r['ESTADO'] === s);
-            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
-            if(p > 0 && p < 1) p *= 100;
-            return { s, p };
-        }).sort((a,b) => b.p - a.p).slice(0, 10);
-        ranking.forEach(item => {
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%"></div></div></div>`;
-        });
-    }
-
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        list.innerHTML = `<div class="state-item active" id="btn-nacional" onclick="resetFilter(this)"><span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span></div>`;
+        list.innerHTML = `
+            <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)">
+                <span><i class="fas fa-building"></i> SEDE CENTRAL</span>
+            </div>
+            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
+                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
+            </div>`;
+        
         [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
             const btn = document.createElement('div');
             btn.className = 'state-item';
@@ -349,6 +242,65 @@
         });
     }
 
+    function renderSedeCentral(el) {
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('view-title').innerText = "SEDE CENTRAL";
+        document.getElementById('full-nacional-content').style.display = "none";
+        document.getElementById('sec-indicadores').innerText = "Resumen de Gestión Sede";
+
+        const count = (estatus) => sedeData.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus).length;
+        
+        const createCard = (l, v, i, c) => `
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="card-label">${l}</span>
+                    <i class="fas ${i}" style="color:${c}"></i>
+                </div>
+                <div class="card-val" style="color:${c}">${v.toLocaleString()}</div>
+            </div>`;
+
+        document.getElementById('grid-criticos').innerHTML = 
+            createCard("Cerrada", count("CERRADA"), "fa-folder-check", "var(--success)") +
+            createCard("En Proceso", count("EN PROCESO"), "fa-spinner", "var(--accent)") +
+            createCard("Sin Atender", count("SIN ATENDER"), "fa-clock", "var(--danger)") +
+            createCard("Desestimada", count("DESESTIMADA"), "fa-ban", "var(--muted)");
+
+        if(window.innerWidth <= 768) toggleSidebar();
+    }
+
+    function updateDashboard(data, title, isNational = false) {
+        document.getElementById('full-nacional-content').style.display = "block";
+        document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
+        const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
+        let s = {};
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
+        cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
+        
+        document.getElementById('view-title').innerText = title;
+        document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
+        
+        renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
+        renderTipologia(s);
+        
+        const createCard = (l, v, i, c) => `
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="card-label">${l}</span>
+                    <i class="fas ${i}" style="color:${c}"></i>
+                </div>
+                <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
+            </div>`;
+        
+        document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669") + createCard("Fiscal Nacional", s["CON FISCAL NACIONAL"], "fa-landmark", "#4338ca");
+
+        document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
+        if(isNational) renderRanking(allFetched);
+    }
+
     function resetFilter(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
@@ -357,6 +309,57 @@
             const sb = document.getElementById('sidebar');
             if(!sb.classList.contains('collapsed')) toggleSidebar();
         }
+    }
+
+    function toggleSidebar() { 
+        const sb = document.getElementById('sidebar');
+        sb.classList.toggle('collapsed');
+        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
+    }
+
+    function handleDateChange(nuevaFecha) {
+        selectedDateGlobal = nuevaFecha;
+        const activeItem = document.querySelector('.state-item.active');
+        if(activeItem.id === 'btn-nacional') resetFilter(activeItem);
+        else if(activeItem.id === 'btn-sede') renderSedeCentral(activeItem);
+        else activeItem.click();
+    }
+
+    function renderCharts(ate, pen, pas, cas) {
+        const config = (labels, data, colors) => ({
+            type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
+        });
+        if(chartA) chartA.destroy(); if(chartF) chartF.destroy();
+        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas', 'Pendientes'], [ate, pen], ['#22c55e', '#ef4444']));
+        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar', 'Asignado'], [pas, cas], ['#f97316', '#059669']));
+    }
+
+    function renderTipologia(stats) {
+        const container = document.getElementById('tipologia-container');
+        container.innerHTML = "";
+        const rubros = ["ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
+        const total = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
+        rubros.forEach(r => {
+            const v = stats[r] || 0;
+            const p = total > 0 ? (v / total * 100) : 0;
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${v.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
+        });
+    }
+
+    function renderRanking(data) {
+        const container = document.getElementById('ranking-container');
+        container.innerHTML = "";
+        const rec = data.filter(d => d['FECHA'] === selectedDateGlobal);
+        const rank = [...new Set(rec.map(d => d['ESTADO']))].map(s => {
+            const row = rec.find(r => r['ESTADO'] === s);
+            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
+            if(p > 0 && p < 1) p *= 100;
+            return { s, p };
+        }).sort((a,b) => b.p - a.p).slice(0, 10);
+        rank.forEach(i => {
+            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${i.s}</span><span>${i.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${i.p}%"></div></div></div>`;
+        });
     }
 </script>
 </body>
