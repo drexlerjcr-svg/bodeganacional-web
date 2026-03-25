@@ -149,7 +149,7 @@
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
             <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CONECTANDO...</div>
-            <div class="calendar-box">
+            <div class="calendar-box" id="calendar-wrapper">
                 <span><i class="fas fa-calendar-day"></i> Fecha:</span>
                 <input type="text" id="global-date-filter" placeholder="Seleccione...">
             </div>
@@ -183,6 +183,7 @@
                     <div id="ranking-container" class="ranking-card"></div>
                 </div>
             </div>
+
             <div id="sede-extra-content" style="display:none;">
                 <div class="section-title">Tipología Sede Central</div>
                 <div id="tipology-container-sede" class="ranking-card"></div>
@@ -248,7 +249,7 @@
         allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
         sedeData = data.sede;
 
-        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
+        const fechasDisponibles = [...new Set([...allFetched, ...sedeData].map(d => d['FECHA']))]
             .filter(f => f)
             .map(f => {
                 const [d, m, y] = f.split('/');
@@ -275,7 +276,7 @@
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
         list.innerHTML = `
-            <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)">
+            <div class="state-item" id="btn-sede" onclick="handleSedeClick(this)">
                 <span><i class="fas fa-building"></i> SEDE CENTRAL</span>
             </div>
             <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
@@ -296,94 +297,32 @@
         });
     }
 
-    function showSedeDetail(estatus) {
-        currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
-        document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
-        document.getElementById('modal-body').innerHTML = "<p style='text-align:center; padding:20px; color:var(--muted);'>Seleccione un elemento arriba para ver su información.</p>";
-
-        const checklistDiv = document.getElementById('checklist-options');
-        checklistDiv.innerHTML = "";
-
-        const uniqueValuesD = [...new Set(currentModalData.map(r => {
-            const keys = Object.keys(r);
-            return r[keys[3]]; 
-        }))].filter(v => v);
-
-        if(uniqueValuesD.length === 0) {
-            checklistDiv.innerHTML = "<span style='font-size:0.7rem;'>Sin datos</span>";
-        }
-
-        uniqueValuesD.forEach(val => {
-            const chip = document.createElement('div');
-            chip.className = 'check-item';
-            chip.innerText = val;
-            chip.onclick = () => {
-                document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected'));
-                chip.classList.add('selected');
-                renderModalRowByVal(val);
-            };
-            checklistDiv.appendChild(chip);
-        });
-
-        document.getElementById('modal-overlay').style.display = 'flex';
-    }
-
-    function renderModalRowByVal(valD) {
-        const body = document.getElementById('modal-body');
-        body.innerHTML = "";
-        
-        const filtered = currentModalData.filter(r => {
-            const keys = Object.keys(r);
-            return r[keys[3]] === valD;
-        });
-
-        filtered.forEach(item => {
-            let html = '<div class="ranking-card" style="margin-bottom:15px; padding:10px;">';
-            for (let key in item) {
-                const uKey = key.toUpperCase().trim();
-                if(item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
-                    html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-val">${item[key]}</span></div>`;
-                }
-            }
-            html += '</div>';
-            body.innerHTML += html;
-        });
-    }
-
-    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-
-    function renderSedeCentral(el) {
+    function handleSedeClick(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
+        renderSedeCentral();
+    }
+
+    function renderSedeCentral() {
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
         document.getElementById('sede-extra-content').style.display = "block";
         document.getElementById('sec-indicadores').innerText = "Resumen de Gestión Sede";
-        document.querySelector('.calendar-box').style.display = 'none';
-
-        const ultimaSede = getUltimaFecha(sedeData, 'FECHA');
-        if(ultimaSede) {
-            selectedDateGlobal = ultimaSede;
-            document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
-        }
-
-        const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
         
+        const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
+        document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
+
         const conteoSujetos = {};
         const conteoTipologia = {};
         
         filteredSede.forEach(r => {
             const keys = Object.keys(r);
-            // Sujeto de Incidencia (Columna F)
             const s = r[keys[5]]; 
             if(s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
-            
-            // Tipología (Columna E)
             const t = r[keys[4]];
             if(t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
         });
 
-        // Render Tipología Sede
         const tipologySedeCont = document.getElementById('tipology-container-sede');
         tipologySedeCont.innerHTML = "";
         const tiposSorted = Object.entries(conteoTipologia).sort((a,b) => b[1] - a[1]);
@@ -405,7 +344,7 @@
 
         const count = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
         
-        const createCard = (l, v, i, c, status) => `
+        const createCardSede = (l, v, i, c, status) => `
             <div class="card" onclick="showSedeDetail('${status}')" style="cursor:pointer">
                 <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div>
                 <div class="card-val" style="color:${c}">${v.toLocaleString()}</div>
@@ -413,10 +352,10 @@
             </div>`;
 
         let gridHtml = 
-            createCard("Cerrada", count("CERRADA"), "fa-folder-check", "var(--success)", "CERRADA") +
-            createCard("En Proceso", count("EN PROCESO"), "fa-spinner", "var(--accent)", "EN PROCESO") +
-            createCard("Sin Atender", count("SIN ATENDER"), "fa-clock", "var(--danger)", "SIN ATENDER") +
-            createCard("Desestimada", count("DESESTIMADA"), "fa-ban", "var(--muted)", "DESESTIMADA");
+            createCardSede("Cerrada", count("CERRADA"), "fa-folder-check", "var(--success)", "CERRADA") +
+            createCardSede("En Proceso", count("EN PROCESO"), "fa-spinner", "var(--accent)", "EN PROCESO") +
+            createCardSede("Sin Atender", count("SIN ATENDER"), "fa-clock", "var(--danger)", "SIN ATENDER") +
+            createCardSede("Desestimada", count("DESESTIMADA"), "fa-ban", "var(--muted)", "DESESTIMADA");
         
         gridHtml += `
             <div class="card" style="grid-column: 1 / -1; border-left: 5px solid var(--purple);">
@@ -433,28 +372,79 @@
         if(window.innerWidth <= 768) toggleSidebar();
     }
 
+    function showSedeDetail(estatus) {
+        currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
+        document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
+        document.getElementById('modal-body').innerHTML = "<p style='text-align:center; padding:20px; color:var(--muted);'>Seleccione un elemento arriba para ver su información.</p>";
+
+        const checklistDiv = document.getElementById('checklist-options');
+        checklistDiv.innerHTML = "";
+
+        const uniqueValuesD = [...new Set(currentModalData.map(r => {
+            const keys = Object.keys(r);
+            return r[keys[3]]; 
+        }))].filter(v => v);
+
+        uniqueValuesD.forEach(val => {
+            const chip = document.createElement('div');
+            chip.className = 'check-item';
+            chip.innerText = val;
+            chip.onclick = () => {
+                document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected'));
+                chip.classList.add('selected');
+                renderModalRowByVal(val);
+            };
+            checklistDiv.appendChild(chip);
+        });
+
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function renderModalRowByVal(valD) {
+        const body = document.getElementById('modal-body');
+        body.innerHTML = "";
+        const filtered = currentModalData.filter(r => {
+            const keys = Object.keys(r);
+            return r[keys[3]] === valD;
+        });
+
+        filtered.forEach(item => {
+            let html = '<div class="ranking-card" style="margin-bottom:15px; padding:10px;">';
+            for (let key in item) {
+                const uKey = key.toUpperCase().trim();
+                if(item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
+                    html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-val">${item[key]}</span></div>`;
+                }
+            }
+            html += '</div>';
+            body.innerHTML += html;
+        });
+    }
+
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
     function updateDashboard(data, title, isNational = false) {
         document.getElementById('full-nacional-content').style.display = "block";
         document.getElementById('sede-extra-content').style.display = "none";
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
-        document.querySelector('.calendar-box').style.display = 'flex';
-        if (title === "VENEZUELA" && isNational) {
-            selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
-            fp.setDate(selectedDateGlobal);
-        }
+        
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
+        const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
+        
         document.getElementById('view-title').innerText = title;
         document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
+        
         renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
         renderTipologia(s);
+        
         const createCard = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}"></i></div><div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div></div>`;
         document.getElementById('grid-criticos').innerHTML = createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
         document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
         document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliación", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
         document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
+        
         document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
         if(isNational) renderRanking(allFetched);
     }
@@ -472,9 +462,14 @@
     function handleDateChange(nuevaFecha) {
         selectedDateGlobal = nuevaFecha;
         const active = document.querySelector('.state-item.active');
+        if(!active) return;
+        
         if(active.id === 'btn-nacional') updateDashboard(allFetched, "VENEZUELA", true);
-        else if(active.id === 'btn-sede') renderSedeCentral(active);
-        else active.click();
+        else if(active.id === 'btn-sede') renderSedeCentral();
+        else {
+            const estadoText = active.innerText.trim();
+            updateDashboard(allFetched.filter(r => r['ESTADO'] === estadoText), estadoText, false);
+        }
     }
 
     function renderCharts(ate, pen, pas, cas) {
