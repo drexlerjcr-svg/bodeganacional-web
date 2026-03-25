@@ -86,7 +86,6 @@
         .pin-input:focus { border-color: var(--accent); }
         .auth-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
 
-        /* Estilos del Pop-up Modificados */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; backdrop-filter: blur(4px); }
         .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; display: flex; flex-direction: column; height: 80vh; }
         @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -113,9 +112,9 @@
 <div id="auth-overlay">
     <div class="auth-card">
         <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
-        <h2>Programación y Monitoreo</h2>
+        <h2>PROGRAMACIÓN Y MONITOREO</h2>
         <input type="password" id="pin-input" class="pin-input" placeholder="Contraseña" maxlength="6">
-        <button onclick="checkAuth()" class="auth-btn">Acceder</button>
+        <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
     </div>
 </div>
 
@@ -149,7 +148,7 @@
     <main class="main-view" id="main-scroll">
         <div class="banner">
             <h1 id="view-title">VENEZUELA</h1>
-            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">Conectando...</div>
+            <div id="date-info" style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px; font-weight: 600;">CONECTANDO...</div>
             <div class="calendar-box">
                 <span><i class="fas fa-calendar-day"></i> Fecha:</span>
                 <input type="text" id="global-date-filter" placeholder="Seleccione...">
@@ -211,15 +210,15 @@
     async function checkAuth() {
         const pinInput = document.getElementById('pin-input').value;
         const cargandoLabel = document.querySelector('.auth-card h2');
-        if(!pinInput) { alert("Pin Requerido); return; }
-        cargandoLabel.innerText = "Verificando...";
+        if(!pinInput) { alert("PIN Requerido"); return; }
+        cargandoLabel.innerText = "VERIFICANDO...";
         try {
             await init(pinInput);
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app').style.opacity = '1';
         } catch (error) {
-            cargandoLabel.innerText = "Acceso Denegado";
-            setTimeout(() => { cargandoLabel.innerText = "rogramación y Monitoreo"; }, 2000);
+            cargandoLabel.innerText = "ACCESO DENEGADO";
+            setTimeout(() => { cargandoLabel.innerText = "PROGRAMACIÓN Y MONITOREO"; }, 2000);
         }
     }
 
@@ -296,7 +295,6 @@
     function showSedeDetail(estatus) {
         currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
         document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
-        
         document.getElementById('modal-body').innerHTML = "<p style='text-align:center; padding:20px; color:var(--muted);'>Seleccione un elemento arriba para ver su información.</p>";
 
         const checklistDiv = document.getElementById('checklist-options');
@@ -304,7 +302,7 @@
 
         const uniqueValuesD = [...new Set(currentModalData.map(r => {
             const keys = Object.keys(r);
-            return r[keys[3]];
+            return r[keys[3]]; 
         }))].filter(v => v);
 
         if(uniqueValuesD.length === 0) {
@@ -365,11 +363,11 @@
         }
 
         const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
-
+        
         const conteoSujetos = {};
         filteredSede.forEach(r => {
             const keys = Object.keys(r);
-            const s = r[keys[5]];
+            const s = r[keys[5]]; 
             if(s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
         });
 
