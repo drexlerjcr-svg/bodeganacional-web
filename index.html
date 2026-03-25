@@ -183,6 +183,10 @@
                     <div id="ranking-container" class="ranking-card"></div>
                 </div>
             </div>
+            <div id="sede-extra-content" style="display:none;">
+                <div class="section-title">Tipología Sede Central</div>
+                <div id="tipology-container-sede" class="ranking-card"></div>
+            </div>
         </div>
     </main>
 </div>
@@ -353,6 +357,7 @@
         el.classList.add('active');
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
+        document.getElementById('sede-extra-content').style.display = "block";
         document.getElementById('sec-indicadores').innerText = "Resumen de Gestión Sede";
         document.querySelector('.calendar-box').style.display = 'none';
 
@@ -365,10 +370,27 @@
         const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
         
         const conteoSujetos = {};
+        const conteoTipologia = {};
+        
         filteredSede.forEach(r => {
             const keys = Object.keys(r);
+            // Sujeto de Incidencia (Columna F)
             const s = r[keys[5]]; 
             if(s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
+            
+            // Tipología (Columna E)
+            const t = r[keys[4]];
+            if(t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
+        });
+
+        // Render Tipología Sede
+        const tipologySedeCont = document.getElementById('tipology-container-sede');
+        tipologySedeCont.innerHTML = "";
+        const tiposSorted = Object.entries(conteoTipologia).sort((a,b) => b[1] - a[1]);
+        const maxTipos = Math.max(...Object.values(conteoTipologia), 1);
+        tiposSorted.forEach(([nombre, valor]) => {
+            const p = (valor / maxTipos) * 100;
+            tipologySedeCont.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${nombre}</span><span>${valor}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
         });
 
         let topSujeto = "N/A", maxD = 0;
@@ -413,6 +435,7 @@
 
     function updateDashboard(data, title, isNational = false) {
         document.getElementById('full-nacional-content').style.display = "block";
+        document.getElementById('sede-extra-content').style.display = "none";
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
         document.querySelector('.calendar-box').style.display = 'flex';
         if (title === "VENEZUELA" && isNational) {
