@@ -289,12 +289,7 @@
             btn.onclick = () => {
                 document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
                 btn.classList.add('active');
-                
-                const filteredByState = allFetched.filter(r => r['ESTADO'] === s);
-                selectedDateGlobal = getUltimaFecha(filteredByState, 'FECHA');
-                if(fp) fp.setDate(selectedDateGlobal, false);
-
-                updateDashboard(filteredByState, s, false);
+                updateDashboard(allFetched.filter(r => r['ESTADO'] === s), s, false);
                 if(window.innerWidth <= 768) toggleSidebar();
             };
             list.appendChild(btn);
@@ -390,6 +385,13 @@
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
         document.querySelector('.calendar-box').style.display = 'flex';
 
+        // CORRECCIÓN CLAVE: Verificar si la fecha global existe en este conjunto de datos (Nacional o Estado)
+        const fechasEnEsteData = [...new Set(data.map(d => d['FECHA']))];
+        if (!selectedDateGlobal || !fechasEnEsteData.includes(selectedDateGlobal)) {
+            selectedDateGlobal = getUltimaFecha(data, 'FECHA');
+            if(fp) fp.setDate(selectedDateGlobal, false);
+        }
+
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
         let s = {};
         const cols = ["REGISTROS RECIBIDOS", "ATENDIDAS", "POR ATENDER", "NUEVO", "DENUNCIAS ADMITIDAS", "PROCESO CULMINADO", "CERRADO", "INSPECCIONADO", "PROCESO CONCILIATORIO", "POR APROBAR FISCALIZACIÓN", "POR ASIGNAR FISCAL", "CON FISCAL ASIGNADO", "CON FISCAL NACIONAL", "ARRENDAMIENTO COMERCIAL", "BIENES", "CONDOMINIOS COMERCIALES", "MATRICULA ESCOLAR", "SERVICIOS"];
@@ -415,10 +417,6 @@
     function resetFilter(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        
-        selectedDateGlobal = getUltimaFecha(allFetched, 'FECHA');
-        if(fp) fp.setDate(selectedDateGlobal, false);
-
         updateDashboard(allFetched, "VENEZUELA", true);
         if(window.innerWidth <= 768) {
             const sb = document.getElementById('sidebar');
