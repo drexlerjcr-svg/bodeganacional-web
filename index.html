@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sala de Mando Operativa - Monitoreo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
@@ -33,10 +33,9 @@
             --glass-border: rgba(255,255,255,0.75);
             --glass-shadow: 0 8px 32px rgba(30,58,138,0.12), 0 1.5px 0 rgba(255,255,255,0.9) inset;
             --glass-blur: blur(18px) saturate(180%);
-            --sidebar-glass: rgba(255,255,255,0.6);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -50,690 +49,240 @@
 
         /* === ANIMATED BACKGROUND BLOBS === */
         body::before, body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: 0;
-            pointer-events: none;
+            content: ''; position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none;
         }
         body::before {
             width: 600px; height: 600px;
             background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, rgba(30,58,138,0.12) 60%, transparent 100%);
-            top: -150px; left: -100px;
-            animation: blobMove1 12s ease-in-out infinite alternate;
+            top: -150px; left: -100px; animation: blobMove1 12s ease-in-out infinite alternate;
         }
         body::after {
             width: 500px; height: 500px;
             background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(59,130,246,0.1) 60%, transparent 100%);
-            bottom: -100px; right: -80px;
-            animation: blobMove2 15s ease-in-out infinite alternate;
+            bottom: -100px; right: -80px; animation: blobMove2 15s ease-in-out infinite alternate;
         }
         @keyframes blobMove1 { from { transform: translate(0,0) scale(1); } to { transform: translate(80px,60px) scale(1.15); } }
         @keyframes blobMove2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-60px,-50px) scale(1.2); } }
 
-        .blob-extra {
-            position: fixed;
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%);
-            top: 40%; left: 45%;
-            border-radius: 50%;
-            filter: blur(70px);
-            pointer-events: none;
-            z-index: 0;
-            animation: blobMove3 18s ease-in-out infinite alternate;
-        }
-        @keyframes blobMove3 { from { transform: translate(0,0); } to { transform: translate(-40px,80px); } }
-
         .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            position: relative;
-            z-index: 1;
+            display: flex; height: 100vh; width: 100vw; opacity: 0; transition: opacity 0.6s ease; position: relative; z-index: 1;
         }
 
-        /* ===== LIQUID GLASS MIXIN ===== */
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-        }
-
-        /* ===== SIDEBAR ===== */
+        /* ===== SIDEBAR (DESKTOP ONLY) ===== */
         .sidebar {
-            width: 270px;
-            min-width: 270px;
-            background: rgba(255,255,255,0.62);
-            backdrop-filter: blur(24px) saturate(200%);
-            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            width: 270px; min-width: 270px;
+            background: rgba(255,255,255,0.62); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
             border-right: 1.5px solid rgba(255,255,255,0.8);
             box-shadow: 4px 0 32px rgba(30,58,138,0.10), 1px 0 0 rgba(255,255,255,0.9) inset;
-            display: flex;
-            flex-direction: column;
-            z-index: 1001;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            display: flex; flex-direction: column; z-index: 1001; transition: all 0.3s ease;
         }
-        .sidebar.collapsed { margin-left: -270px; }
-
         .sidebar-header {
             padding: 18px 20px;
             background: linear-gradient(135deg, rgba(30,58,138,0.92) 0%, rgba(59,130,246,0.85) 100%);
-            backdrop-filter: blur(16px);
-            color: white;
-            font-weight: 800;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            letter-spacing: 0.08em;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 14px; letter-spacing: 0.08em;
         }
-        .sidebar-header i { cursor: pointer; transition: transform 0.2s; }
-        .sidebar-header i:hover { transform: scale(1.15); }
-
         .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0 20px; }
         .sidebar-content::-webkit-scrollbar { width: 4px; }
         .sidebar-content::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; }
 
         .state-item {
-            padding: 10px 16px;
-            margin: 3px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
+            padding: 10px 16px; margin: 3px 10px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--muted);
+            display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; border: 1px solid transparent;
         }
-        .state-item:hover {
-            background: rgba(59,130,246,0.1);
-            border-color: rgba(59,130,246,0.2);
-            color: var(--primary);
-        }
+        .state-item:hover { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); color: var(--primary); }
         .state-item.active {
             background: linear-gradient(135deg, rgba(30,58,138,0.88) 0%, rgba(59,130,246,0.82) 100%);
-            backdrop-filter: blur(12px);
-            color: white;
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 4px 14px rgba(30,58,138,0.25);
+            color: white; border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 14px rgba(30,58,138,0.25);
         }
         .state-item i { margin-right: 8px; font-size: 0.75rem; }
-
-        @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; height: 100%; width: 85%; max-width: 300px; }
-            .sidebar.collapsed { margin-left: -100%; }
+        
+        .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.6); }
+        .logout-btn {
+            width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.1); color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .logout-btn:hover { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
         /* ===== MAIN VIEW ===== */
         .main-view {
-            flex-grow: 1;
-            padding: 22px 24px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            position: relative;
-            z-index: 1;
+            flex-grow: 1; padding: 22px 24px; overflow-y: auto; scroll-behavior: smooth; position: relative; z-index: 1;
         }
         .main-view::-webkit-scrollbar { width: 5px; }
         .main-view::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius: 4px; }
 
-        .floating-toggle {
-            position: fixed;
-            top: 16px; left: 16px;
-            z-index: 999;
-            background: rgba(30,58,138,0.85);
-            backdrop-filter: blur(12px);
-            color: white;
-            border: 1.5px solid rgba(255,255,255,0.25);
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(30,58,138,0.3);
-        }
-
-        /* ===== BANNER ===== */
         .banner {
             background: linear-gradient(135deg, rgba(30,58,138,0.88) 0%, rgba(59,130,246,0.78) 100%);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            color: white;
-            padding: 24px 28px;
-            border-radius: 18px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.22);
-            box-shadow: 0 8px 32px rgba(30,58,138,0.22), 0 1px 0 rgba(255,255,255,0.3) inset;
-            position: relative;
-            overflow: hidden;
+            backdrop-filter: blur(20px) saturate(180%); color: white; padding: 24px 28px; border-radius: 18px; margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 8px 32px rgba(30,58,138,0.22), 0 1px 0 rgba(255,255,255,0.3) inset;
+            position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
         }
-        .banner::before {
-            content: '';
-            position: absolute;
-            top: -50%; right: -10%;
-            width: 280px; height: 280px;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        .banner h1 {
-            margin: 0;
-            font-size: 1.55rem;
-            text-transform: uppercase;
-            font-weight: 900;
-            letter-spacing: 0.06em;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .banner-sub {
-            font-size: 0.78rem;
-            opacity: 0.85;
-            margin-top: 4px;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-        }
+        .banner-text h1 { margin: 0; font-size: 1.55rem; text-transform: uppercase; font-weight: 900; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .banner-sub { font-size: 0.78rem; opacity: 0.85; margin-top: 4px; font-weight: 600; letter-spacing: 0.04em; }
 
         .calendar-box {
-            margin-top: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(8px);
-            padding: 7px 14px;
-            border-radius: 10px;
-            width: fit-content;
+            display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 7px 14px; border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.28);
         }
-        .calendar-box span { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .calendar-box span { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
         .calendar-box input {
-            background: rgba(255,255,255,0.92);
-            border: none;
-            border-radius: 6px;
-            padding: 4px 9px;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.82rem;
-            color: var(--primary);
-            outline: none;
-            cursor: pointer;
-            width: 105px;
-        }
-
-        @media (max-width: 768px) {
-            .banner { padding-top: 58px; text-align: center; }
-            .floating-toggle { display: flex; }
-            .calendar-box { margin: 14px auto 0; }
+            background: rgba(255,255,255,0.92); border: none; border-radius: 6px; padding: 4px 9px; font-weight: 700; color: var(--primary);
+            outline: none; cursor: pointer; width: 105px;
         }
 
         /* ===== GRID & CARDS ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 14px;
-            margin-bottom: 28px;
-        }
-
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
         .card {
-            background: rgba(255,255,255,0.58);
-            backdrop-filter: blur(18px) saturate(180%);
-            -webkit-backdrop-filter: blur(18px) saturate(180%);
-            padding: 18px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.78);
-            box-shadow: 0 6px 24px rgba(30,58,138,0.10), 0 1px 0 rgba(255,255,255,0.95) inset;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
-            overflow: hidden;
+            background: rgba(255,255,255,0.58); backdrop-filter: var(--glass-blur); padding: 18px 20px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.78); box-shadow: 0 6px 24px rgba(30,58,138,0.10), 0 1px 0 rgba(255,255,255,0.95) inset;
+            display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s ease;
         }
-        .card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(30,58,138,0.16), 0 1px 0 rgba(255,255,255,0.95) inset;
-        }
-        .card[onclick] { cursor: pointer; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(30,58,138,0.16); }
+        .card-label { font-size: 0.62rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+        .card-val { font-size: 1.75rem; font-weight: 900; font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1; }
 
-        .card-label {
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-        }
-        .card-val {
-            font-size: 1.75rem;
-            font-weight: 900;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            line-height: 1;
-        }
-
-        /* ===== CHARTS ===== */
-        .charts-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
-
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
         .chart-container {
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
+            background: rgba(255,255,255,0.55); backdrop-filter: var(--glass-blur); padding: 20px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.75); display: flex; flex-direction: column; align-items: center;
         }
-        .chart-container::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
-        }
-        .chart-container h3 {
-            font-size: 0.7rem;
-            margin: 0 0 14px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 800;
-        }
-        .chart-box {
-            position: relative;
-            width: 100%;
-            max-width: 240px;
-            aspect-ratio: 1 / 1;
-        }
+        .chart-container h3 { font-size: 0.7rem; margin: 0 0 14px; color: var(--muted); text-transform: uppercase; font-weight: 800; }
+        .chart-box { width: 100%; max-width: 240px; aspect-ratio: 1 / 1; }
 
-        /* ===== RANKING / TIPOLOGIA ===== */
         .ranking-card {
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 22px 24px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
-        }
-        .ranking-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            background: rgba(255,255,255,0.55); backdrop-filter: var(--glass-blur); padding: 22px 24px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.75); margin-bottom: 28px;
         }
         .ranking-item { margin-bottom: 14px; }
         .ranking-item:last-child { margin-bottom: 0; }
-        .ranking-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text);
-        }
-        .bar-container {
-            height: 8px;
-            background: rgba(30,58,138,0.08);
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-        .bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            transition: width 1s ease;
-            border-radius: 6px;
-        }
+        .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; }
+        .bar-container { height: 8px; background: rgba(30,58,138,0.08); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.5); }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; }
 
-        /* ===== SECTION TITLE ===== */
         .section-title {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin: 28px 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 28px 0 16px; display: flex; align-items: center; gap: 10px;
         }
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(180deg, var(--warning), var(--accent));
-            border-radius: 3px;
-            flex-shrink: 0;
+        .section-title::before { content: ''; width: 4px; height: 16px; background: linear-gradient(180deg, var(--warning), var(--accent)); border-radius: 3px; }
+
+        /* ====================================
+           MOBILE NAVBAR (Responsive Overrides)
+        ==================================== */
+        .mobile-navbar { display: none; }
+        .mobile-states-sheet { display: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none !important; }
+            .main-view { padding: 15px 15px 90px 15px; } /* Espacio inferior para el navbar */
+            .banner { text-align: center; justify-content: center; flex-direction: column; }
+            .charts-row { grid-template-columns: 1fr; }
+            
+            /* Navbar Flotante Inferior */
+            .mobile-navbar {
+                display: flex; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                background: rgba(255,255,255,0.65); backdrop-filter: blur(25px) saturate(200%); -webkit-backdrop-filter: blur(25px);
+                border: 1px solid rgba(255,255,255,0.8); border-radius: 50px; padding: 8px 12px;
+                box-shadow: 0 10px 30px rgba(30,58,138,0.15), 0 1px 0 rgba(255,255,255,0.9) inset;
+                z-index: 2000; align-items: center; gap: 5px; width: 90%; max-width: 380px; justify-content: space-between;
+            }
+            .nav-item {
+                display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 30px;
+                color: var(--muted); cursor: pointer; transition: all 0.3s ease; font-weight: 700; font-size: 0.85rem;
+            }
+            .nav-item i { font-size: 1.1rem; }
+            .nav-item .nav-text { display: none; } /* Ocultar texto por defecto */
+            
+            /* Estado Activo */
+            .nav-item.active { background: rgba(255,255,255,0.9); color: var(--primary); box-shadow: 0 4px 12px rgba(30,58,138,0.08); }
+            .nav-item.active .nav-text { display: block; }
+            
+            /* Separador y Botón de Salida */
+            .nav-divider { width: 1px; height: 24px; background: rgba(30,58,138,0.15); margin: 0 4px; }
+            .nav-item.logout { color: var(--danger); padding: 10px; }
+            .nav-item.logout:active { background: rgba(239, 68, 68, 0.1); }
+
+            /* Bottom Sheet de Estados */
+            .mobile-states-sheet {
+                display: block; position: fixed; bottom: -100%; left: 0; right: 0; height: 65vh;
+                background: rgba(240, 246, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-top-left-radius: 25px; border-top-right-radius: 25px; z-index: 3000;
+                box-shadow: 0 -10px 40px rgba(30,58,138,0.2); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                display: flex; flex-direction: column;
+            }
+            .mobile-states-sheet.open { bottom: 0; }
+            .sheet-header {
+                padding: 20px; display: flex; justify-content: space-between; align-items: center;
+                border-bottom: 1px solid rgba(30,58,138,0.1); font-weight: 800; color: var(--primary);
+            }
+            .sheet-header .close-btn { background: rgba(30,58,138,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+            .sheet-content { overflow-y: auto; padding: 10px 20px 30px; flex-grow: 1; }
+            .sheet-item {
+                padding: 14px 16px; margin-bottom: 8px; background: white; border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(30,58,138,0.05); font-weight: 600; color: var(--text);
+                display: flex; align-items: center; gap: 12px; border: 1px solid transparent;
+            }
+            .sheet-item.active { border-color: var(--accent); background: rgba(59,130,246,0.05); color: var(--primary); }
+            
+            /* Overlay oscuro al abrir el sheet */
+            #sheet-overlay {
+                position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 2500;
+                display: none; opacity: 0; transition: opacity 0.3s;
+            }
+            #sheet-overlay.open { display: block; opacity: 1; }
         }
 
-        /* ===========================
-           AUTH OVERLAY — LIQUID GLASS
-        =========================== */
+        /* ====================================
+           AUTH & OVERLAYS
+        ==================================== */
         #auth-overlay {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 5000;
-            background: linear-gradient(135deg, #c8daf0 0%, #dce8f7 50%, #c5d5ee 100%);
+            position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 5000;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.12) 1px, transparent 1px), linear-gradient(135deg, #c8daf0 0%, #dce8f7 50%, #c5d5ee 100%);
+            background-size: 24px 24px, 100% 100%;
         }
-        #auth-overlay::before {
-            content: '';
-            position: absolute;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%);
-            top: -100px; left: -100px;
-            border-radius: 50%;
-            filter: blur(60px);
-            animation: blobMove1 10s ease-in-out infinite alternate;
-        }
-        #auth-overlay::after {
-            content: '';
-            position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
-            bottom: -80px; right: -80px;
-            border-radius: 50%;
-            filter: blur(60px);
-            animation: blobMove2 13s ease-in-out infinite alternate;
-        }
-
         .auth-card {
-            background: rgba(255,255,255,0.6);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
-            padding: 44px 38px;
-            border-radius: 24px;
-            text-align: center;
-            width: 90%;
-            max-width: 370px;
-            border: 1.5px solid rgba(255,255,255,0.82);
-            box-shadow: 0 16px 56px rgba(30,58,138,0.18), 0 1.5px 0 rgba(255,255,255,0.95) inset;
-            position: relative;
-            z-index: 1;
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(35px) saturate(210%);
+            padding: 45px 35px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px;
+            border: 1.5px solid rgba(255, 255, 255, 0.85); box-shadow: 0 25px 60px rgba(30, 58, 138, 0.22); position: relative; overflow: hidden;
         }
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(59,130,246,0.6), rgba(30,58,138,0.8), rgba(59,130,246,0.6), transparent);
+        .scan-line {
+            position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: cyberScan 4s linear infinite;
         }
-        .auth-logo { width: 130px; margin-bottom: 22px; }
-        .auth-card h2 {
-            font-size: 1.25rem;
-            color: var(--text);
-            margin: 0 0 24px;
-            font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        @keyframes cyberScan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
+        .auth-logo { width: 125px; margin-bottom: 20px; }
+        .auth-card h2 { font-size: 1.15rem; color: var(--primary); margin: 0 0 6px; font-weight: 800; text-transform: uppercase; }
+        .cyber-input-wrapper { position: relative; margin-bottom: 25px; margin-top: 25px;}
         .pin-input {
-            width: 100%;
-            padding: 16px;
-            font-size: 1.3rem;
-            text-align: center;
-            background: rgba(255,255,255,0.7);
-            border: 1.5px solid rgba(200,215,240,0.8);
-            border-radius: 14px;
-            margin-bottom: 20px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            font-family: inherit;
-            font-weight: 700;
-            color: var(--primary);
-            backdrop-filter: blur(8px);
-            letter-spacing: 0.2em;
-        }
-        .pin-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+            width: 100%; padding: 16px; font-size: 1.4rem; text-align: center; background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid rgba(164, 193, 236, 0.7); border-radius: 12px; outline: none; font-family: 'Share Tech Mono', monospace;
+            font-weight: 700; color: var(--primary); letter-spacing: 0.25em;
         }
         .auth-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, rgba(30,58,138,0.9) 0%, rgba(59,130,246,0.85) 100%);
-            backdrop-filter: blur(12px);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 14px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 16px rgba(30,58,138,0.28);
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white;
+            border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em;
+            box-shadow: 0 4px 18px rgba(30,58,138,0.35); transition: all 0.25s ease;
         }
-        .auth-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px rgba(30,58,138,0.36);
-        }
-        .auth-btn:active { transform: translateY(0); }
 
-        /* ===========================
-           VERIFY OVERLAY CARD
-        =========================== */
         #verify-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.35);
-            backdrop-filter: blur(6px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 6000;
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 6000;
         }
         #verify-overlay.active { display: flex; }
-
         .verify-card {
-            background: rgba(255,255,255,0.72);
-            backdrop-filter: blur(32px) saturate(220%);
-            -webkit-backdrop-filter: blur(32px) saturate(220%);
-            border: 1.5px solid rgba(255,255,255,0.88);
-            border-radius: 22px;
-            padding: 38px 40px;
-            text-align: center;
-            width: 90%;
-            max-width: 320px;
-            box-shadow: 0 20px 60px rgba(30,58,138,0.22), 0 2px 0 rgba(255,255,255,0.95) inset;
-            position: relative;
-            overflow: hidden;
-            animation: verifyIn 0.3s ease;
+            background: rgba(255,255,255,0.72); backdrop-filter: blur(32px); border-radius: 22px; padding: 38px 40px; text-align: center; width: 90%; max-width: 320px;
         }
-        @keyframes verifyIn {
-            from { transform: scale(0.88) translateY(20px); opacity: 0; }
-            to   { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        .verify-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-        }
-        .verify-card.state-pending::before { background: linear-gradient(90deg, transparent, var(--warning), transparent); }
-        .verify-card.state-success::before { background: linear-gradient(90deg, transparent, var(--success), transparent); }
-        .verify-card.state-error::before   { background: linear-gradient(90deg, transparent, var(--danger), transparent); }
+        .verify-icon-wrap { font-size: 2rem; margin-bottom: 15px; }
+        .verify-title { font-weight: 800; font-size: 1.1rem; }
 
-        .verify-icon-wrap {
-            width: 68px; height: 68px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px;
-            font-size: 1.7rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .verify-card.state-pending .verify-icon-wrap {
-            background: rgba(245,158,11,0.15);
-            border: 2px solid rgba(245,158,11,0.4);
-            color: var(--warning);
-            animation: spinPulse 1.2s ease-in-out infinite;
-        }
-        .verify-card.state-success .verify-icon-wrap {
-            background: rgba(34,197,94,0.15);
-            border: 2px solid rgba(34,197,94,0.4);
-            color: var(--success);
-            animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        .verify-card.state-error .verify-icon-wrap {
-            background: rgba(239,68,68,0.15);
-            border: 2px solid rgba(239,68,68,0.4);
-            color: var(--danger);
-            animation: shake 0.45s ease;
-        }
-        @keyframes spinPulse {
-            0%   { transform: rotate(0deg) scale(1); }
-            50%  { transform: rotate(180deg) scale(1.08); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
-        @keyframes popIn {
-            0%   { transform: scale(0.5); opacity: 0; }
-            70%  { transform: scale(1.18); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            20%  { transform: translateX(-8px); }
-            40%  { transform: translateX(8px); }
-            60%  { transform: translateX(-5px); }
-            80%  { transform: translateX(5px); }
-        }
-
-        .verify-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--text);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin-bottom: 6px;
-            letter-spacing: 0.02em;
-        }
-        .verify-sub {
-            font-size: 0.78rem;
-            color: var(--muted);
-            font-weight: 500;
-        }
-        .verify-dots { letter-spacing: 3px; }
-
-        /* ===========================
-           MODAL — LIQUID GLASS
-        =========================== */
+        /* Modal Detalles Sede */
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(30,58,138,0.22);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(30,58,138,0.22); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;
         }
-        .modal-card {
-            background: rgba(255,255,255,0.72);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
-            width: 100%;
-            max-width: 500px;
-            border-radius: 22px;
-            overflow: hidden;
-            border: 1.5px solid rgba(255,255,255,0.82);
-            box-shadow: 0 24px 60px rgba(30,58,138,0.22), 0 2px 0 rgba(255,255,255,0.95) inset;
-            animation: modalIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-        }
-        @keyframes modalIn {
-            from { transform: translateY(18px) scale(0.97); opacity: 0; }
-            to   { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        .modal-header {
-            padding: 18px 22px;
-            background: linear-gradient(135deg, rgba(30,58,138,0.9) 0%, rgba(59,130,246,0.82) 100%);
-            backdrop-filter: blur(16px);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            border-bottom: 1px solid rgba(255,255,255,0.18);
-        }
-        .modal-header h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 800; }
-
-        .modal-selection-area {
-            padding: 14px 20px;
-            background: rgba(248,250,252,0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-        .selection-label { font-size: 0.68rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
-        .checklist-container { display: flex; flex-wrap: wrap; gap: 7px; max-height: 95px; overflow-y: auto; padding: 4px; }
-        .check-item {
-            background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(200,215,240,0.8);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            color: var(--text);
-        }
-        .check-item:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
-        .check-item.selected { background: linear-gradient(135deg, rgba(30,58,138,0.85), rgba(59,130,246,0.8)); color: white; border-color: transparent; box-shadow: 0 3px 10px rgba(30,58,138,0.22); }
-
+        .modal-card { background: rgba(255,255,255,0.85); width: 100%; max-width: 500px; border-radius: 22px; display: flex; flex-direction: column; height: 80vh; overflow: hidden; }
+        .modal-header { padding: 15px 20px; background: var(--primary); color: white; display: flex; justify-content: space-between; }
         .modal-body { padding: 18px; flex-grow: 1; overflow-y: auto; }
-        .modal-body::-webkit-scrollbar { width: 4px; }
-        .modal-body::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 4px; }
-
-        .detail-row { padding: 11px 0; border-bottom: 1px solid rgba(226,232,240,0.5); display: flex; flex-direction: column; gap: 3px; }
-        .detail-row:last-child { border: none; }
-        .detail-label { font-size: 0.65rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-        .detail-val { font-size: 0.88rem; font-weight: 600; color: var(--text); }
-        .close-modal { cursor: pointer; font-size: 1.1rem; opacity: 0.85; transition: opacity 0.2s; }
-        .close-modal:hover { opacity: 1; }
-
-        /* Flatpickr override */
-        .flatpickr-calendar { box-shadow: 0 12px 40px rgba(30,58,138,0.18) !important; border-radius: 14px !important; overflow: hidden; }
+        .checklist-container { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px; background: rgba(0,0,0,0.05); }
+        .check-item { padding: 5px 12px; border-radius: 20px; background: white; border: 1px solid #ccc; font-size: 0.8rem; cursor: pointer; }
+        .check-item.selected { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -742,59 +291,54 @@
 <!-- ===== AUTH OVERLAY ===== -->
 <div id="auth-overlay">
     <div class="auth-card">
+        <div class="scan-line"></div>
         <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
-        <h2>Programacion y Monitoreo</h2>
-        <input type="password" id="pin-input" class="pin-input" placeholder="Contrasena" maxlength="6">
-        <button onclick="checkAuth()" class="auth-btn">ACCEDER</button>
-    </div>
-</div>
-
-<!-- ===== VERIFY OVERLAY ===== -->
-<div id="verify-overlay">
-    <div class="verify-card state-pending" id="verify-card">
-        <div class="verify-icon-wrap" id="verify-icon">
-            <i class="fas fa-sync-alt" id="verify-icon-i"></i>
+        <h2>Sala de Mando Operativa</h2>
+        <div class="cyber-input-wrapper">
+            <input type="password" id="pin-input" class="pin-input" placeholder="CÓDIGO" maxlength="4">
         </div>
-        <div class="verify-title" id="verify-title">Verificando credenciales</div>
-        <div class="verify-sub" id="verify-sub">Por favor espere<span class="verify-dots">...</span></div>
+        <button onclick="attemptLogin()" class="auth-btn"><i class="fas fa-shield-alt"></i> Autenticar Portal</button>
     </div>
 </div>
 
-<!-- ===== MODAL ===== -->
+<div id="verify-overlay">
+    <div class="verify-card" id="verify-card">
+        <div class="verify-icon-wrap" id="verify-icon"><i class="fas fa-sync-alt fa-spin" style="color:var(--accent)"></i></div>
+        <div class="verify-title" id="verify-title">Verificando...</div>
+        <div class="verify-sub" id="verify-sub">Por favor espere</div>
+    </div>
+</div>
+
 <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3 id="modal-title">Detalle de Registro</h3>
-            <i class="fas fa-times close-modal" onclick="closeModal()"></i>
+            <h3 id="modal-title">Detalle</h3><i class="fas fa-times" onclick="closeModal()"></i>
         </div>
-        <div class="modal-selection-area">
-            <span class="selection-label">Seleccione un registro:</span>
-            <div id="checklist-options" class="checklist-container"></div>
-        </div>
-        <div id="modal-body" class="modal-body">
-            <p style="text-align:center; padding:22px; color:var(--muted); font-size:0.85rem;">Seleccione un elemento arriba para ver su informacion.</p>
-        </div>
+        <div class="checklist-container" id="checklist-options"></div>
+        <div id="modal-body" class="modal-body"></div>
     </div>
 </div>
 
 <!-- ===== APP ===== -->
 <div class="app-container" id="app">
+    <!-- Sidebar Desktop -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-bars" onclick="toggleSidebar()"></i>
-            <span>ESTADOS</span>
-        </div>
+        <div class="sidebar-header"><i class="fas fa-satellite-dish"></i> <span>ESTADOS</span></div>
         <div class="sidebar-content" id="sidebar-list"></div>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
+        </div>
     </aside>
 
-    <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-
+    <!-- Main View -->
     <main class="main-view" id="main-scroll">
         <div class="banner">
-            <h1 id="view-title">VENEZUELA</h1>
-            <div id="date-info" class="banner-sub">CONECTANDO...</div>
+            <div class="banner-text">
+                <h1 id="view-title">VENEZUELA</h1>
+                <div id="date-info" class="banner-sub">CONECTANDO...</div>
+            </div>
             <div class="calendar-box" id="cal-box">
-                <span><i class="fas fa-calendar-day"></i> Fecha:</span>
+                <span><i class="fas fa-calendar-day"></i></span>
                 <input type="text" id="global-date-filter" placeholder="Seleccione...">
             </div>
         </div>
@@ -810,10 +354,10 @@
                 <div class="section-title">Procesos de Campo e Inspeccion</div>
                 <div id="grid-procesos" class="grid"></div>
 
-                <div class="section-title">Asignacion de Fiscales y Dependencias</div>
+                <div class="section-title">Asignacion de Fiscales</div>
                 <div id="grid-fiscales" class="grid"></div>
 
-                <div class="section-title">Analisis Visual de Gestion</div>
+                <div class="section-title">Analisis Visual</div>
                 <div class="charts-row">
                     <div class="chart-container">
                         <h3>Atencion vs Pendientes</h3>
@@ -828,7 +372,7 @@
                 <div class="section-title">Tipologia</div>
                 <div id="tipology-container" class="ranking-card"></div>
 
-                 <div id="ranking-section">
+                <div id="ranking-section">
                     <div class="section-title">Eficiencia por Estados (Top 10)</div>
                     <div id="ranking-container" class="ranking-card"></div>
                 </div>
@@ -840,6 +384,35 @@
             </div>
         </div>
     </main>
+
+    <!-- Navbar Inferior Móvil -->
+    <nav class="mobile-navbar" id="mobile-nav">
+        <div class="nav-item active" id="nav-mob-nacional" onclick="setMobileNav('nacional')">
+            <i class="fas fa-home"></i><span class="nav-text">Inicio</span>
+        </div>
+        <div class="nav-item" id="nav-mob-sede" onclick="setMobileNav('sede')">
+            <i class="fas fa-building"></i><span class="nav-text">Sede</span>
+        </div>
+        <div class="nav-item" id="nav-mob-estados" onclick="openMobileStates()">
+            <i class="fas fa-list"></i><span class="nav-text" id="lbl-mob-estado">Estados</span>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-item logout" onclick="logout()">
+            <i class="fas fa-power-off"></i>
+        </div>
+    </nav>
+
+    <!-- Overlay & Bottom Sheet para Estados en Móvil -->
+    <div id="sheet-overlay" onclick="closeMobileStates()"></div>
+    <div class="mobile-states-sheet" id="states-sheet">
+        <div class="sheet-header">
+            <span>Seleccionar Estado</span>
+            <div class="close-btn" onclick="closeMobileStates()"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="sheet-content" id="mobile-states-list">
+            <!-- Renderizado dinámicamente -->
+        </div>
+    </div>
 </div>
 
 <script>
@@ -850,67 +423,215 @@
     let currentModalData = [];
     let chartA, chartF;
     let selectedDateGlobal = "";
-    let lastNacionalDate = "";  // FIX: guardar ultima fecha nacional
+    let lastNacionalDate = "";
     let fp;
+    
+    // Variables de Estado para el Auto-Refresh
+    let currentViewType = 'nacional'; // 'nacional', 'sede', 'estado'
+    let currentEstadoName = '';
+    let autoRefreshInterval = null;
 
-    document.getElementById('pin-input').addEventListener('keypress', e => { if (e.key === 'Enter') checkAuth(); });
+    document.getElementById('pin-input').addEventListener('keypress', e => { if (e.key === 'Enter') attemptLogin(); });
 
-    function toggleSidebar() {
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display =
-            sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
+    /* ===== PERSISTENCIA Y AUTO-REFRESH ===== */
+    window.onload = () => {
+        const savedPin = localStorage.getItem('sundde_auth_token');
+        if(savedPin) {
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('app').style.opacity = '1';
+            showVerify('Restaurando Sesión', 'Obteniendo datos actualizados...');
+            doAuthAndLoad(savedPin, true);
+        }
+    };
+
+    function startAutoRefresh(pin) {
+        if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(() => {
+            fetchDataInBackground(pin);
+        }, 120000); // 2 minutos
     }
 
-    /* ---- VERIFY OVERLAY HELPERS ---- */
-    function showVerify(state, title, sub) {
-        const overlay = document.getElementById('verify-overlay');
-        const card    = document.getElementById('verify-card');
-        const iconWrap= document.getElementById('verify-icon');
-        const iconI   = document.getElementById('verify-icon-i');
-        const titleEl = document.getElementById('verify-title');
-        const subEl   = document.getElementById('verify-sub');
+    async function fetchDataInBackground(pin) {
+        try {
+            const res = await fetch(`${webAppUrl}?pass=${pin}`);
+            const data = await res.json();
+            if (data.error) throw new Error("Sesión expirada");
+            
+            allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
+            sedeData = data.sede;
+            
+            // Refrescar vista actual sin molestar al usuario
+            if(currentViewType === 'nacional') {
+                updateDashboard(allFetched, "VENEZUELA", true);
+            } else if (currentViewType === 'sede') {
+                renderSedeCentralLogic();
+            } else if (currentViewType === 'estado') {
+                updateDashboard(allFetched.filter(r => r['ESTADO'] === currentEstadoName), currentEstadoName, false);
+            }
+        } catch (error) {
+            console.error(error);
+            logout(); // Si falla el refresh en background, cerrar sesión.
+        }
+    }
 
-        card.className = 'verify-card state-' + state;
+    function logout() {
+        localStorage.removeItem('sundde_auth_token');
+        if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+        document.getElementById('pin-input').value = '';
+        document.getElementById('app').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('auth-overlay').style.display = 'flex';
+        }, 500);
+    }
 
-        const icons = { pending: 'fa-sync-alt', success: 'fa-check', error: 'fa-times' };
-        iconI.className = 'fas ' + icons[state];
-
-        titleEl.textContent = title;
-        subEl.innerHTML = sub;
-
-        overlay.classList.add('active');
+    /* ===== OVERLAYS ===== */
+    function showVerify(title, sub) {
+        document.getElementById('verify-title').textContent = title;
+        document.getElementById('verify-sub').textContent = sub;
+        document.getElementById('verify-overlay').classList.add('active');
     }
     function hideVerify() {
         document.getElementById('verify-overlay').classList.remove('active');
     }
 
-    async function checkAuth() {
+    async function attemptLogin() {
         const pinInput = document.getElementById('pin-input').value;
-        if (!pinInput) { alert("Contrasena requerida"); return; }
+        if (!pinInput) { alert("Código requerido"); return; }
+        showVerify('Verificando credenciales', 'Por favor espere...');
+        await doAuthAndLoad(pinInput, false);
+    }
 
-        showVerify('pending', 'Verificando credenciales', 'Por favor espere<span class="verify-dots">...</span>');
-
+    async function doAuthAndLoad(pin, isRestore) {
         try {
-            await init(pinInput);
-            showVerify('success', 'Acceso concedido', 'Bienvenido al sistema');
-            setTimeout(() => {
-                hideVerify();
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('app').style.opacity = '1';
-            }, 900);
+            const res = await fetch(`${webAppUrl}?pass=${pin}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            // Éxito
+            localStorage.setItem('sundde_auth_token', pin);
+            allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
+            sedeData = data.sede;
+
+            const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
+                .filter(f => f).map(f => { const [d, m, y] = f.split('/'); return new Date(y, m - 1, d); });
+
+            fp = flatpickr("#global-date-filter", {
+                locale: "es", dateFormat: "d/m/Y", maxDate: new Date(), enable: fechasDisponibles,
+                onChange: function(selectedDates, dateStr) { if (dateStr) handleDateChange(dateStr); }
+            });
+
+            lastNacionalDate = getUltimaFecha(allFetched, 'FECHA');
+            selectedDateGlobal = lastNacionalDate;
+            if (selectedDateGlobal) fp.setDate(selectedDateGlobal);
+
+            renderSidebar();
+            renderMobileStatesList();
+            setMobileNav('nacional'); // Default view
+            startAutoRefresh(pin);
+
+            hideVerify();
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('app').style.opacity = '1';
+
         } catch (error) {
-            showVerify('error', 'Acceso denegado', 'Credenciales invalidas');
-            setTimeout(() => { hideVerify(); }, 2000);
+            hideVerify();
+            if(!isRestore) alert("Acceso denegado. Credenciales inválidas.");
+            logout();
         }
     }
 
+    /* ===== LÓGICA DE NAVEGACIÓN Y VISTAS ===== */
+    function renderSidebar() {
+        const list = document.getElementById('sidebar-list');
+        list.innerHTML = `
+            <div class="state-item" id="btn-sede" onclick="navSede()"><span><i class="fas fa-building"></i> SEDE CENTRAL</span></div>
+            <div class="state-item active" id="btn-nacional" onclick="navNacional()"><span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span></div>`;
+
+        [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
+            const btn = document.createElement('div');
+            btn.className = 'state-item state-row-desktop';
+            btn.dataset.estado = s;
+            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
+            btn.onclick = () => navEstado(s);
+            list.appendChild(btn);
+        });
+    }
+
+    /* Funciones Enrutadoras Principales */
+    function navNacional() {
+        currentViewType = 'nacional';
+        restoreNacionalDate();
+        updateDashboard(allFetched, "VENEZUELA", true);
+        updateActiveUI('btn-nacional', 'nav-mob-nacional', 'Estados');
+    }
+
+    function navSede() {
+        currentViewType = 'sede';
+        renderSedeCentralLogic();
+        updateActiveUI('btn-sede', 'nav-mob-sede', 'Estados');
+    }
+
+    function navEstado(estado) {
+        currentViewType = 'estado';
+        currentEstadoName = estado;
+        restoreNacionalDate();
+        updateDashboard(allFetched.filter(r => r['ESTADO'] === estado), estado, false);
+        updateActiveUI(estado, 'nav-mob-estados', estado);
+        closeMobileStates();
+    }
+
+    function updateActiveUI(desktopIdOrEstado, mobileNavId, mobileEstadoLabel) {
+        // Desktop
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        if(desktopIdOrEstado === 'btn-nacional' || desktopIdOrEstado === 'btn-sede') {
+            document.getElementById(desktopIdOrEstado).classList.add('active');
+        } else {
+            document.querySelectorAll('.state-row-desktop').forEach(el => {
+                if(el.dataset.estado === desktopIdOrEstado) el.classList.add('active');
+            });
+        }
+        // Mobile Navbar
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(mobileNavId).classList.add('active');
+        document.getElementById('lbl-mob-estado').textContent = mobileEstadoLabel.substring(0, 8); // Truncar si es muy largo
+    }
+
+    /* ===== MENÚ ESTADOS MÓVIL (BOTTOM SHEET) ===== */
+    function renderMobileStatesList() {
+        const list = document.getElementById('mobile-states-list');
+        list.innerHTML = "";
+        [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
+            const el = document.createElement('div');
+            el.className = 'sheet-item';
+            el.innerHTML = `<i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> <span>${s}</span>`;
+            el.onclick = () => {
+                document.querySelectorAll('.sheet-item').forEach(i => i.classList.remove('active'));
+                el.classList.add('active');
+                navEstado(s);
+            };
+            list.appendChild(el);
+        });
+    }
+
+    function openMobileStates() {
+        document.getElementById('sheet-overlay').classList.add('open');
+        document.getElementById('states-sheet').classList.add('open');
+    }
+    function closeMobileStates() {
+        document.getElementById('sheet-overlay').classList.remove('open');
+        document.getElementById('states-sheet').classList.remove('open');
+    }
+    function setMobileNav(tipo) {
+        if(tipo === 'nacional') navNacional();
+        if(tipo === 'sede') navSede();
+    }
+
+    /* ===== HELPERS DE DATOS Y RENDERIZADO ===== */
     function cleanNum(val) {
         if (!val) return 0;
         let n = parseFloat(String(val).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
         return isNaN(n) ? 0 : n;
     }
-
     function getUltimaFecha(dataArr, campoFecha) {
         const fechas = [...new Set(dataArr.map(d => d[campoFecha]))].filter(f => f);
         return fechas.sort((a, b) => {
@@ -918,75 +639,23 @@
             return new Date(db[2], db[1]-1, db[0]) - new Date(da[2], da[1]-1, da[0]);
         })[0] || "";
     }
-
-    async function init(pin) {
-        const res = await fetch(`${webAppUrl}?pass=${pin}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
-        sedeData = data.sede;
-
-        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
-            .filter(f => f)
-            .map(f => { const [d, m, y] = f.split('/'); return new Date(y, m - 1, d); });
-
-        fp = flatpickr("#global-date-filter", {
-            locale: "es",
-            dateFormat: "d/m/Y",
-            maxDate: new Date(),
-            enable: fechasDisponibles,
-            onChange: function(selectedDates, dateStr) {
-                if (dateStr) handleDateChange(dateStr);
-            }
-        });
-
-        // FIX: guardar la ultima fecha del dataset nacional
-        lastNacionalDate = getUltimaFecha(allFetched, 'FECHA');
-        selectedDateGlobal = lastNacionalDate;
-        if (selectedDateGlobal) fp.setDate(selectedDateGlobal);
-
-        renderSidebar();
-        resetFilter(document.getElementById('btn-nacional'));
-    }
-
-    function renderSidebar() {
-        const list = document.getElementById('sidebar-list');
-        list.innerHTML = `
-            <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)">
-                <span><i class="fas fa-building"></i> SEDE CENTRAL</span>
-            </div>
-            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
-            </div>`;
-
-        [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
-            const btn = document.createElement('div');
-            btn.className = 'state-item';
-            btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
-            btn.onclick = () => {
-                document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-                btn.classList.add('active');
-                // FIX: restaurar fecha nacional al salir de sede central
-                restoreNacionalDate();
-                updateDashboard(allFetched.filter(r => r['ESTADO'] === s), s, false);
-                if (window.innerWidth <= 768) toggleSidebar();
-            };
-            list.appendChild(btn);
-        });
-    }
-
-    /* FIX: restaura la fecha nacional si se estaba en sede */
     function restoreNacionalDate() {
         if (lastNacionalDate && selectedDateGlobal !== lastNacionalDate) {
             selectedDateGlobal = lastNacionalDate;
             if (fp) fp.setDate(selectedDateGlobal, false);
         }
     }
+    function handleDateChange(nuevaFecha) {
+        selectedDateGlobal = nuevaFecha;
+        if (currentViewType !== 'sede') lastNacionalDate = nuevaFecha;
 
-    function renderSedeCentral(el) {
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
+        if (currentViewType === 'nacional') updateDashboard(allFetched, "VENEZUELA", true);
+        else if (currentViewType === 'sede') renderSedeCentralLogic();
+        else updateDashboard(allFetched.filter(r => r['ESTADO'] === currentEstadoName), currentEstadoName, false);
+    }
+
+    /* ===== RENDERIZADO DE VISTAS ===== */
+    function renderSedeCentralLogic() {
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
         document.getElementById('sede-extra-content').style.display = "block";
@@ -994,74 +663,54 @@
         document.getElementById('cal-box').style.display = 'none';
 
         const ultimaSede = getUltimaFecha(sedeData, 'FECHA');
-        if (ultimaSede) {
-            selectedDateGlobal = ultimaSede;
-            document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
-        }
+        if (ultimaSede) { selectedDateGlobal = ultimaSede; document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal; }
 
         const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
-
-        const conteoSujetos = {};
-        const conteoTipologia = {};
+        const conteoSujetos = {}; const conteoTipologia = {};
+        
         filteredSede.forEach(r => {
             const keys = Object.keys(r);
-            const s = r[keys[5]];
-            if (s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
-            const t = r[keys[4]];
-            if (t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
+            const s = r[keys[5]]; if (s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
+            const t = r[keys[4]]; if (t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
         });
 
-        const tipologySedeCont = document.getElementById('tipology-container-sede');
-        tipologySedeCont.innerHTML = "";
-        const tiposSorted = Object.entries(conteoTipologia).sort((a, b) => b[1] - a[1]);
+        const tipologySedeCont = document.getElementById('tipology-container-sede'); tipologySedeCont.innerHTML = "";
         const maxTipos = Math.max(...Object.values(conteoTipologia), 1);
-        tiposSorted.forEach(([nombre, valor]) => {
+        Object.entries(conteoTipologia).sort((a, b) => b[1] - a[1]).forEach(([nombre, valor]) => {
             const p = (valor / maxTipos) * 100;
             tipologySedeCont.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${nombre}</span><span>${valor}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
         });
 
         let topSujeto = "N/A", maxD = 0;
         for (let s in conteoSujetos) if (conteoSujetos[s] > maxD) { maxD = conteoSujetos[s]; topSujeto = s; }
-
         const topData = filteredSede.filter(r => { const keys = Object.keys(r); return r[keys[5]] === topSujeto; });
-        const topSinAtender  = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "SIN ATENDER").length;
-        const topEnProceso   = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "EN PROCESO").length;
-        const topDesestimada = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "DESESTIMADA").length;
-        const topCerrada     = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "CERRADA").length;
+        
+        const countStat = (est, dataArr) => dataArr.filter(r => String(r['ESTATUS']).toUpperCase().trim() === est).length;
+        const topSinAtender = countStat("SIN ATENDER", topData), topEnProceso = countStat("EN PROCESO", topData), topDesestimada = countStat("DESESTIMADA", topData), topCerrada = countStat("CERRADA", topData);
 
-        const count = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
-
+        const count = (est) => countStat(est, filteredSede);
         const createCard = (l, v, i, c, status) => `
             <div class="card" onclick="showSedeDetail('${status}')" style="cursor:pointer">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}; font-size:1rem;"></i>
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}; font-size:1rem;"></i></div>
                 <div class="card-val" style="color:${c}">${v.toLocaleString()}</div>
                 <div style="font-size:0.6rem; color:var(--muted); text-align:right; margin-top:2px;">Ver detalles <i class="fas fa-chevron-right"></i></div>
             </div>`;
 
-        let gridHtml =
-            createCard("Cerrada",    count("CERRADA"),    "fa-folder-check", "var(--success)", "CERRADA") +
-            createCard("En Proceso", count("EN PROCESO"), "fa-spinner",      "var(--accent)",  "EN PROCESO") +
-            createCard("Sin Atender",count("SIN ATENDER"),"fa-clock",        "var(--danger)",  "SIN ATENDER") +
-            createCard("Desestimada",count("DESESTIMADA"),"fa-ban",          "var(--muted)",   "DESESTIMADA");
-
-        gridHtml += `
+        document.getElementById('grid-criticos').innerHTML =
+            createCard("Cerrada", count("CERRADA"), "fa-folder-check", "var(--success)", "CERRADA") +
+            createCard("En Proceso", count("EN PROCESO"), "fa-spinner", "var(--accent)", "EN PROCESO") +
+            createCard("Sin Atender", count("SIN ATENDER"), "fa-clock", "var(--danger)", "SIN ATENDER") +
+            createCard("Desestimada", count("DESESTIMADA"), "fa-ban", "var(--muted)", "DESESTIMADA") + `
             <div class="card" style="grid-column:1/-1; border-left:4px solid var(--purple);">
                 <span class="card-label">Sujeto con mayor incidencia</span>
                 <div style="font-size:1.05rem; font-weight:800; color:var(--primary); margin:4px 0;">${topSujeto}</div>
                 <div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;">
                     <div><span class="card-label">Sin Atender</span><div style="font-size:1.15rem;font-weight:800;color:var(--danger)">${topSinAtender}</div></div>
                     <div><span class="card-label">En Proceso</span><div style="font-size:1.15rem;font-weight:800;color:var(--accent)">${topEnProceso}</div></div>
-                    <div><span class="card-label">Desestimada</span><div style="font-size:1.15rem;font-weight:800;color:var(--muted)">${topDesestimada}</div></div>
                     <div><span class="card-label">Cerrada</span><div style="font-size:1.15rem;font-weight:800;color:var(--success)">${topCerrada}</div></div>
                     <div style="margin-left:auto;text-align:right;"><span class="card-label">Total</span><div style="font-size:1.15rem;font-weight:800;">${maxD}</div></div>
                 </div>
             </div>`;
-
-        document.getElementById('grid-criticos').innerHTML = gridHtml;
-        if (window.innerWidth <= 768) toggleSidebar();
     }
 
     function updateDashboard(data, title, isNational = false) {
@@ -1075,12 +724,11 @@
             selectedDateGlobal = getUltimaFecha(data, 'FECHA');
             if (fp) fp.setDate(selectedDateGlobal, false);
         }
-        // FIX: actualizar lastNacionalDate cuando se esta en vista nacional/estado
         if (isNational) lastNacionalDate = selectedDateGlobal;
 
         const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS","ATENDIDAS","POR ATENDER","NUEVO","DENUNCIAS ADMITIDAS","PROCESO CULMINADO","CERRADO","INSPECCIONADO","PROCESO CONCILIATORIO","POR APROBAR FISCALIZACIÓN","POR ASIGNAR FISCAL","CON FISCAL ASIGNADO","CON FISCAL NACIONAL","ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"];
+        const cols = ["REGISTROS RECIBIDOS","ATENDIDAS","POR ATENDER","NUEVO","DENUNCIAS ADMITIDAS","PROCESO CULMINADO","CERRADO","INSPECCIONADO","PROCESO CONCILIATORIO","POR APROBAR FISCALIZACIÓN","POR ASIGNAR FISCAL","CON FISCAL ASIGNADO","ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"];
         cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
@@ -1091,151 +739,76 @@
 
         const createCard = (l, v, i, c) => `
             <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}; font-size:1rem;"></i>
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}; font-size:1rem;"></i></div>
                 <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
             </div>`;
 
         document.getElementById('grid-criticos').innerHTML =
-            createCard("Recibidos",  s["REGISTROS RECIBIDOS"],  "fa-inbox",          "var(--primary)") +
-            createCard("Admitidas",  s["DENUNCIAS ADMITIDAS"],  "fa-file-signature", "var(--purple)") +
-            createCard("Atendidas",  s["ATENDIDAS"],            "fa-check-circle",   "var(--success)") +
-            createCard("Por Atender",s["POR ATENDER"],          "fa-clock",          "var(--warning)");
+            createCard("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") +
+            createCard("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") +
+            createCard("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") +
+            createCard("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
 
-        document.getElementById('grid-estatus').innerHTML =
-            createCard("Nuevas",    s["NUEVO"],            "fa-certificate",     "#3b82f6") +
-            createCard("Culminadas",s["PROCESO CULMINADO"],"fa-flag-checkered",  "#22c55e") +
-            createCard("Cerrado",   s["CERRADO"],          "fa-archive",         "#1e293b");
-
-        document.getElementById('grid-procesos').innerHTML =
-            createCard("Inspeccionado",s["INSPECCIONADO"],            "fa-search",        "#06b6d4") +
-            createCard("Conciliacion", s["PROCESO CONCILIATORIO"],   "fa-handshake",     "#f59e0b") +
-            createCard("Por Aprobar",  s["POR APROBAR FISCALIZACIÓN"],"fa-clipboard-check","#ec4899");
-
-        document.getElementById('grid-fiscales').innerHTML =
-            createCard("Por Asignar",     s["POR ASIGNAR FISCAL"],  "fa-user-plus", "#f97316") +
-            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie",  "#059669");
+        document.getElementById('grid-estatus').innerHTML = createCard("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + createCard("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + createCard("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-procesos').innerHTML = createCard("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + createCard("Conciliacion", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + createCard("Por Aprobar Fiscalización", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
+        document.getElementById('grid-fiscales').innerHTML = createCard("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
 
         document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
         if (isNational) renderRanking(allFetched);
     }
 
-    function resetFilter(el) {
-        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        // FIX: restaurar la fecha al volver de sede central
-        restoreNacionalDate();
-        updateDashboard(allFetched, "VENEZUELA", true);
-        if (window.innerWidth <= 768) {
-            const sb = document.getElementById('sidebar');
-            if (!sb.classList.contains('collapsed')) toggleSidebar();
-        }
-    }
-
-    function handleDateChange(nuevaFecha) {
-        selectedDateGlobal = nuevaFecha;
-        // FIX: actualizar lastNacionalDate si no estamos en sede
-        const active = document.querySelector('.state-item.active');
-        if (!active) return;
-        if (active.id !== 'btn-sede') lastNacionalDate = nuevaFecha;
-
-        if (active.id === 'btn-nacional') {
-            updateDashboard(allFetched, "VENEZUELA", true);
-        } else if (active.id === 'btn-sede') {
-            renderSedeCentral(active);
-        } else {
-            const estadoNombre = active.innerText.replace(/^\s*\S+\s*/, '').trim();
-            updateDashboard(allFetched.filter(r => r['ESTADO'] === estadoNombre), estadoNombre, false);
-        }
-    }
-
     function renderCharts(ate, pen, pas, cas) {
         const config = (labels, data, colors) => ({
-            type: 'doughnut',
-            data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                cutout: '72%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: '600' }, padding: 12 } }
-                }
-            }
+            type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
+            options: { responsive: true, maintainAspectRatio: true, cutout: '72%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: '600' } } } } }
         });
-        if (chartA) chartA.destroy();
-        if (chartF) chartF.destroy();
+        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Pendientes'], [ate, pen], ['#22c55e','#ef4444']));
         chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar','Asignado'], [pas, cas], ['#f97316','#059669']));
     }
 
     function renderTipologia(stats) {
-        const container = document.getElementById('tipology-container');
-        container.innerHTML = "";
+        const container = document.getElementById('tipology-container'); container.innerHTML = "";
         const rubros = ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"];
         const total = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
         rubros.forEach(r => {
-            const v = stats[r] || 0;
-            const p = total > 0 ? (v / total * 100) : 0;
+            const v = stats[r] || 0; const p = total > 0 ? (v / total * 100) : 0;
             container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${v.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
         });
     }
 
-   function renderRanking(data) {
-        const container = document.getElementById('ranking-container');
-        container.innerHTML = "";
+    function renderRanking(data) {
+        const container = document.getElementById('ranking-container'); container.innerHTML = "";
         const rec = data.filter(d => d['FECHA'] === selectedDateGlobal);
         const rank = [...new Set(rec.map(d => d['ESTADO']))].map(s => {
             const row = rec.find(r => r['ESTADO'] === s);
-            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
-            if(p > 0 && p < 1) p *= 100;
+            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0; if(p > 0 && p < 1) p *= 100;
             return { s, p };
         }).sort((a,b) => b.p - a.p).slice(0, 10);
-        rank.forEach(i => {
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${i.s}</span><span>${i.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${i.p}%"></div></div></div>`;
-        });
+        rank.forEach(i => container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${i.s}</span><span>${i.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${i.p}%"></div></div></div>`);
     }
-    
+
+    /* Modal Sede */
     function showSedeDetail(estatus) {
         currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
-        document.getElementById('modal-title').innerText = "REGISTROS: " + estatus;
-        document.getElementById('modal-body').innerHTML = "<p style='text-align:center;padding:22px;color:var(--muted);font-size:0.85rem;'>Seleccione un elemento arriba para ver su informacion.</p>";
-        const checklistDiv = document.getElementById('checklist-options');
-        checklistDiv.innerHTML = "";
-        const uniqueValuesD = [...new Set(currentModalData.map(r => { const keys = Object.keys(r); return r[keys[3]]; }))].filter(v => v);
-        if (uniqueValuesD.length === 0) checklistDiv.innerHTML = "<span style='font-size:0.7rem;color:var(--muted);'>Sin datos</span>";
-        uniqueValuesD.forEach(val => {
-            const chip = document.createElement('div');
-            chip.className = 'check-item';
-            chip.innerText = val;
-            chip.onclick = () => {
-                document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected'));
-                chip.classList.add('selected');
-                renderModalRowByVal(val);
-            };
+        document.getElementById('modal-title').innerText = estatus; document.getElementById('modal-body').innerHTML = "";
+        const checklistDiv = document.getElementById('checklist-options'); checklistDiv.innerHTML = "";
+        const uniqueVals = [...new Set(currentModalData.map(r => { const keys = Object.keys(r); return r[keys[3]]; }))].filter(v => v);
+        uniqueVals.forEach(val => {
+            const chip = document.createElement('div'); chip.className = 'check-item'; chip.innerText = val;
+            chip.onclick = () => { document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); renderModalRowByVal(val); };
             checklistDiv.appendChild(chip);
         });
         document.getElementById('modal-overlay').style.display = 'flex';
     }
-
-    function renderModalRowByVal(valD) {
-        const body = document.getElementById('modal-body');
-        body.innerHTML = "";
-        const filtered = currentModalData.filter(r => { const keys = Object.keys(r); return r[keys[3]] === valD; });
-        filtered.forEach(item => {
-            let html = '<div class="ranking-card" style="margin-bottom:14px;padding:10px;">';
-            for (let key in item) {
-                const uKey = key.toUpperCase().trim();
-                if (item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
-                    html += `<div class="detail-row"><span class="detail-label">${key}</span><span class="detail-val">${item[key]}</span></div>`;
-                }
-            }
-            html += '</div>';
-            body.innerHTML += html;
+    function renderModalRowByVal(val) {
+        const body = document.getElementById('modal-body'); body.innerHTML = "";
+        currentModalData.filter(r => { const keys = Object.keys(r); return r[keys[3]] === val; }).forEach(item => {
+            let html = '<div style="margin-bottom:14px;padding:10px;background:#f8fafc;border-radius:10px;font-size:0.8rem;">';
+            for (let key in item) if (item[key] && !['ITEM','FECHA'].includes(key.toUpperCase().trim())) html += `<div style="margin-bottom:4px"><strong style="color:var(--muted)">${key}:</strong> ${item[key]}</div>`;
+            body.innerHTML += html + '</div>';
         });
     }
-
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 </script>
 </body>
