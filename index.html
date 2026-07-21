@@ -95,7 +95,7 @@
             z-index: 1;
         }
 
-        /* ===== SIDEBAR ===== */
+        /* ===== SIDEBAR & NAVBAR (ESCRITORIO) ===== */
         .sidebar {
             width: 270px;
             min-width: 270px;
@@ -128,9 +128,26 @@
         .sidebar-header i { cursor: pointer; transition: transform 0.2s; }
         .sidebar-header i:hover { transform: scale(1.15); }
 
-        .sidebar-content { overflow-y: auto; flex-grow: 1; padding: 10px 0 20px; }
-        .sidebar-content::-webkit-scrollbar { width: 4px; }
-        .sidebar-content::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; }
+        .sidebar-content { 
+            display: flex; flex-direction: column; flex-grow: 1; 
+            padding: 10px 0 0; overflow: hidden; 
+        }
+        
+        .nav-main-items { display: flex; flex-direction: column; }
+        .states-wrapper { 
+            display: flex; flex-direction: column; flex-grow: 1; 
+            overflow-y: auto; padding-bottom: 10px; margin-top: 5px; 
+        }
+        .states-wrapper::-webkit-scrollbar { width: 4px; }
+        .states-wrapper::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; }
+        
+        .sidebar-footer-btn { 
+            padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.06); 
+            background: rgba(255,255,255,0.3); 
+        }
+        
+        .mobile-states-btn { display: none !important; }
+        .mobile-logout-btn { display: none !important; }
 
         .state-item {
             padding: 10px 16px;
@@ -159,8 +176,11 @@
             box-shadow: 0 4px 14px rgba(30,58,138,0.25);
         }
         .state-item i { margin-right: 8px; font-size: 0.75rem; }
+        
+        .text-danger { color: #ef4444 !important; }
+        .text-danger:hover { background: rgba(239, 68, 68, 0.08) !important; border-color: rgba(239, 68, 68, 0.2) !important; color: #ef4444 !important;}
 
-        /* ===== LIQUID NAVBAR RESPONSIVO (TRANSICIÓN DE SIDEBAR) ===== */
+        /* ===== LIQUID NAVBAR RESPONSIVO (MÓVIL) ===== */
         @media (max-width: 768px) {
             .sidebar { 
                 position: fixed; 
@@ -169,7 +189,7 @@
                 transform: translateX(-50%);
                 height: auto; 
                 width: 94%; 
-                max-width: 400px; 
+                max-width: 450px; 
                 min-width: unset;
                 flex-direction: row; 
                 border-radius: 24px;
@@ -179,54 +199,71 @@
                 border: 1px solid var(--glass-border);
                 box-shadow: var(--glass-shadow);
                 margin: 0; 
-                padding: 10px 10px;
+                padding: 8px 10px;
                 z-index: 10000;
             }
-            .sidebar.collapsed { 
-                margin-left: 0; /* Anula el margin-left que escondía el sidebar en móvil */
-            }
-            .sidebar-header { 
-                display: none; 
-            }
+            .sidebar.collapsed { margin-left: 0; }
+            .sidebar-header { display: none; }
+            
             .sidebar-content { 
-                display: flex; 
-                flex-direction: row; 
-                overflow-x: auto; 
-                overflow-y: hidden; 
-                width: 100%; 
-                height: 100%;
-                align-items: center; 
-                padding: 0; 
-                margin: 0; 
-                gap: 8px; 
-                scroll-behavior: smooth;
+                flex-direction: row; width: 100%; overflow: visible; padding: 0; align-items: center; justify-content: space-between;
             }
-            .sidebar-content::-webkit-scrollbar { 
-                display: none; 
+            
+            .nav-main-items { 
+                display: flex; flex-direction: row; flex-grow: 1; justify-content: space-between; align-items: center; width: 100%;
             }
-            .state-item { 
-                margin: 0; 
-                padding: 10px 16px; 
-                border-radius: 16px; 
-                white-space: nowrap; 
-                flex-shrink: 0;
+            
+            /* Controles de display móvil/escritorio */
+            .sidebar-footer-btn.desktop-logout-btn { display: none !important; }
+            .mobile-states-btn { display: flex !important; }
+            .mobile-logout-btn { display: flex !important; }
+            
+            /* Botones del Navbar inferior unificados */
+            .sidebar-content .state-item { 
+                margin: 0 2px; padding: 8px 6px; border-radius: 14px; flex: 1; text-align: center; justify-content: center;
             }
-            /* Acomoda el icono arriba y el texto abajo como las apps nativas */
-            .state-item span {
-                display: flex;
+            .sidebar-content .state-item span {
+                display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; font-size: 0.60rem;
+            }
+            .sidebar-content .state-item i { margin-right: 0; font-size: 1.15rem; }
+
+            /* Panel emergente de Estados */
+            .states-wrapper {
+                display: none;
+                position: absolute;
+                bottom: 85px; 
+                left: 50%; 
+                transform: translateX(-50%);
+                width: 92%; 
+                max-height: 55vh; 
+                background: var(--glass-bg);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
+                border: 1px solid var(--glass-border);
+                border-radius: 18px;
+                box-shadow: 0 -10px 40px rgba(30,58,138,0.25);
+                padding: 12px; 
                 flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 5px;
-                font-size: 0.65rem;
+                z-index: 10001;
             }
-            .state-item i { 
-                margin-right: 0; 
-                font-size: 1.15rem; 
+            .states-wrapper.show {
+                display: flex;
+                animation: popUpStates 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
             }
-            .main-view { 
-                padding-bottom: 120px; /* Evita que el contenido quede tapado por la liquid navbar */
+            @keyframes popUpStates {
+                from { opacity: 0; transform: translate(-50%, 15px) scale(0.95); }
+                to { opacity: 1; transform: translate(-50%, 0) scale(1); }
             }
+            /* Restablecer estilo de items de estado dentro del panel emergente */
+            .states-wrapper .state-item {
+                margin: 4px 0; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.6); flex: none; justify-content: flex-start;
+            }
+            .states-wrapper .state-item span {
+                flex-direction: row; justify-content: flex-start; font-size: 0.85rem;
+            }
+            .states-wrapper .state-item i { margin-right: 12px; font-size: 1rem; }
+
+            .main-view { padding-bottom: 120px; }
         }
 
         /* ===== MAIN VIEW ===== */
@@ -326,7 +363,7 @@
 
         @media (max-width: 768px) {
             .banner { padding-top: 24px; text-align: center; }
-            .floating-toggle { display: none !important; } /* Se oculta el toggle porque la liquid navbar siempre es visible */
+            .floating-toggle { display: none !important; }
             .calendar-box { margin: 14px auto 0; }
         }
 
@@ -354,10 +391,7 @@
             overflow: hidden;
         }
         .card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
         }
         .card:hover {
@@ -366,27 +400,11 @@
         }
         .card[onclick] { cursor: pointer; }
 
-        .card-label {
-            font-size: 0.62rem;
-            font-weight: 800;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-        }
-        .card-val {
-            font-size: 1.75rem;
-            font-weight: 900;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            line-height: 1;
-        }
+        .card-label { font-size: 0.62rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+        .card-val { font-size: 1.75rem; font-weight: 900; font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1; }
 
         /* ===== CHARTS ===== */
-        .charts-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 28px;
-        }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
         @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
 
         .chart-container {
@@ -397,97 +415,40 @@
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.75);
             box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden;
         }
         .chart-container::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
         }
-        .chart-container h3 {
-            font-size: 0.7rem;
-            margin: 0 0 14px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 800;
-        }
-        .chart-box {
-            position: relative;
-            width: 100%;
-            max-width: 240px;
-            aspect-ratio: 1 / 1;
-        }
+        .chart-container h3 { font-size: 0.7rem; margin: 0 0 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
+        .chart-box { position: relative; width: 100%; max-width: 240px; aspect-ratio: 1 / 1; }
 
         /* ===== RANKING / TIPOLOGIA ===== */
         .ranking-card {
             background: rgba(255,255,255,0.55);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 22px 24px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
+            padding: 22px 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.75);
+            box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset; margin-bottom: 28px; position: relative; overflow: hidden;
         }
         .ranking-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
         }
         .ranking-item { margin-bottom: 14px; }
         .ranking-item:last-child { margin-bottom: 0; }
-        .ranking-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text);
-        }
-        .bar-container {
-            height: 8px;
-            background: rgba(30,58,138,0.08);
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-        .bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            transition: width 1s ease;
-            border-radius: 6px;
-        }
+        .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .bar-container { height: 8px; background: rgba(30,58,138,0.08); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.5); }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; border-radius: 6px; }
 
-        /* ===== SECTION TITLE ===== */
         .section-title {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin: 28px 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase;
+            letter-spacing: 0.08em; margin: 28px 0 16px; display: flex; align-items: center; gap: 10px;
         }
         .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(180deg, var(--warning), var(--accent));
-            border-radius: 3px;
-            flex-shrink: 0;
+            content: ''; width: 4px; height: 16px; background: linear-gradient(180deg, var(--warning), var(--accent));
+            border-radius: 3px; flex-shrink: 0;
         }
 
         /* ====================================
@@ -791,130 +752,72 @@
         .verify-dots { letter-spacing: 3px; }
 
         /* ===========================
-           MODAL — ESTILO HORIZONTAL TIPO DASHBOARD
+           MODAL — MULTINIVEL
         =========================== */
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(30,58,138,0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(30,58,138,0.4);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px;
         }
         .modal-card {
-            background: rgba(255,255,255,0.95);
-            width: 95%;
-            max-width: 1200px; /* Mas ancho para las 3 columnas */
-            height: 85vh;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 24px 60px rgba(30,58,138,0.3);
-            animation: modalIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
+            background: rgba(255,255,255,0.95); width: 95%; max-width: 1200px; height: 85vh;
+            border-radius: 16px; overflow: hidden; box-shadow: 0 24px 60px rgba(30,58,138,0.3);
+            animation: modalIn 0.3s ease; display: flex; flex-direction: column;
         }
         @keyframes modalIn {
             from { transform: translateY(18px) scale(0.97); opacity: 0; }
             to   { transform: translateY(0) scale(1); opacity: 1; }
         }
-        .modal-header {
-            padding: 16px 22px;
-            background: #3b82f6;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
+        .modal-header { padding: 16px 22px; background: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .modal-header h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 800; }
-        
         .close-modal { cursor: pointer; font-size: 1.1rem; opacity: 0.85; transition: opacity 0.2s; }
         .close-modal:hover { opacity: 1; }
 
+        /* Escritorio: Distribución de Columnas */
         .modal-content-wrapper {
-            display: flex;
-            flex-direction: row;
-            flex-grow: 1;
-            overflow: hidden;
-            background: #f8fafc;
+            display: flex; flex-direction: row; flex-grow: 1; overflow: hidden; background: #f8fafc; scroll-behavior: smooth;
         }
-        
         .modal-col {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            overflow-y: auto;
-            border-right: 1px solid rgba(0,0,0,0.06);
+            flex: 1; display: flex; flex-direction: column; padding: 24px; overflow-y: auto; border-right: 1px solid rgba(0,0,0,0.06);
         }
-        .modal-col:last-child {
-            border-right: none;
-            background: #eef2f6; /* Fondo gris claro para los detalles */
-        }
-        
-        /* Ocultar barra scroll para columnas */
+        .modal-col:last-child { flex: 1.5; border-right: none; background: #eef2f6; } /* Más espacio para detalles en escritorio */
         .modal-col::-webkit-scrollbar { width: 4px; }
         .modal-col::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 4px; }
 
-        .selection-label { 
-            font-size: 0.75rem; 
-            font-weight: 800; 
-            color: var(--muted); 
-            text-transform: uppercase; 
-            letter-spacing: 0.07em; 
-            margin-bottom: 16px;
-            display: block;
+        /* === SISTEMA GRID PARA LA INFORMACIÓN (HORIZONTAL EN PC, VERTICAL EN MÓVIL) === */
+        .detail-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+        .detail-item { padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        /* Móvil: Distribución Vertical */
+        @media (max-width: 768px) {
+            .modal-overlay { padding: 10px; align-items: flex-end; }
+            .modal-card {
+                height: 90vh; width: 100%; border-radius: 20px 20px 0 0; animation: modalSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            @keyframes modalSlideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+            
+            .modal-content-wrapper { flex-direction: column; overflow-y: auto; }
+            .modal-col {
+                flex: none; min-height: 240px; border-right: none; border-bottom: 2px solid rgba(0,0,0,0.08); padding: 20px 18px; overflow-y: visible;
+            }
+            .modal-col:last-child { border-bottom: none; min-height: 350px; }
+
+            /* Información colapsa a lista vertical en teléfono */
+            .detail-grid { grid-template-columns: 1fr; } 
         }
-        
-        .checklist-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            align-content: flex-start;
-        }
-        
+
+        .selection-label { font-size: 0.75rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; display: block; }
+        .checklist-container { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
         .check-item {
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            color: var(--text);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: white; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 20px; font-size: 0.78rem;
+            cursor: pointer; transition: all 0.2s; font-weight: 600; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .check-item:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.05); }
-        .check-item.selected { 
-            background: #3b82f6; 
-            color: white; 
-            border-color: #3b82f6; 
-            box-shadow: 0 4px 10px rgba(59,130,246,0.25); 
-        }
-
-        /* Estilo para el nivel 2 (Denuncias) */
-        .check-item-alt {
-            border-color: rgba(139, 92, 246, 0.3);
-            background: white;
-            color: var(--purple);
-        }
-        .check-item-alt:hover {
-            border-color: var(--purple);
-            background: rgba(139, 92, 246, 0.05);
-        }
-        .check-item-alt.selected {
-            background: var(--purple);
-            color: white;
-            border-color: var(--purple);
-            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25); 
-        }
-
-        /* Flatpickr override */
+        .check-item.selected { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59,130,246,0.25); }
+        .check-item-alt { border-color: rgba(139, 92, 246, 0.3); background: white; color: var(--purple); }
+        .check-item-alt:hover { border-color: var(--purple); background: rgba(139, 92, 246, 0.05); }
+        .check-item-alt.selected { background: var(--purple); color: white; border-color: var(--purple); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25); }
+        
         .flatpickr-calendar { box-shadow: 0 12px 40px rgba(30,58,138,0.18) !important; border-radius: 14px !important; overflow: hidden; }
     </style>
 </head>
@@ -965,36 +868,32 @@
         </div>
         
         <div class="modal-content-wrapper">
-            <!-- Columna 1: Selección de Sujeto -->
-            <div class="modal-col" style="background: #ffffff;">
+            <!-- Columna 1 -->
+            <div class="modal-col" style="background: #ffffff;" id="col-sujetos">
                 <span class="selection-label">1. SELECCIONE EL SUJETO</span>
                 <div id="modal-checklist-sujetos" class="checklist-container"></div>
             </div>
 
-            <!-- Columna 2: Selección de Denuncia -->
-            <div class="modal-col" style="background: #f8fafc;">
+            <!-- Columna 2 -->
+            <div class="modal-col" style="background: #f8fafc;" id="col-denuncias">
                 <span class="selection-label" style="color:var(--purple);">2. SELECCIONE EL CASO</span>
                 <div id="modal-checklist-denuncias" class="checklist-container"></div>
             </div>
 
-            <!-- Columna 3: Detalle final -->
-            <div class="modal-col">
-                <div id="modal-body" style="height: 100%;">
-                    <!-- Se inyecta dinamicamente -->
-                </div>
+            <!-- Columna 3 -->
+            <div class="modal-col" id="col-detalles">
+                <div id="modal-body" style="height: 100%;"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== APP ===== -->
 <div class="app-container" id="app">
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-bars" onclick="toggleSidebar()"></i>
-            <span>ESTADOS</span>
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i><span>ESTADOS</span></div>
+        <div class="sidebar-content" id="sidebar-list">
+            <!-- Renderizado desde JS -->
         </div>
-        <div class="sidebar-content" id="sidebar-list"></div>
     </aside>
 
     <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -1016,28 +915,17 @@
             <div id="full-nacional-content">
                 <div class="section-title">Estatus del Flujo</div>
                 <div id="grid-estatus" class="grid"></div>
-
                 <div class="section-title">Procesos de Campo e Inspeccion</div>
                 <div id="grid-procesos" class="grid"></div>
-
                 <div class="section-title">Asignacion de Fiscales y Dependencias</div>
                 <div id="grid-fiscales" class="grid"></div>
-
                 <div class="section-title">Analisis Visual de Gestion</div>
                 <div class="charts-row">
-                    <div class="chart-container">
-                        <h3>Atencion vs Pendientes</h3>
-                        <div class="chart-box"><canvas id="chartAtencion"></canvas></div>
-                    </div>
-                    <div class="chart-container">
-                        <h3>Asignacion de Fiscales</h3>
-                        <div class="chart-box"><canvas id="chartFiscales"></canvas></div>
-                    </div>
+                    <div class="chart-container"><h3>Atencion vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
+                    <div class="chart-container"><h3>Asignacion de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
                 </div>
-
                 <div class="section-title">Tipologia</div>
                 <div id="tipology-container" class="ranking-card"></div>
-
                  <div id="ranking-section">
                     <div class="section-title">Eficiencia por Estados (Top 10)</div>
                     <div id="ranking-container" class="ranking-card"></div>
@@ -1068,47 +956,47 @@
     function toggleSidebar() {
         const sb = document.getElementById('sidebar');
         sb.classList.toggle('collapsed');
-        document.getElementById('menu-btn').style.display =
-            sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
+        document.getElementById('menu-btn').style.display = sb.classList.contains('collapsed') ? 'flex' : (window.innerWidth > 768 ? 'none' : 'flex');
+    }
+
+    function toggleMobileStates() {
+        document.getElementById('states-wrapper').classList.toggle('show');
+    }
+
+    function logout() {
+        document.getElementById('pin-input').value = '';
+        document.getElementById('app').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('auth-overlay').style.display = 'flex';
+        }, 600);
+        
+        if (window.innerWidth <= 768) {
+            document.getElementById('states-wrapper').classList.remove('show');
+        }
     }
 
     function showVerify(state, title, sub) {
         const overlay = document.getElementById('verify-overlay');
-        const card    = document.getElementById('verify-card');
-        const iconWrap= document.getElementById('verify-icon');
-        const iconI   = document.getElementById('verify-icon-i');
-        const titleEl = document.getElementById('verify-title');
-        const subEl   = document.getElementById('verify-sub');
-
+        const card = document.getElementById('verify-card');
+        const iconI = document.getElementById('verify-icon-i');
         card.className = 'verify-card state-' + state;
-
         const icons = { pending: 'fa-sync-alt', success: 'fa-check', error: 'fa-times' };
         iconI.className = 'fas ' + icons[state];
-
-        titleEl.textContent = title;
-        subEl.innerHTML = sub;
-
+        document.getElementById('verify-title').textContent = title;
+        document.getElementById('verify-sub').innerHTML = sub;
         overlay.classList.add('active');
     }
     
-    function hideVerify() {
-        document.getElementById('verify-overlay').classList.remove('active');
-    }
+    function hideVerify() { document.getElementById('verify-overlay').classList.remove('active'); }
 
     async function checkAuth() {
         const pinInput = document.getElementById('pin-input').value;
         if (!pinInput) { alert("Código requerido"); return; }
-
-        showVerify('pending', 'Verificando credenciales', 'Por favor espere<span class="verify-dots">...</span>');
-
+        showVerify('pending', 'Verificando credenciales', 'Por favor espere...');
         try {
             await init(pinInput);
             showVerify('success', 'Acceso concedido', 'Bienvenido al sistema');
-            setTimeout(() => {
-                hideVerify();
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('app').style.opacity = '1';
-            }, 900);
+            setTimeout(() => { hideVerify(); document.getElementById('auth-overlay').style.display = 'none'; document.getElementById('app').style.opacity = '1'; }, 900);
         } catch (error) {
             showVerify('error', 'Acceso denegado', 'Credenciales invalidas');
             setTimeout(() => { hideVerify(); }, 2000);
@@ -1136,19 +1024,11 @@
 
         allFetched = data.nacional.filter(d => d['ESTADO'] && !['TOTAL', 'TOTALES'].includes(String(d['ESTADO']).toUpperCase().trim()));
         sedeData = data.sede;
-
-        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))]
-            .filter(f => f)
-            .map(f => { const [d, m, y] = f.split('/'); return new Date(y, m - 1, d); });
+        const fechasDisponibles = [...new Set(allFetched.map(d => d['FECHA']))].filter(f => f).map(f => { const [d, m, y] = f.split('/'); return new Date(y, m - 1, d); });
 
         fp = flatpickr("#global-date-filter", {
-            locale: "es",
-            dateFormat: "d/m/Y",
-            maxDate: new Date(),
-            enable: fechasDisponibles,
-            onChange: function(selectedDates, dateStr) {
-                if (dateStr) handleDateChange(dateStr);
-            }
+            locale: "es", dateFormat: "d/m/Y", maxDate: new Date(), enable: fechasDisponibles,
+            onChange: function(selectedDates, dateStr) { if (dateStr) handleDateChange(dateStr); }
         });
 
         lastNacionalDate = getUltimaFecha(allFetched, 'FECHA');
@@ -1161,18 +1041,27 @@
 
     function renderSidebar() {
         const list = document.getElementById('sidebar-list');
-        list.innerHTML = `
-            <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)">
-                <span><i class="fas fa-building"></i> SEDE CENTRAL</span>
+        
+        let html = `
+            <div class="nav-main-items">
+                <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)"><span><i class="fas fa-building"></i> SEDE</span></div>
+                <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)"><span><i class="fas fa-globe-americas"></i> NACIONAL</span></div>
+                <div class="state-item mobile-states-btn" onclick="toggleMobileStates()"><span><i class="fas fa-list-ul"></i> ESTADOS</span></div>
+                <div class="state-item text-danger mobile-logout-btn" onclick="logout()"><span><i class="fas fa-sign-out-alt"></i> SALIR</span></div>
             </div>
-            <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)">
-                <span><i class="fas fa-globe-americas"></i> NACIONAL (TOTAL)</span>
-            </div>`;
+            
+            <div class="states-wrapper" id="states-wrapper"></div>
+            
+            <div class="sidebar-footer-btn desktop-logout-btn">
+                <div class="state-item text-danger" onclick="logout()"><span><i class="fas fa-sign-out-alt"></i> SALIR</span></div>
+            </div>
+        `;
+        list.innerHTML = html;
 
+        const statesWrapper = document.getElementById('states-wrapper');
         [...new Set(allFetched.map(d => d['ESTADO']))].sort().forEach(s => {
             const btn = document.createElement('div');
-            btn.className = 'state-item';
-            // IMPORTANTE: Guardamos el nombre exacto del estado en un dataset para evitar errores de lectura
+            btn.className = 'state-item sub-state';
             btn.dataset.stateName = s; 
             btn.innerHTML = `<span><i class="fas fa-map-marker-alt"></i> ${s}</span>`;
             btn.onclick = () => {
@@ -1180,9 +1069,12 @@
                 btn.classList.add('active');
                 restoreNacionalDate();
                 updateDashboard(allFetched.filter(r => r['ESTADO'] === s), s, false);
-                if (window.innerWidth <= 768) toggleSidebar();
+                
+                if (window.innerWidth <= 768) {
+                    statesWrapper.classList.remove('show');
+                }
             };
-            list.appendChild(btn);
+            statesWrapper.appendChild(btn);
         });
     }
 
@@ -1196,6 +1088,9 @@
     function renderSedeCentral(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
+        
+        if (window.innerWidth <= 768) document.getElementById('states-wrapper').classList.remove('show');
+
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
         document.getElementById('sede-extra-content').style.display = "block";
@@ -1203,74 +1098,53 @@
         document.getElementById('cal-box').style.display = 'none';
 
         const ultimaSede = getUltimaFecha(sedeData, 'FECHA');
-        if (ultimaSede) {
-            selectedDateGlobal = ultimaSede;
-            document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
-        }
+        if (ultimaSede) { selectedDateGlobal = ultimaSede; document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal; }
 
         const filteredSede = sedeData.filter(r => r['FECHA'] === selectedDateGlobal);
-
-        const conteoSujetos = {};
-        const conteoTipologia = {};
+        const conteoSujetos = {}, conteoTipologia = {};
         filteredSede.forEach(r => {
             const keys = Object.keys(r);
-            const s = r[keys[5]];
-            if (s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
-            const t = r[keys[4]];
-            if (t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
+            const s = r[keys[5]]; if (s && s.trim() !== "") conteoSujetos[s] = (conteoSujetos[s] || 0) + 1;
+            const t = r[keys[4]]; if (t && t.trim() !== "") conteoTipologia[t] = (conteoTipologia[t] || 0) + 1;
         });
 
         const tipologySedeCont = document.getElementById('tipology-container-sede');
         tipologySedeCont.innerHTML = "";
-        const tiposSorted = Object.entries(conteoTipologia).sort((a, b) => b[1] - a[1]);
         const maxTipos = Math.max(...Object.values(conteoTipologia), 1);
-        tiposSorted.forEach(([nombre, valor]) => {
-            const p = (valor / maxTipos) * 100;
-            tipologySedeCont.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${nombre}</span><span>${valor}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
+        Object.entries(conteoTipologia).sort((a, b) => b[1] - a[1]).forEach(([nombre, valor]) => {
+            tipologySedeCont.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${nombre}</span><span>${valor}</span></div><div class="bar-container"><div class="bar-fill" style="width:${(valor / maxTipos) * 100}%"></div></div></div>`;
         });
 
         let topSujeto = "N/A", maxD = 0;
         for (let s in conteoSujetos) if (conteoSujetos[s] > maxD) { maxD = conteoSujetos[s]; topSujeto = s; }
 
-        const topData = filteredSede.filter(r => { const keys = Object.keys(r); return r[keys[5]] === topSujeto; });
-        const topSinAtender  = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "SIN ATENDER").length;
-        const topEnProceso   = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "EN PROCESO").length;
-        const topDesestimada = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "DESESTIMADA").length;
-        const topCerrada     = topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === "CERRADA").length;
-
-        const count = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
+        const topData = filteredSede.filter(r => r[Object.keys(r)[5]] === topSujeto);
+        const countEst = (est) => topData.filter(r => String(r['ESTATUS']).toUpperCase().trim() === est).length;
+        const countAll = (est) => filteredSede.filter(r => r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === est).length;
 
         const createCard = (l, v, i, c, status) => `
             <div class="card" onclick="showSedeDetail('${status}')" style="cursor:pointer">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}; font-size:1rem;"></i>
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c}; font-size:1rem;"></i></div>
                 <div class="card-val" style="color:${c}">${v.toLocaleString()}</div>
                 <div style="font-size:0.6rem; color:var(--muted); text-align:right; margin-top:2px;">Ver detalle casos <i class="fas fa-chevron-right"></i></div>
             </div>`;
 
-        let gridHtml =
-            createCard("Cerrada",    count("CERRADA"),    "fa-folder-check", "var(--success)", "CERRADA") +
-            createCard("En Proceso", count("EN PROCESO"), "fa-spinner",      "var(--accent)",  "EN PROCESO") +
-            createCard("Sin Atender",count("SIN ATENDER"),"fa-clock",        "var(--danger)",  "SIN ATENDER") +
-            createCard("Desestimada",count("DESESTIMADA"),"fa-ban",          "var(--muted)",   "DESESTIMADA");
-
-        gridHtml += `
-            <div class="card" style="grid-column:1/-1; border-left:4px solid var(--purple);">
+        document.getElementById('grid-criticos').innerHTML =
+            createCard("Cerrada",    countAll("CERRADA"),    "fa-folder-check", "var(--success)", "CERRADA") +
+            createCard("En Proceso", countAll("EN PROCESO"), "fa-spinner",      "var(--accent)",  "EN PROCESO") +
+            createCard("Sin Atender",countAll("SIN ATENDER"),"fa-clock",        "var(--danger)",  "SIN ATENDER") +
+            createCard("Desestimada",countAll("DESESTIMADA"),"fa-ban",          "var(--muted)",   "DESESTIMADA") +
+            `<div class="card" style="grid-column:1/-1; border-left:4px solid var(--purple);">
                 <span class="card-label">Sujeto con mayor incidencia</span>
                 <div style="font-size:1.05rem; font-weight:800; color:var(--primary); margin:4px 0;">${topSujeto}</div>
                 <div style="display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;">
-                    <div><span class="card-label">Sin Atender</span><div style="font-size:1.15rem;font-weight:800;color:var(--danger)">${topSinAtender}</div></div>
-                    <div><span class="card-label">En Proceso</span><div style="font-size:1.15rem;font-weight:800;color:var(--accent)">${topEnProceso}</div></div>
-                    <div><span class="card-label">Desestimada</span><div style="font-size:1.15rem;font-weight:800;color:var(--muted)">${topDesestimada}</div></div>
-                    <div><span class="card-label">Cerrada</span><div style="font-size:1.15rem;font-weight:800;color:var(--success)">${topCerrada}</div></div>
+                    <div><span class="card-label">Sin Atender</span><div style="font-size:1.15rem;font-weight:800;color:var(--danger)">${countEst('SIN ATENDER')}</div></div>
+                    <div><span class="card-label">En Proceso</span><div style="font-size:1.15rem;font-weight:800;color:var(--accent)">${countEst('EN PROCESO')}</div></div>
+                    <div><span class="card-label">Desestimada</span><div style="font-size:1.15rem;font-weight:800;color:var(--muted)">${countEst('DESESTIMADA')}</div></div>
+                    <div><span class="card-label">Cerrada</span><div style="font-size:1.15rem;font-weight:800;color:var(--success)">${countEst('CERRADA')}</div></div>
                     <div style="margin-left:auto;text-align:right;"><span class="card-label">Total</span><div style="font-size:1.15rem;font-weight:800;">${maxD}</div></div>
                 </div>
             </div>`;
-
-        document.getElementById('grid-criticos').innerHTML = gridHtml;
-        if (window.innerWidth <= 768) toggleSidebar();
     }
 
     function updateDashboard(data, title, isNational = false) {
@@ -1279,240 +1153,143 @@
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
         document.getElementById('cal-box').style.display = 'flex';
 
-        const fechasEnEsteData = [...new Set(data.map(d => d['FECHA']))];
-        if (!selectedDateGlobal || !fechasEnEsteData.includes(selectedDateGlobal)) {
+        if (!selectedDateGlobal || ![...new Set(data.map(d => d['FECHA']))].includes(selectedDateGlobal)) {
             selectedDateGlobal = getUltimaFecha(data, 'FECHA');
             if (fp) fp.setDate(selectedDateGlobal, false);
         }
         if (isNational) lastNacionalDate = selectedDateGlobal;
 
-        const filteredData = data.filter(d => d['FECHA'] === selectedDateGlobal);
+        const fData = data.filter(d => d['FECHA'] === selectedDateGlobal);
         let s = {};
-        const cols = ["REGISTROS RECIBIDOS","ATENDIDAS","POR ATENDER","NUEVO","DENUNCIAS ADMITIDAS","PROCESO CULMINADO","CERRADO","INSPECCIONADO","PROCESO CONCILIATORIO","POR APROBAR FISCALIZACIÓN","POR ASIGNAR FISCAL","CON FISCAL ASIGNADO","CON FISCAL NACIONAL","ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"];
-        cols.forEach(c => s[c] = filteredData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
+        ["REGISTROS RECIBIDOS","ATENDIDAS","POR ATENDER","NUEVO","DENUNCIAS ADMITIDAS","PROCESO CULMINADO","CERRADO","INSPECCIONADO","PROCESO CONCILIATORIO","POR APROBAR FISCALIZACIÓN","POR ASIGNAR FISCAL","CON FISCAL ASIGNADO","ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"]
+            .forEach(c => s[c] = fData.reduce((acc, curr) => acc + cleanNum(curr[c]), 0));
 
         document.getElementById('view-title').innerText = title;
         document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
 
-        renderCharts(s["ATENDIDAS"], s["POR ATENDER"], s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]);
-        renderTipologia(s);
+        const config = (l, d, c) => ({ type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: c, borderWidth: 0 }] }, options: { cutout: '72%', plugins: { legend: { position: 'bottom' } } } });
+        if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
+        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Pendientes'], [s["ATENDIDAS"], s["POR ATENDER"]], ['#22c55e','#ef4444']));
+        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar','Asignado'], [s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]], ['#f97316','#059669']));
 
-        const createCard = (l, v, i, c) => `
-            <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span class="card-label">${l}</span>
-                    <i class="fas ${i}" style="color:${c}; font-size:1rem;"></i>
-                </div>
-                <div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div>
-            </div>`;
+        document.getElementById('tipology-container').innerHTML = "";
+        const rTotal = ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"].reduce((acc, r) => acc + (s[r] || 0), 0);
+        ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"].forEach(r => {
+            document.getElementById('tipology-container').innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${(s[r]||0).toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${rTotal>0?((s[r]||0)/rTotal*100):0}%"></div></div></div>`;
+        });
 
-        document.getElementById('grid-criticos').innerHTML =
-            createCard("Recibidos",  s["REGISTROS RECIBIDOS"],  "fa-inbox",          "var(--primary)") +
-            createCard("Admitidas",  s["DENUNCIAS ADMITIDAS"],  "fa-file-signature", "var(--purple)") +
-            createCard("Atendidas",  s["ATENDIDAS"],            "fa-check-circle",   "var(--success)") +
-            createCard("Por Atender",s["POR ATENDER"],          "fa-clock",          "var(--warning)");
-
-        document.getElementById('grid-estatus').innerHTML =
-            createCard("Nuevas",    s["NUEVO"],            "fa-certificate",     "#3b82f6") +
-            createCard("Culminadas",s["PROCESO CULMINADO"],"fa-flag-checkered",  "#22c55e") +
-            createCard("Cerrado",   s["CERRADO"],          "fa-archive",         "#1e293b");
-
-        document.getElementById('grid-procesos').innerHTML =
-            createCard("Inspeccionado",s["INSPECCIONADO"],            "fa-search",        "#06b6d4") +
-            createCard("Conciliacion", s["PROCESO CONCILIATORIO"],   "fa-handshake",     "#f59e0b") +
-            createCard("Por Aprobar",  s["POR APROBAR FISCALIZACIÓN"],"fa-clipboard-check","#ec4899");
-
-        document.getElementById('grid-fiscales').innerHTML =
-            createCard("Por Asignar",     s["POR ASIGNAR FISCAL"],  "fa-user-plus", "#f97316") +
-            createCard("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie",  "#059669");
+        const cC = (l, v, i, c) => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="card-label">${l}</span><i class="fas ${i}" style="color:${c};"></i></div><div class="card-val" style="color:${c}">${Math.floor(v).toLocaleString()}</div></div>`;
+        
+        document.getElementById('grid-criticos').innerHTML = cC("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + cC("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + cC("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + cC("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
+        document.getElementById('grid-estatus').innerHTML = cC("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + cC("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + cC("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
+        document.getElementById('grid-procesos').innerHTML = cC("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + cC("Conciliacion", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + cC("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
+        document.getElementById('grid-fiscales').innerHTML = cC("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + cC("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
 
         document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
-        if (isNational) renderRanking(allFetched);
+        if (isNational) {
+            document.getElementById('ranking-container').innerHTML = [...new Set(fData.map(d => d['ESTADO']))].map(st => { const row = fData.find(r => r['ESTADO'] === st); let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0; if(p > 0 && p < 1) p *= 100; return { st, p }; }).sort((a,b) => b.p - a.p).slice(0,10).map(item => `<div class="ranking-item"><div class="ranking-header"><span>${item.st}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%; background: linear-gradient(90deg, #1e3a8a, #8b5cf6);"></div></div></div>`).join('');
+        }
     }
 
     function resetFilter(el) {
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        restoreNacionalDate();
-        updateDashboard(allFetched, "VENEZUELA", true);
-        if (window.innerWidth <= 768) {
-            const sb = document.getElementById('sidebar');
-            if (!sb.classList.contains('collapsed')) toggleSidebar();
-        }
+        el.classList.add('active'); restoreNacionalDate(); updateDashboard(allFetched, "VENEZUELA", true);
+        
+        if (window.innerWidth <= 768) document.getElementById('states-wrapper').classList.remove('show');
     }
 
     function handleDateChange(nuevaFecha) {
-        selectedDateGlobal = nuevaFecha;
-        const active = document.querySelector('.state-item.active');
-        if (!active) return;
+        selectedDateGlobal = nuevaFecha; const active = document.querySelector('.state-item.active'); if (!active) return;
         if (active.id !== 'btn-sede') lastNacionalDate = nuevaFecha;
-
-        if (active.id === 'btn-nacional') {
-            updateDashboard(allFetched, "VENEZUELA", true);
-        } else if (active.id === 'btn-sede') {
-            renderSedeCentral(active);
-        } else {
-            // CORRECCIÓN: Leemos el nombre del estado directamente del dataset que definimos al crear el botón
-            const estadoNombre = active.dataset.stateName;
-            updateDashboard(allFetched.filter(r => r['ESTADO'] === estadoNombre), estadoNombre, false);
-        }
+        if (active.id === 'btn-nacional') updateDashboard(allFetched, "VENEZUELA", true);
+        else if (active.id === 'btn-sede') renderSedeCentral(active);
+        else updateDashboard(allFetched.filter(r => r['ESTADO'] === active.dataset.stateName), active.dataset.stateName, false);
     }
 
-    function renderCharts(ate, pen, pas, cas) {
-        const config = (labels, data, colors) => ({
-            type: 'doughnut',
-            data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                cutout: '72%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: '600' }, padding: 12 } }
-                }
-            }
-        });
-        if (chartA) chartA.destroy();
-        if (chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Pendientes'], [ate, pen], ['#22c55e','#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar','Asignado'], [pas, cas], ['#f97316','#059669']));
-    }
-
-    function renderTipologia(stats) {
-        const container = document.getElementById('tipology-container');
-        container.innerHTML = "";
-        const rubros = ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"];
-        const total = rubros.reduce((acc, r) => acc + (stats[r] || 0), 0);
-        rubros.forEach(r => {
-            const v = stats[r] || 0;
-            const p = total > 0 ? (v / total * 100) : 0;
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${r}</span><span>${v.toLocaleString()}</span></div><div class="bar-container"><div class="bar-fill" style="width:${p}%"></div></div></div>`;
-        });
-    }
-
-   function renderRanking(data) {
-        const container = document.getElementById('ranking-container');
-        container.innerHTML = "";
-        const rec = data.filter(d => d['FECHA'] === selectedDateGlobal);
-        const rank = [...new Set(rec.map(d => d['ESTADO']))].map(s => {
-            const row = rec.find(r => r['ESTADO'] === s);
-            let p = row && row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
-            if(p > 0 && p < 1) p *= 100;
-            return { s, p };
-        }).sort((a,b) => b.p - a.p).slice(0,10);
-
-        rank.forEach(item => {
-            container.innerHTML += `<div class="ranking-item"><div class="ranking-header"><span>${item.s}</span><span>${item.p.toFixed(1)}%</span></div><div class="bar-container"><div class="bar-fill" style="width:${item.p}%; background: linear-gradient(90deg, #1e3a8a, #8b5cf6);"></div></div></div>`;
-        });
-    }
-
-    /* ---- LÓGICA DEL MODAL REESTRUCTURADO EN COLUMNAS ---- */
+    /* ---- LÓGICA DEL MODAL RESPONSIVO ---- */
     function showSedeDetail(estatus) {
         currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
-        
         document.getElementById('modal-title').innerText = "ESTATUS: " + estatus;
         
         const checklistSujetos = document.getElementById('modal-checklist-sujetos');
         const checklistDenuncias = document.getElementById('modal-checklist-denuncias');
         const body = document.getElementById('modal-body');
         
-        // Reset de contenedores
-        checklistSujetos.innerHTML = "";
-        checklistDenuncias.innerHTML = "";
+        checklistSujetos.innerHTML = ""; checklistDenuncias.innerHTML = "";
         body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>Seleccione un sujeto y posteriormente un caso.</p>";
 
         if (currentModalData.length === 0) {
             body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>No hay registros disponibles para este estatus.</p>";
         } else {
-            // Agrupar la data actual por nombre de Sujeto (usando el índice 5)
             const sujetosMap = {};
             currentModalData.forEach(item => {
-                const keys = Object.keys(item);
-                const sujetoName = item[keys[5]] || "SIN SUJETO DEFINIDO";
+                const sujetoName = item[Object.keys(item)[5]] || "SIN SUJETO DEFINIDO";
                 if (!sujetosMap[sujetoName]) sujetosMap[sujetoName] = [];
                 sujetosMap[sujetoName].push(item);
             });
 
-            // Crear el botón para cada Sujeto único
             Object.keys(sujetosMap).forEach(sujetoName => {
                 const btn = document.createElement('div');
                 btn.className = 'check-item';
                 btn.innerText = `${sujetoName} (${sujetosMap[sujetoName].length})`;
-                
                 btn.onclick = () => {
-                    // Limpiar selección previa
                     document.querySelectorAll('#modal-checklist-sujetos .check-item').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
-                    // Cargar las denuncias del sujeto seleccionado
                     showDenunciasForSujeto(sujetosMap[sujetoName]);
+
+                    if(window.innerWidth <= 768) {
+                        setTimeout(() => document.getElementById('col-denuncias').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                    }
                 };
                 checklistSujetos.appendChild(btn);
             });
         }
-
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
     function showDenunciasForSujeto(denunciasArray) {
         const checklistDenuncias = document.getElementById('modal-checklist-denuncias');
         const body = document.getElementById('modal-body');
-
         checklistDenuncias.innerHTML = "";
-        body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>Seleccione un caso específico para desplegar su detalle completo en esta columna.</p>";
+        body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>Seleccione un caso para ver su detalle en la siguiente sección.</p>";
 
         denunciasArray.forEach((item, index) => {
             const keys = Object.keys(item);
-            
-            // Intenta extraer inteligentemente un identificador como el ID, Nro. de caso, etc.
             let buttonLabel = `Caso #${index + 1}`;
-            const posibleColumnaID = keys.find(k => 
-                k.toUpperCase().includes('NRO') || 
-                k.toUpperCase().includes('CÓDIGO') || 
-                k.toUpperCase().includes('DENUNCIA') ||
-                k.toUpperCase().includes('RECLAMO') ||
-                k.toUpperCase().includes('ID')
-            );
-
-            if (posibleColumnaID && item[posibleColumnaID]) {
-                buttonLabel = `${posibleColumnaID}: ${item[posibleColumnaID]}`;
-            }
+            const posibleColumnaID = keys.find(k => k.toUpperCase().includes('NRO') || k.toUpperCase().includes('CÓDIGO') || k.toUpperCase().includes('DENUNCIA') || k.toUpperCase().includes('RECLAMO') || k.toUpperCase().includes('ID'));
+            if (posibleColumnaID && item[posibleColumnaID]) buttonLabel = `${posibleColumnaID}: ${item[posibleColumnaID]}`;
 
             const btn = document.createElement('div');
-            btn.className = 'check-item check-item-alt'; // Clase alternativa visual
+            btn.className = 'check-item check-item-alt';
             btn.innerText = buttonLabel;
-
             btn.onclick = () => {
-                // Limpiar selección previa
                 document.querySelectorAll('#modal-checklist-denuncias .check-item').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                // Cargar los detalles de la denuncia
                 renderModalRowByVal(item);
+
+                if(window.innerWidth <= 768) {
+                    setTimeout(() => document.getElementById('col-detalles').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                }
             };
             checklistDenuncias.appendChild(btn);
         });
     }
 
     function renderModalRowByVal(item) {
-        const body = document.getElementById('modal-body');
-        let html = '<div style="background:#fff; border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05);">';
+        // Implementación de grid horizontal para computadora / vertical para móvil
+        let html = '<div style="background:#fff; border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05);"><div class="detail-grid">';
         
         for (let key in item) {
             const uKey = key.toUpperCase().trim();
-            // Filtramos las columnas que no aportan para que se vea más limpio
             if (item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
-                html += `
-                    <div style="margin-bottom:12px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:8px;">
-                        <div style="font-size:0.62rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">
-                            ${key}
-                        </div>
-                        <div style="font-size:0.85rem; font-weight:600; color:var(--text);">
-                            ${item[key]}
-                        </div>
-                    </div>`;
+                html += `<div class="detail-item">
+                            <div style="font-size:0.62rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">${key}</div>
+                            <div style="font-size:0.85rem; font-weight:600; color:var(--text);">${item[key]}</div>
+                         </div>`;
             }
         }
         
-        html += '</div>';
-        body.innerHTML = html;
+        document.getElementById('modal-body').innerHTML = html + '</div></div>';
     }
 
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
