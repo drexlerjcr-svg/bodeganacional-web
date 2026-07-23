@@ -1169,8 +1169,8 @@
 
         const config = (l, d, c) => ({ type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: c, borderWidth: 0 }] }, options: { cutout: '72%', plugins: { legend: { position: 'bottom' } } } });
         if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
-        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Pendientes'], [s["ATENDIDAS"], s["POR ATENDER"]], ['#22c55e','#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar','Asignado'], [s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]], ['#f97316','#059669']));
+        chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Por Atender'], [s["ATENDIDAS"], s["POR ATENDER"]], ['#22c55e','#ef4444']));
+        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar Fiscal','Con Fiscal Asignado'], [s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]], ['#f97316','#059669']));
 
         document.getElementById('tipology-container').innerHTML = "";
         const rTotal = ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"].reduce((acc, r) => acc + (s[r] || 0), 0);
@@ -1182,8 +1182,8 @@
         
         document.getElementById('grid-criticos').innerHTML = cC("Recibidos", s["REGISTROS RECIBIDOS"], "fa-inbox", "var(--primary)") + cC("Admitidas", s["DENUNCIAS ADMITIDAS"], "fa-file-signature", "var(--purple)") + cC("Atendidas", s["ATENDIDAS"], "fa-check-circle", "var(--success)") + cC("Por Atender", s["POR ATENDER"], "fa-clock", "var(--warning)");
         document.getElementById('grid-estatus').innerHTML = cC("Nuevas", s["NUEVO"], "fa-certificate", "#3b82f6") + cC("Culminadas", s["PROCESO CULMINADO"], "fa-flag-checkered", "#22c55e") + cC("Cerrado", s["CERRADO"], "fa-archive", "#1e293b");
-        document.getElementById('grid-procesos').innerHTML = cC("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + cC("Conciliacion", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + cC("Por Aprobar", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
-        document.getElementById('grid-fiscales').innerHTML = cC("Por Asignar", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + cC("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
+        document.getElementById('grid-procesos').innerHTML = cC("Inspeccionado", s["INSPECCIONADO"], "fa-search", "#06b6d4") + cC("Conciliacion", s["PROCESO CONCILIATORIO"], "fa-handshake", "#f59e0b") + cC("Por Aprobar Fiscalización", s["POR APROBAR FISCALIZACIÓN"], "fa-clipboard-check", "#ec4899");
+        document.getElementById('grid-fiscales').innerHTML = cC("Por Asignar Fiscal", s["POR ASIGNAR FISCAL"], "fa-user-plus", "#f97316") + cC("Fiscal Asignado", s["CON FISCAL ASIGNADO"], "fa-user-tie", "#059669");
 
         document.getElementById('ranking-section').style.display = isNational ? "block" : "none";
         if (isNational) {
