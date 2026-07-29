@@ -274,7 +274,7 @@
         /* ===== MAIN VIEW ===== */
         .main-view {
             flex-grow: 1;
-            padding: 22px 24px;
+            padding: 22px 24px 120px 24px;
             overflow-y: auto;
             scroll-behavior: smooth;
             position: relative;
@@ -1078,6 +1078,10 @@
                 if (window.innerWidth <= 768) {
                     statesWrapper.classList.remove('show');
                 }
+
+                const mainScroll = document.getElementById('main-scroll');
+                if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             };
             statesWrapper.appendChild(btn);
         });
@@ -1091,6 +1095,10 @@
     }
 
     function renderSedeCentral(el) {
+        const mainScroll = document.getElementById('main-scroll');
+        if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         
@@ -1153,6 +1161,10 @@
     }
 
     function updateDashboard(data, title, isNational = false) {
+        const mainScroll = document.getElementById('main-scroll');
+        if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         document.getElementById('full-nacional-content').style.display = "block";
         document.getElementById('sede-extra-content').style.display = "none";
         document.getElementById('sec-indicadores').innerText = "Indicadores a destacar";
@@ -1175,7 +1187,7 @@
         const config = (l, d, c) => ({ type: 'doughnut', data: { labels: l, datasets: [{ data: d, backgroundColor: c, borderWidth: 0 }] }, options: { cutout: '72%', plugins: { legend: { position: 'bottom' } } } });
         if (chartA) chartA.destroy(); if (chartF) chartF.destroy();
         chartA = new Chart(document.getElementById('chartAtencion'), config(['Atendidas','Por Atender'], [s["ATENDIDAS"], s["POR ATENDER"]], ['#22c55e','#ef4444']));
-        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar F.','Con F. Asignado'], [s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]], ['#f97316','#059669']));
+        chartF = new Chart(document.getElementById('chartFiscales'), config(['Por Asignar','Asignado'], [s["POR ASIGNAR FISCAL"], s["CON FISCAL ASIGNADO"]], ['#f97316','#059669']));
 
         document.getElementById('tipology-container').innerHTML = "";
         const rTotal = ["ARRENDAMIENTO COMERCIAL","BIENES","CONDOMINIOS COMERCIALES","MATRICULA ESCOLAR","SERVICIOS"].reduce((acc, r) => acc + (s[r] || 0), 0);
@@ -1197,6 +1209,10 @@
     }
 
     function resetFilter(el) {
+        const mainScroll = document.getElementById('main-scroll');
+        if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active'); restoreNacionalDate(); updateDashboard(allFetched, "VENEZUELA", true);
         
