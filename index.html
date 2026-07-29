@@ -256,14 +256,19 @@
             }
             /* Restablecer estilo de items de estado dentro del panel emergente */
             .states-wrapper .state-item {
-                margin: 4px 0; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.6); flex: none; justify-content: flex-start;
+                margin: 4px 0; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.7); flex: none; justify-content: flex-start; color: var(--text);
+            }
+            .states-wrapper .state-item.active {
+                background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+                color: #ffffff !important;
+                box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
             }
             .states-wrapper .state-item span {
                 flex-direction: row; justify-content: flex-start; font-size: 0.85rem;
             }
             .states-wrapper .state-item i { margin-right: 12px; font-size: 1rem; }
 
-            .main-view { padding-bottom: 120px; }
+            .main-view { padding-top: 35px; padding-bottom: 160px; }
         }
 
         /* ===== MAIN VIEW ===== */
