@@ -429,33 +429,6 @@
         .chart-container h3 { font-size: 0.7rem; margin: 0 0 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
         .chart-box { position: relative; width: 100%; max-width: 240px; aspect-ratio: 1 / 1; }
 
-        /* ===== RANKING / TIPOLOGIA ===== */
-        .ranking-card {
-            background: rgba(255,255,255,0.55);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            padding: 22px 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 6px 24px rgba(30,58,138,0.09), 0 1px 0 rgba(255,255,255,0.9) inset; margin-bottom: 28px; position: relative; overflow: hidden;
-        }
-        .ranking-card::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
-        }
-        .ranking-item { margin-bottom: 14px; }
-        .ranking-item:last-child { margin-bottom: 0; }
-        .ranking-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-        .bar-container { height: 8px; background: rgba(30,58,138,0.08); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.5); }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease; border-radius: 6px; }
-
-        .section-title {
-            font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase;
-            letter-spacing: 0.08em; margin: 28px 0 16px; display: flex; align-items: center; gap: 10px;
-        }
-        .section-title::before {
-            content: ''; width: 4px; height: 16px; background: linear-gradient(180deg, var(--warning), var(--accent));
-            border-radius: 3px; flex-shrink: 0;
-        }
-
         /* ====================================
            AUTH OVERLAY
         ==================================== */
