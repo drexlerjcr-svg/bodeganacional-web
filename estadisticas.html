@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Mando Operativa - Monitoreo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="blob-extra"></div>
+
+<div id="auth-overlay" style="display: none;">
+    <div class="auth-card">
+        <div class="tech-corner tl"></div>
+        <div class="tech-corner tr"></div>
+        <div class="tech-corner bl"></div>
+        <div class="tech-corner br"></div>
+        <div class="scan-line"></div>
+
+        <img src="https://i.ibb.co/v4pPWh2s/sundde.png" alt="Logo Sundde" class="auth-logo">
+        <h2>Programación y Monitoreo</h2>
+        <span class="auth-subtitle">Página en mantenimiento</span>
+        
+        <div class="cyber-input-wrapper">
+            <i class="fas fa-key input-icon"></i>
+            <input type="password" id="pin-input" class="pin-input" placeholder="ACCESO RESTRINGIDO" maxlength="6">
+        </div>
+        
+        <button onclick="checkAuth()" class="auth-btn">
+            <i class="fa-regular fa-circle-user-circle-check"></i> ACCESO RESTRINGIDO
+        </button>
+    </div>
+</div>
+
+<div id="verify-overlay">
+    <div class="verify-card state-pending" id="verify-card">
+        <div class="verify-icon-wrap" id="verify-icon">
+            <i class="fas fa-sync-alt" id="verify-icon-i"></i>
+        </div>
+        <div class="verify-title" id="verify-title">Verificando código</div>
+        <div class="verify-sub" id="verify-sub">Por favor espere<span class="verify-dots">...</span></div>
+    </div>
+</div>
+
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modal-title">ESTATUS: CERRADA</h3>
+            <i class="fas fa-times close-modal" onclick="closeModal()"></i>
+        </div>
+        
+        <div class="modal-content-wrapper">
+            <div class="modal-col" style="background: #ffffff;" id="col-sujetos">
+                <span class="selection-label">1. SELECCIONE EL SUJETO</span>
+                <div id="modal-checklist-sujetos" class="checklist-container"></div>
+            </div>
+
+            <div class="modal-col" style="background: #f8fafc;" id="col-denuncias">
+                <span class="selection-label" style="color:var(--purple);">2. SELECCIONE EL CASO</span>
+                <div id="modal-checklist-denuncias" class="checklist-container"></div>
+            </div>
+
+            <div class="modal-col" id="col-detalles">
+                <div id="modal-body" style="height: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-container" id="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-bars" onclick="toggleSidebar()"></i><span>ESTADOS</span></div>
+        <div class="sidebar-content" id="sidebar-list">
+        </div>
+    </aside>
+
+    <button class="floating-toggle" id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+    <main class="main-view" id="main-scroll">
+        <div class="banner">
+            <h1 id="view-title">VENEZUELA</h1>
+            <div id="date-info" class="banner-sub">CONECTANDO...</div>
+            <div class="calendar-box" id="cal-box">
+                <span><i class="fas fa-calendar-day"></i> Fecha:</span>
+                <input type="text" id="global-date-filter" placeholder="Seleccione...">
+            </div>
+        </div>
+
+        <div id="dynamic-content">
+            <div class="section-title" id="sec-indicadores">Indicadores a destacar</div>
+            <div id="grid-criticos" class="grid"></div>
+
+            <div id="full-nacional-content">
+                <div class="section-title">Estatus del Flujo</div>
+                <div id="grid-estatus" class="grid"></div>
+                <div class="section-title">Procesos de Campo e Inspeccion</div>
+                <div id="grid-procesos" class="grid"></div>
+                <div class="section-title">Asignacion de Fiscales y Dependencias</div>
+                <div id="grid-fiscales" class="grid"></div>
+                <div class="section-title">Analisis Visual de Gestion</div>
+                <div class="charts-row">
+                    <div class="chart-container"><h3>Atencion vs Pendientes</h3><div class="chart-box"><canvas id="chartAtencion"></canvas></div></div>
+                    <div class="chart-container"><h3>Asignacion de Fiscales</h3><div class="chart-box"><canvas id="chartFiscales"></canvas></div></div>
+                </div>
+                <div class="section-title">Tipologia</div>
+                <div id="tipology-container" class="ranking-card"></div>
+                 <div id="ranking-section">
+                    <div class="section-title">Eficiencia por Estados (Top 10)</div>
+                    <div id="ranking-container" class="ranking-card"></div>
+                </div>
+            </div>
+
+            <div id="sede-extra-content" style="display:none;">
+                <div class="section-title">Tipologia Sede Central</div>
+                <div id="tipology-container-sede" class="ranking-card"></div>
+            </div>
+
+            <div id="autoridades-content" style="display:none; text-align:center;">
+                <div id="autoridades-list" style="display:flex; flex-direction:column; gap:16px; max-width:800px; margin: 0 auto;"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
