@@ -1371,6 +1371,10 @@
                     <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Recibidos</div>
                     <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${cleanNum(row['REGISTROS RECIBIDOS']).toLocaleString()}</div>
                 </div>
+		<div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Admitidas</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--purple);">${cleanNum(row['DENUNCIAS ADMITIDAS']).toLocaleString()}</div>
+                </div>
                 <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
                     <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Atendidas</div>
                     <div style="font-size:1.2rem; font-weight:800; color:var(--success);">${cleanNum(row['ATENDIDAS']).toLocaleString()}</div>
@@ -1378,10 +1382,6 @@
                 <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
                     <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Por Atender</div>
                     <div style="font-size:1.2rem; font-weight:800; color:var(--warning);">${cleanNum(row['POR ATENDER']).toLocaleString()}</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
-                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Admitidas</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:var(--purple);">${cleanNum(row['DENUNCIAS ADMITIDAS']).toLocaleString()}</div>
                 </div>
             </div>
             <button onclick="goToStateDashboard('${row['ESTADO']}')" style="margin-top:16px; width:100%; padding:10px; background:linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color:white; border:none; border-radius:10px; font-weight:700; font-size:0.8rem; cursor:pointer; box-shadow:0 4px 12px rgba(30,58,138,0.2);">
