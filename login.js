@@ -1,4 +1,4 @@
-const webAppUrl = "https://script.google.com/macros/s/AKfycbypsSbSP194UABFRsVsrF0XN8OaeZK7WUj-3triDEUem6gOO2QTqVl8r4-OFGv0bNHm/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbyrff3ZX9PsTV9DcFqwUrZBv-wFWuGXW9q9GXmQpPmGmWr7pfUe45VzX4WGl4lWBkjS/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     const pinInput = document.getElementById('pin-input');
