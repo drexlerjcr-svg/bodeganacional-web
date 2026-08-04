@@ -213,12 +213,10 @@
                 display: flex; flex-direction: row; flex-grow: 1; justify-content: space-between; align-items: center; width: 100%;
             }
             
-            /* Controles de display móvil/escritorio */
             .sidebar-footer-btn.desktop-logout-btn { display: none !important; }
             .mobile-states-btn { display: flex !important; }
             .mobile-logout-btn { display: flex !important; }
             
-            /* Botones del Navbar inferior unificados */
             .sidebar-content .state-item { 
                 margin: 0 2px; padding: 8px 6px; border-radius: 14px; flex: 1; text-align: center; justify-content: center;
             }
@@ -227,7 +225,6 @@
             }
             .sidebar-content .state-item i { margin-right: 0; font-size: 1.15rem; }
 
-            /* Panel emergente de Estados */
             .states-wrapper {
                 display: none;
                 position: absolute;
@@ -254,7 +251,6 @@
                 from { opacity: 0; transform: translate(-50%, 15px) scale(0.95); }
                 to { opacity: 1; transform: translate(-50%, 0) scale(1); }
             }
-            /* Restablecer estilo de items de estado dentro del panel emergente */
             .states-wrapper .state-item {
                 margin: 4px 0; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,0.7); flex: none; justify-content: flex-start; color: var(--text);
             }
@@ -500,9 +496,83 @@
             line-height: 1.3;
         }
 
-        /* ====================================
-           AUTH OVERLAY
-        ==================================== */
+        /* ===== ESTILOS PARA EL MAPA DE EFICIENCIA CON PUNTOS ===== */
+        .map-card-wrapper {
+            background: rgba(255,255,255,0.58);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.78);
+            box-shadow: 0 8px 32px rgba(30,58,138,0.12);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+        .map-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        @media (max-width: 900px) {
+            .map-layout { flex-direction: column; }
+        }
+        .svg-map-container {
+            flex: 1.8;
+            width: 100%;
+            position: relative;
+            text-align: center;
+        }
+        .state-info-panel {
+            flex: 1;
+            width: 100%;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.9);
+            box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+        }
+
+        .state-dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #cbd5e1;
+            border: 2.5px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+            z-index: 10;
+        }
+        .state-dot:hover {
+            transform: translate(-50%, -50%) scale(1.6);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding: 12px 18px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.8);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .legend-gradient {
+            height: 10px;
+            flex-grow: 1;
+            margin: 0 14px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%);
+        }
+
+        /* ===== AUTH OVERLAY ===== */
         #auth-overlay {
             position: fixed;
             inset: 0;
@@ -822,22 +892,19 @@
         .close-modal { cursor: pointer; font-size: 1.1rem; opacity: 0.85; transition: opacity 0.2s; }
         .close-modal:hover { opacity: 1; }
 
-        /* Escritorio: Distribución de Columnas */
         .modal-content-wrapper {
             display: flex; flex-direction: row; flex-grow: 1; overflow: hidden; background: #f8fafc; scroll-behavior: smooth;
         }
         .modal-col {
             flex: 1; display: flex; flex-direction: column; padding: 24px; overflow-y: auto; border-right: 1px solid rgba(0,0,0,0.06);
         }
-        .modal-col:last-child { flex: 1.5; border-right: none; background: #eef2f6; } /* Más espacio para detalles en escritorio */
+        .modal-col:last-child { flex: 1.5; border-right: none; background: #eef2f6; }
         .modal-col::-webkit-scrollbar { width: 4px; }
         .modal-col::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 4px; }
 
-        /* === SISTEMA GRID PARA LA INFORMACIÓN (HORIZONTAL EN PC, VERTICAL EN MÓVIL) === */
         .detail-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
         .detail-item { padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 
-        /* Móvil: Distribución Vertical */
         @media (max-width: 768px) {
             .modal-overlay { padding: 10px; align-items: flex-end; }
             .modal-card {
@@ -851,7 +918,6 @@
             }
             .modal-col:last-child { border-bottom: none; min-height: 350px; }
 
-            /* Información colapsa a lista vertical en teléfono */
             .detail-grid { grid-template-columns: 1fr; } 
         }
 
@@ -986,10 +1052,63 @@
                 <div id="tipology-container-sede" class="ranking-card"></div>
             </div>
 
-            <!-- ===== NUEVO CONTENEDOR DE AUTORIDADES ===== -->
+            <!-- ===== CONTENEDOR DE AUTORIDADES ===== -->
             <div id="autoridades-content" style="display:none; text-align:center;">
                 <div id="autoridades-list" style="display:flex; flex-direction:column; gap:16px; max-width:800px; margin: 0 auto;"></div>
             </div>
+
+            <!-- ===== NUEVO CONTENEDOR DE MAPA DE EFICIENCIA (IMAGEN + PUNTOS) ===== -->
+            <div id="mapa-content" style="display:none;">
+                <div class="map-card-wrapper">
+                    <div class="map-layout">
+                        <div class="svg-map-container">
+                            <img src="venezuelasvg.png" alt="Mapa de Venezuela" style="width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 6px 12px rgba(30,58,138,0.15));">
+                            
+                            <div id="map-dots-container" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; height: 100%;">
+                                <!-- Puntos interactivos por estado ajustados y con comportamiento 'click' configurado para actualizar panel -->
+                                <div class="state-dot" data-state="ZULIA" style="top: 15%; left: 8%;" onmouseenter="hoverStateMap('ZULIA')" onclick="hoverStateMap('ZULIA')"></div>
+                                <div class="state-dot" data-state="FALCON" style="top: 9%; left: 25%;" onmouseenter="hoverStateMap('FALCON')" onclick="hoverStateMap('FALCON')"></div>
+                                <div class="state-dot" data-state="LARA" style="top: 17%; left: 25%;" onmouseenter="hoverStateMap('LARA')" onclick="hoverStateMap('LARA')"></div>
+                                <div class="state-dot" data-state="YARACUY" style="top: 16%; left: 31%;" onmouseenter="hoverStateMap('YARACUY')" onclick="hoverStateMap('YARACUY')"></div>
+                                <div class="state-dot" data-state="CARABOBO" style="top: 16%; left: 35%;" onmouseenter="hoverStateMap('CARABOBO')" onclick="hoverStateMap('CARABOBO')"></div>
+                                <div class="state-dot" data-state="ARAGUA" style="top: 18%; left: 40%;" onmouseenter="hoverStateMap('ARAGUA')" onclick="hoverStateMap('ARAGUA')"></div>
+                                <div class="state-dot" data-state="LA GUAIRA" style="top: 12%; left: 45%;" onmouseenter="hoverStateMap('LA GUAIRA')" onclick="hoverStateMap('LA GUAIRA')"></div>
+                                <div class="state-dot" data-state="DISTRITO CAPITAL" style="top: 14%; left: 41%;" onmouseenter="hoverStateMap('DISTRITO CAPITAL')" onclick="hoverStateMap('DISTRITO CAPITAL')"></div>
+                                <div class="state-dot" data-state="MIRANDA" style="top: 16%; left: 45%;" onmouseenter="hoverStateMap('MIRANDA')" onclick="hoverStateMap('MIRANDA')"></div>
+                                <div class="state-dot" data-state="TRUJILLO" style="top: 22%; left: 19%;" onmouseenter="hoverStateMap('TRUJILLO')" onclick="hoverStateMap('TRUJILLO')"></div>
+                                <div class="state-dot" data-state="MERIDA" style="top: 28%; left: 15%;" onmouseenter="hoverStateMap('MERIDA')" onclick="hoverStateMap('MERIDA')"></div>
+                                <div class="state-dot" data-state="TACHIRA" style="top: 33%; left: 10%;" onmouseenter="hoverStateMap('TACHIRA')" onclick="hoverStateMap('TACHIRA')"></div>
+                                <div class="state-dot" data-state="BARINAS" style="top: 30%; left: 22%;" onmouseenter="hoverStateMap('BARINAS')" onclick="hoverStateMap('BARINAS')"></div>
+                                <div class="state-dot" data-state="PORTUGUESA" style="top: 25%; left: 28%;" onmouseenter="hoverStateMap('PORTUGUESA')" onclick="hoverStateMap('PORTUGUESA')"></div>
+                                <div class="state-dot" data-state="COJEDES" style="top: 22%; left: 33%;" onmouseenter="hoverStateMap('COJEDES')" onclick="hoverStateMap('COJEDES')"></div>
+                                <div class="state-dot" data-state="GUARICO" style="top: 27%; left: 45%;" onmouseenter="hoverStateMap('GUARICO')" onclick="hoverStateMap('GUARICO')"></div>
+                                <div class="state-dot" data-state="ANZOATEGUI" style="top: 25%; left: 59%;" onmouseenter="hoverStateMap('ANZOATEGUI')" onclick="hoverStateMap('ANZOATEGUI')"></div>
+                                <div class="state-dot" data-state="SUCRE" style="top: 14%; left: 65%;" onmouseenter="hoverStateMap('SUCRE')" onclick="hoverStateMap('SUCRE')"></div>
+                                <div class="state-dot" data-state="NUEVA ESPARTA" style="top: 10%; left: 59%;" onmouseenter="hoverStateMap('NUEVA ESPARTA')" onclick="hoverStateMap('NUEVA ESPARTA')"></div>
+                                <div class="state-dot" data-state="MONAGAS" style="top: 22%; left: 68%;" onmouseenter="hoverStateMap('MONAGAS')" onclick="hoverStateMap('MONAGAS')"></div>
+                                <div class="state-dot" data-state="DELTA AMACURO" style="top: 25%; left: 76%;" onmouseenter="hoverStateMap('DELTA AMACURO')" onclick="hoverStateMap('DELTA AMACURO')"></div>
+                                <div class="state-dot" data-state="BOLIVAR" style="top: 45%; left: 66%;" onmouseenter="hoverStateMap('BOLIVAR')" onclick="hoverStateMap('BOLIVAR')"></div>
+                                <div class="state-dot" data-state="AMAZONAS" style="top: 64%; left: 48%;" onmouseenter="hoverStateMap('AMAZONAS')" onclick="hoverStateMap('AMAZONAS')"></div>
+                                <div class="state-dot" data-state="APURE" style="top: 38%; left: 32%;" onmouseenter="hoverStateMap('APURE')" onclick="hoverStateMap('APURE')"></div>
+                            </div>
+                            
+                            <div class="legend-bar">
+                                <span><i class="fas fa-exclamation-circle text-danger"></i> &lt; 40% (Crítico)</span>
+                                <div class="legend-gradient"></div>
+                                <span><i class="fas fa-check-circle text-success"></i> &gt; 70% (Eficiente)</span>
+                            </div>
+                        </div>
+                        <div class="state-info-panel" id="state-info-panel">
+                            <div style="text-align:center; padding: 30px 10px; color: var(--muted);">
+                                <i class="fas fa-mouse-pointer" style="font-size: 2rem; margin-bottom: 12px; color: var(--accent);"></i>
+                                <h3 style="margin: 0; font-size: 1rem; color: var(--primary);">Pase el cursor por un estado</h3>
+                                <p style="font-size:0.78rem; margin-top: 6px;">Consulte el indicador de eficiencia y métricas clave en tiempo real.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 </div>
@@ -999,7 +1118,7 @@
 
     let allFetched = [];
     let sedeData = [];
-    let autoridadesData = []; // <--- NUEVA VARIABLE
+    let autoridadesData = [];
     let currentModalData = [];
     let chartA, chartF;
     let selectedDateGlobal = "";
@@ -1064,6 +1183,13 @@
         return isNaN(n) ? 0 : n;
     }
 
+    function normalizeStateName(str) {
+        if (!str) return '';
+        return str.toString().toUpperCase()
+                  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                  .trim();
+    }
+
     function getUltimaFecha(dataArr, campoFecha) {
         const fechas = [...new Set(dataArr.map(d => d[campoFecha]))].filter(f => f);
         return fechas.sort((a, b) => {
@@ -1104,6 +1230,7 @@
                 <div class="state-item" id="btn-autoridades" onclick="renderAutoridades(this)"><span><i class="fas fa-users-cog"></i> AUTORIDADES</span></div>
                 <div class="state-item" id="btn-sede" onclick="renderSedeCentral(this)"><span><i class="fas fa-building"></i> SEDE</span></div>
                 <div class="state-item active" id="btn-nacional" onclick="resetFilter(this)"><span><i class="fas fa-globe-americas"></i> NACIONAL</span></div>
+                <div class="state-item" id="btn-mapa" onclick="renderMapaEficiencia(this)"><span><i class="fas fa-map-marked-alt"></i> MAPA DE EFICIENCIA</span></div>
                 <div class="state-item mobile-states-btn" onclick="toggleMobileStates()"><span><i class="fas fa-list-ul"></i> ESTADOS</span></div>
                 <div class="state-item text-danger mobile-logout-btn" onclick="logout()"><span><i class="fas fa-sign-out-alt"></i> SALIR</span></div>
             </div>
@@ -1140,7 +1267,134 @@
         });
     }
 
-    // <--- NUEVA FUNCIÓN PARA RENDERIZAR AUTORIDADES --->
+    function renderMapaEficiencia(el) {
+        const mainScroll = document.getElementById('main-scroll');
+        if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        document.querySelectorAll('.state-item').forEach(i => i.classList.remove('active'));
+        if (el) el.classList.add('active');
+        
+        if (window.innerWidth <= 768) document.getElementById('states-wrapper').classList.remove('show');
+
+        document.getElementById('full-nacional-content').style.display = "none";
+        document.getElementById('sede-extra-content').style.display = "none";
+        document.getElementById('autoridades-content').style.display = "none";
+        document.getElementById('sec-indicadores').style.display = "none";
+        document.getElementById('grid-criticos').style.display = "none";
+        
+        document.getElementById('mapa-content').style.display = "block";
+        document.getElementById('cal-box').style.display = 'flex';
+
+        document.getElementById('view-title').innerText = "MAPA DE EFICIENCIA";
+        document.getElementById('date-info').innerText = "CORTE AL: " + selectedDateGlobal;
+
+        updateSvgMapColors();
+    }
+
+    function updateSvgMapColors() {
+        const fData = allFetched.filter(d => d['FECHA'] === selectedDateGlobal);
+        const stateDataMap = {};
+
+        fData.forEach(row => {
+            const stName = row['ESTADO'];
+            if (!stName) return;
+            const norm = normalizeStateName(stName);
+            let ef = row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
+            if (ef > 0 && ef <= 1) ef *= 100;
+            
+            stateDataMap[norm] = {
+                rawName: stName,
+                eficiencia: ef,
+                recibidos: cleanNum(row['REGISTROS RECIBIDOS']),
+                atendidas: cleanNum(row['ATENDIDAS']),
+                porAtender: cleanNum(row['POR ATENDER'])
+            };
+        });
+
+        document.querySelectorAll('.state-dot').forEach(dot => {
+            const stateKey = normalizeStateName(dot.dataset.state);
+            let info = stateDataMap[stateKey];
+            
+            if (!info) {
+                if (stateKey === 'VARGAS') info = stateDataMap['LA GUAIRA'];
+                else if (stateKey === 'LA GUAIRA') info = stateDataMap['VARGAS'];
+            }
+
+            const ef = info ? info.eficiencia : 0;
+            let color = 'rgba(203, 213, 225, 0.9)';
+
+            if (info) {
+                if (ef >= 70) color = '#22c55e';
+                else if (ef >= 40) color = '#f59e0b';
+                else color = '#ef4444';
+            }
+
+            dot.style.backgroundColor = color;
+        });
+    }
+
+    function hoverStateMap(stateRaw) {
+        const norm = normalizeStateName(stateRaw);
+        const fData = allFetched.filter(d => d['FECHA'] === selectedDateGlobal);
+        let row = fData.find(r => normalizeStateName(r['ESTADO']) === norm);
+        if (!row && norm === 'VARGAS') row = fData.find(r => normalizeStateName(r['ESTADO']) === 'LA GUAIRA');
+        if (!row && norm === 'LA GUAIRA') row = fData.find(r => normalizeStateName(r['ESTADO']) === 'VARGAS');
+
+        const panel = document.getElementById('state-info-panel');
+        if (!panel) return;
+
+        if (!row) {
+            panel.innerHTML = `
+                <div style="text-align:center; padding: 20px 0;">
+                    <i class="fas fa-map-marker-alt" style="font-size: 2rem; color: var(--muted); margin-bottom: 10px;"></i>
+                    <h3 style="margin:0; font-size: 1.1rem; color: var(--primary);">${stateRaw}</h3>
+                    <p style="font-size:0.8rem; color: var(--muted); margin-top:6px;">Sin registros para la fecha seleccionada (${selectedDateGlobal})</p>
+                </div>`;
+            return;
+        }
+
+        let ef = row['ATENCIÓN %'] ? cleanNum(row['ATENCIÓN %']) : 0;
+        if (ef > 0 && ef <= 1) ef *= 100;
+
+        let efColor = ef >= 70 ? 'var(--success)' : (ef >= 40 ? 'var(--warning)' : 'var(--danger)');
+
+        panel.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--primary);">${row['ESTADO']}</h3>
+                <span style="background:${efColor}; color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:12px;">
+                    ${ef.toFixed(1)}% EFICIENCIA
+                </span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+                <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Recibidos</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${cleanNum(row['REGISTROS RECIBIDOS']).toLocaleString()}</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Atendidas</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--success);">${cleanNum(row['ATENDIDAS']).toLocaleString()}</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Por Atender</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--warning);">${cleanNum(row['POR ATENDER']).toLocaleString()}</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.8); padding:10px; border-radius:10px; border:1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size:0.65rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Admitidas</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--purple);">${cleanNum(row['DENUNCIAS ADMITIDAS']).toLocaleString()}</div>
+                </div>
+            </div>
+            <button onclick="goToStateDashboard('${row['ESTADO']}')" style="margin-top:16px; width:100%; padding:10px; background:linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color:white; border:none; border-radius:10px; font-weight:700; font-size:0.8rem; cursor:pointer; box-shadow:0 4px 12px rgba(30,58,138,0.2);">
+                <i class="fas fa-chart-line"></i> VER DASHBOARD DETALLADO
+            </button>
+        `;
+    }
+
+    function goToStateDashboard(stateName) {
+        const btn = document.querySelector(`.sub-state[data-state-name="${stateName}"]`);
+        if (btn) btn.click();
+    }
+
     function renderAutoridades(el) {
         const mainScroll = document.getElementById('main-scroll');
         if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1151,12 +1405,11 @@
         
         if (window.innerWidth <= 768) document.getElementById('states-wrapper').classList.remove('show');
 
-        // Control de vistas principal
         document.getElementById('full-nacional-content').style.display = "none";
         document.getElementById('sede-extra-content').style.display = "none";
+        document.getElementById('mapa-content').style.display = "none";
         document.getElementById('autoridades-content').style.display = "block";
         
-        // CORRECCIÓN 1: Ocultar explícitamente las cards e indicadores superiores
         document.getElementById('sec-indicadores').style.display = "none";
         document.getElementById('grid-criticos').style.display = "none";
         
@@ -1168,7 +1421,6 @@
         container.innerHTML = "";
 
         const limit = Math.min(autoridadesData.length, 5);
-        
         const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2285%22 height=%22105%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23c8dbf0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%231e3a8a%22 font-family=%22sans-serif%22 font-size=%2214%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3EFOTO%3C/text%3E%3C/svg%3E";
         
         for(let i=0; i<limit; i++) {
@@ -1193,7 +1445,6 @@
                 finalUrl = `https://drive.google.com/uc?export=view&id=${driveMatch[0]}`;
             }
 
-            // Uso de this.onerror=null para prevenir bucles si hasta el fallback fallara
             container.innerHTML += `
                 <div class="autoridad-card">
                     <img src="${finalUrl}" alt="Foto ${nombre}" onerror="this.onerror=null; this.src='${fallbackImg}'" referrerpolicy="no-referrer">
@@ -1225,6 +1476,7 @@
 
         document.getElementById('view-title').innerText = "SEDE CENTRAL";
         document.getElementById('full-nacional-content').style.display = "none";
+        document.getElementById('mapa-content').style.display = "none";
         document.getElementById('sede-extra-content').style.display = "block";
         document.getElementById('autoridades-content').style.display = "none"; 
         
@@ -1290,6 +1542,7 @@
 
         document.getElementById('full-nacional-content').style.display = "block";
         document.getElementById('sede-extra-content').style.display = "none";
+        document.getElementById('mapa-content').style.display = "none";
         document.getElementById('autoridades-content').style.display = "none"; 
         
         document.getElementById('sec-indicadores').style.display = "flex";
@@ -1352,10 +1605,10 @@
         if (active.id === 'btn-nacional') updateDashboard(allFetched, "VENEZUELA", true);
         else if (active.id === 'btn-sede') renderSedeCentral(active);
         else if (active.id === 'btn-autoridades') renderAutoridades(active);
+        else if (active.id === 'btn-mapa') renderMapaEficiencia(active);
         else updateDashboard(allFetched.filter(r => r['ESTADO'] === active.dataset.stateName), active.dataset.stateName, false);
     }
 
-    /* ---- LÓGICA DEL MODAL RESPONSIVO ---- */
     function showSedeDetail(estatus) {
         currentModalData = sedeData.filter(r => r['FECHA'] === selectedDateGlobal && r['ESTATUS'] && r['ESTATUS'].toUpperCase().trim() === estatus.toUpperCase());
         document.getElementById('modal-title').innerText = "ESTATUS: " + estatus;
@@ -1381,67 +1634,48 @@
                 const btn = document.createElement('div');
                 btn.className = 'check-item';
                 btn.innerText = `${sujetoName} (${sujetosMap[sujetoName].length})`;
+                
                 btn.onclick = () => {
-                    document.querySelectorAll('#modal-checklist-sujetos .check-item').forEach(b => b.classList.remove('selected'));
+                    document.querySelectorAll('#modal-checklist-sujetos .check-item').forEach(el => el.classList.remove('selected'));
                     btn.classList.add('selected');
-                    showDenunciasForSujeto(sujetosMap[sujetoName]);
-
-                    if(window.innerWidth <= 768) {
-                        setTimeout(() => document.getElementById('col-denuncias').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-                    }
+                    
+                    checklistDenuncias.innerHTML = "";
+                    body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>Seleccione un caso para ver los detalles.</p>";
+                    
+                    sujetosMap[sujetoName].forEach((caso, index) => {
+                        const btnCaso = document.createElement('div');
+                        btnCaso.className = 'check-item check-item-alt';
+                        
+                        // Generar el identificador visual del caso
+                        const casoId = caso['ID'] || caso['NÚMERO'] || caso[Object.keys(caso)[0]] || `Caso #${index + 1}`;
+                        btnCaso.innerText = casoId;
+                        
+                        btnCaso.onclick = () => {
+                            document.querySelectorAll('#modal-checklist-denuncias .check-item-alt').forEach(el => el.classList.remove('selected'));
+                            btnCaso.classList.add('selected');
+                            
+                            let htmlDetalle = '<div class="detail-grid">';
+                            Object.keys(caso).forEach(k => {
+                                htmlDetalle += `<div class="detail-item"><div class="card-label">${k}</div><div style="font-size:0.85rem; font-weight:600; margin-top:4px;">${caso[k] || '-'}</div></div>`;
+                            });
+                            htmlDetalle += '</div>';
+                            body.innerHTML = htmlDetalle;
+                        };
+                        
+                        checklistDenuncias.appendChild(btnCaso);
+                    });
                 };
+                
                 checklistSujetos.appendChild(btn);
             });
         }
+        
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    function showDenunciasForSujeto(denunciasArray) {
-        const checklistDenuncias = document.getElementById('modal-checklist-denuncias');
-        const body = document.getElementById('modal-body');
-        checklistDenuncias.innerHTML = "";
-        body.innerHTML = "<p style='text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;'>Seleccione un caso para ver su detalle en la siguiente sección.</p>";
-
-        denunciasArray.forEach((item, index) => {
-            const keys = Object.keys(item);
-            let buttonLabel = `Caso #${index + 1}`;
-            const posibleColumnaID = keys.find(k => k.toUpperCase().includes('NRO') || k.toUpperCase().includes('CÓDIGO') || k.toUpperCase().includes('DENUNCIA') || k.toUpperCase().includes('RECLAMO') || k.toUpperCase().includes('ID'));
-            if (posibleColumnaID && item[posibleColumnaID]) buttonLabel = `${posibleColumnaID}: ${item[posibleColumnaID]}`;
-
-            const btn = document.createElement('div');
-            btn.className = 'check-item check-item-alt';
-            btn.innerText = buttonLabel;
-            btn.onclick = () => {
-                document.querySelectorAll('#modal-checklist-denuncias .check-item').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                renderModalRowByVal(item);
-
-                if(window.innerWidth <= 768) {
-                    setTimeout(() => document.getElementById('col-detalles').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-                }
-            };
-            checklistDenuncias.appendChild(btn);
-        });
+    function closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
     }
-
-    function renderModalRowByVal(item) {
-        // Implementación de grid horizontal para computadora / vertical para móvil
-        let html = '<div style="background:#fff; border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05);"><div class="detail-grid">';
-        
-        for (let key in item) {
-            const uKey = key.toUpperCase().trim();
-            if (item[key] && uKey !== 'ITEM' && uKey !== 'FECHA') {
-                html += `<div class="detail-item">
-                            <div style="font-size:0.62rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">${key}</div>
-                            <div style="font-size:0.85rem; font-weight:600; color:var(--text);">${item[key]}</div>
-                         </div>`;
-            }
-        }
-        
-        document.getElementById('modal-body').innerHTML = html + '</div></div>';
-    }
-
-    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 </script>
 </body>
 </html>
