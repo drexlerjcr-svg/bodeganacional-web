@@ -1420,7 +1420,7 @@
         const container = document.getElementById('autoridades-list');
         container.innerHTML = "";
 
-        const limit = Math.min(autoridadesData.length, 5);
+        const limit = Math.min(autoridadesData.length, 12);
         const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2285%22 height=%22105%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23c8dbf0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%231e3a8a%22 font-family=%22sans-serif%22 font-size=%2214%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3EFOTO%3C/text%3E%3C/svg%3E";
         
         for(let i=0; i<limit; i++) {
